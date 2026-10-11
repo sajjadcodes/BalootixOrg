@@ -26,6 +26,8 @@ import { clearAuthCookies, setAuthCookies } from './auth-cookies.js';
 
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { RefreshTokenGuard } from './guards/refresh-token.guard.js';
+import { RequirePermission } from '../authorization/decorators/require-permission.decorator.js';
+import { AuthorizationGuard } from '../authorization/guards/authorization.guard.js';
 
 import type { Response } from 'express';
 import type { AuthenticatedRequest, LoginUserData } from './types/auth.js';
@@ -36,7 +38,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @UseGuards(ThrottlerGuard)
+  @RequirePermission('/auth/register', 'CREATE')
+  @UseGuards(ThrottlerGuard, JwtAuthGuard, AuthorizationGuard)
   registerWithEmailPassword(@Body() input: RegisterWithEmailPasswordDto) {
     return this.authService.registerWithEmailPassword(input);
   }
