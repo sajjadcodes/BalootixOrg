@@ -58,6 +58,17 @@ const roleDescendants: RoleData = {
   updatedAt: '2026-10-09T00:00:00.000Z',
 };
 
+const ownerRole: RoleData = {
+  id: 'role-owner',
+  unitId: 'unit-1',
+  name: 'OWNER',
+  description: 'App-wide owner override',
+  scope: 'SELF',
+  isActive: true,
+  createdAt: '2026-10-09T00:00:00.000Z',
+  updatedAt: '2026-10-09T00:00:00.000Z',
+};
+
 const roleAssignment: RoleAssignmentData = {
   id: 'ra-1',
   userId: user.id,
@@ -134,6 +145,17 @@ describe('OrganizationAuthorizationService', () => {
     unitAll.mockReset().mockResolvedValue([]);
 
     service = new AuthorizationService(prisma as unknown as PrismaService);
+  });
+
+  it('allows access when the user has an active OWNER role regardless of normal permissions', async () => {
+    resourceWhere.mockResolvedValueOnce(null);
+    permissionWhere.mockResolvedValueOnce(null);
+    roleAssignmentAll.mockResolvedValueOnce([assignmentFor(ownerRole)]);
+    roleWhere.mockResolvedValueOnce(ownerRole);
+
+    await expect(
+      service.canAccess(user.id, permission.action, resource.route, 'unit-1'),
+    ).resolves.toBe(true);
   });
 
   it('allows access when the user has the permission directly on the selected SELF role', async () => {

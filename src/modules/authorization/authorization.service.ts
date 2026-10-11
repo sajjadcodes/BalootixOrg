@@ -25,73 +25,84 @@ export class AuthorizationService {
       return false;
     }
 
-    // Step 2: resolve the route to the protected resource record.
+    // Step 2: load the user's active role assignments.
+    const roleAssignments = await this.prisma.public.RoleAssignment.where({
+      userId,
+    }).all();
+
+    // Step 3: filter out inactive role assignments.
+    const activeAssignments = roleAssignments.filter(
+      (assignment) => assignment.isActive,
+    );
+
+    // Step 4: if the user has no active role assignments, they cannot access the resource.
+    if (activeAssignments.length === 0) {
+      return false;
+    }
+
+    // Step 5: load each active role once, check for the OWNER override, and keep valid roles for the normal permission evaluation.
+    const activeRoles: RoleData[] = [];
+
+    for (const assignment of activeAssignments) {
+      const role = await this.prisma.public.Role.where({
+        id: assignment.roleId,
+      }).first();
+
+      // Skip any role that is not found or inactive.
+      if (!role || !role.isActive) {
+        continue;
+      }
+
+      // If the user has an OWNER role, they automatically have access to all resources and actions.
+      if (role.name.toUpperCase() === 'OWNER') {
+        return true;
+      }
+
+      activeRoles.push(role);
+    }
+
+    // Step 6: resolve the route to the protected resource record.
     const resource = await this.prisma.public.Resource.where({
       route: resourceRoute,
     }).first();
 
-    // Step 3: if the resource does not exist, the check fails.
+    // Step 7: if the resource does not exist, the check fails.
     if (!resource) {
       return false;
     }
 
-    // Step 4: resolve the permission record for the resource and action.
+    // Step 8: resolve the permission record for the resource and action.
     const permission = await this.prisma.public.Permission.where({
       resourceId: resource.id,
       action,
     }).first();
 
-    // Step 5: if the permission does not exist, the check fails.
+    // Step 9: if the permission does not exist, the check fails.
     if (!permission) {
       return false;
     }
 
-    // Step 6: load the user's active role assignments.
-    const roleAssignments = await this.prisma.public.RoleAssignment.where({
-      userId,
-    }).all();
-
-    // Step 7: filter out inactive role assignments
-    const activeAssignments = roleAssignments.filter(
-      (assignment) => assignment.isActive,
-    );
-
-    // Step 8: if the user has no active role assignments, they cannot access the resource.
-    if (activeAssignments.length === 0) {
-      return false;
-    }
-
-    // Step 9: build a map of all units for efficient ancestry checks during role validation.
+    // Step 10: build a map of all units for efficient ancestry checks during role validation.
     const unitsByIdMap = await this.getUnitsByIdMap();
 
-    // Step 10: iterate through the user's active role assignments to check for permission access.
-    for (const assignment of activeAssignments) {
-      // Step 10a: load the role associated with the assignment and check if it is active.
-      const role = await this.prisma.public.Role.where({
-        id: assignment.roleId,
-      }).first();
-
-      // Step 10b: skip inactive roles, as they do not grant any permissions.
-      if (!role || !role.isActive) {
-        continue;
-      }
-
-      // Step 10c: check if the role is valid for the target unit based on its scope (SELF or DESCENDANTS).
+    // Step 11: iterate through the valid active roles to check for permission access.
+    for (const role of activeRoles) {
+      // Step 11a: check if the role is valid for the target unit based on its scope (SELF or DESCENDANTS).
       if (!this.isRoleValidForTargetUnit(role, targetUnitId, unitsByIdMap)) {
         continue;
       }
 
-      // Step 10d: collect the effective permission IDs for the role, including any inherited from descendant roles.
+      // Step 11b: collect the effective permission IDs for the role, including any inherited from descendant roles.
       const effectivePermissionIds =
         await this.getEffectivePermissionIdsForRole(role, unitsByIdMap);
 
-      // Step 10e: if the required permission ID is in the effective permission set, grant access.
+      // Step 11c: if the required permission ID is in the effective permission set, grant access.
       if (effectivePermissionIds.has(permission.id)) {
         return true;
       }
     }
 
-    // Step 11: if no active role assignments grant the required permission, deny access.
+    // Step 12: if no active role assignments grant the required permission, deny access.
     return false;
   }
 
