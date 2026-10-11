@@ -8,8 +8,12 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard.js';
+import { RequirePermission } from '../decorators/require-permission.decorator.js';
+import { AuthorizationGuard } from '../guards/authorization.guard.js';
 import { CreateRolePermissionDto } from './dto/create-role-permission.dto.js';
 import { UpdateRolePermissionDto } from './dto/update-role-permission.dto.js';
 import { RolePermissionsService } from './role-permissions.service.js';
@@ -23,6 +27,8 @@ export class RolePermissionsController {
   ) {}
 
   @Post()
+  @RequirePermission('/authorization/role-permissions', 'CREATE')
+  @UseGuards(JwtAuthGuard, AuthorizationGuard)
   createRolePermission(
     @Body() input: CreateRolePermissionDto,
   ): Promise<RolePermissionData> {
@@ -30,16 +36,22 @@ export class RolePermissionsController {
   }
 
   @Get()
+  @RequirePermission('/authorization/role-permissions', 'READ')
+  @UseGuards(JwtAuthGuard, AuthorizationGuard)
   listRolePermissions(): Promise<RolePermissionData[]> {
     return this.rolePermissionsService.listRolePermissions();
   }
 
   @Get(':id')
+  @RequirePermission('/authorization/role-permissions/:id', 'READ')
+  @UseGuards(JwtAuthGuard, AuthorizationGuard)
   getRolePermission(@Param('id') id: string): Promise<RolePermissionData> {
     return this.rolePermissionsService.getRolePermission(id);
   }
 
   @Patch(':id')
+  @RequirePermission('/authorization/role-permissions/:id', 'UPDATE')
+  @UseGuards(JwtAuthGuard, AuthorizationGuard)
   @HttpCode(HttpStatus.OK)
   updateRolePermission(
     @Param('id') id: string,
@@ -49,6 +61,8 @@ export class RolePermissionsController {
   }
 
   @Delete(':id')
+  @RequirePermission('/authorization/role-permissions/:id', 'DELETE')
+  @UseGuards(JwtAuthGuard, AuthorizationGuard)
   @HttpCode(HttpStatus.OK)
   deleteRolePermission(@Param('id') id: string) {
     return this.rolePermissionsService.deleteRolePermission(id);
