@@ -30,13 +30,32 @@ Authorization requires both checks to succeed:
 
 The authorization flow is:
 
+1. user has active assignments?
+2. any active role is OWNER? -> allow immediately
+3. resource exists?
+4. permission exists for that resource/action?
+5. role scope valid for target unit?
+6. effective permissions include the required permission?
+7. allow or deny
+
+At the app level, the meaning of the components is:
+
+- `@RequirePermission` = route policy declaration
+- `AuthorizationGuard` = request context extraction
+- `AuthorizationService` = business rule enforcement
+- `Role.scope` = SELF vs DESCENDANTS
+- `OWNER` = global override for system admin / app owner
+
+The practical flow is:
+
 1. Resolve the requested route and HTTP method using the user object.
 2. Find the required permission record.
 3. Load the user's assigned roles.
-4. Find roles that contain the required permission.
-5. Determine the target organizational unit.
-6. Check whether the target unit is inside the role's scope.
-7. Allow the request if at least one role passes both checks; otherwise deny it.
+4. If any active role is OWNER, allow immediately.
+5. Find roles that contain the required permission.
+6. Determine the target organizational unit.
+7. Check whether the target unit is inside the role's scope.
+8. Allow the request if at least one role passes both checks; otherwise deny it.
 
 ## Example
 
