@@ -7,11 +7,7 @@ import { jest } from '@jest/globals';
 import type { PrismaService } from '../../prisma/prisma.service.js';
 import { UnitsService } from './units.service.js';
 import type { UnitData, UnitType } from './types/unit.js';
-import {
-  assertSiblingNameAvailable,
-  assertTargetParentIsValid,
-  buildTree,
-} from './utils/tree.js';
+import { assertTargetParentIsValid, buildTree } from './utils/tree.js';
 
 const unit: UnitData = {
   id: 'unit-1',
@@ -116,8 +112,39 @@ describe('tree helpers', () => {
     };
 
     expect(() =>
-      assertTargetParentIsValid(child, root.id, new Map([[root.id, root]])),
+      assertTargetParentIsValid(child, root.id, [root, child]),
     ).not.toThrow();
+  });
+
+  it('validates both parent ancestry and duplicate sibling names in one check', () => {
+    const root: UnitData = {
+      ...unit,
+      id: 'root-1',
+      parentId: null,
+      name: 'Root',
+    };
+    const child: UnitData = {
+      ...unit,
+      id: 'child-1',
+      parentId: root.id,
+      name: 'Child',
+    };
+
+    expect(() =>
+      assertTargetParentIsValid(root, child.id, [root, child]),
+    ).toThrow(ConflictException);
+
+    expect(() =>
+      assertTargetParentIsValid(child, 'target-parent', [
+        root,
+        {
+          ...unit,
+          id: 'duplicate-1',
+          parentId: 'target-parent',
+          name: 'Child',
+        },
+      ]),
+    ).toThrow(ConflictException);
   });
 
   it('rejects moving a unit under itself or one of its descendants', () => {
@@ -135,14 +162,7 @@ describe('tree helpers', () => {
     };
 
     expect(() =>
-      assertTargetParentIsValid(
-        root,
-        child.id,
-        new Map([
-          [root.id, root],
-          [child.id, child],
-        ]),
-      ),
+      assertTargetParentIsValid(root, child.id, [root, child]),
     ).toThrow(ConflictException);
   });
 
@@ -162,11 +182,7 @@ describe('tree helpers', () => {
     };
 
     expect(() =>
-      assertTargetParentIsValid(
-        child,
-        parent.id,
-        new Map([[parent.id, parent]]),
-      ),
+      assertTargetParentIsValid(child, parent.id, [parent, child]),
     ).toThrow(ForbiddenException);
   });
 
@@ -179,7 +195,7 @@ describe('tree helpers', () => {
     };
 
     expect(() =>
-      assertTargetParentIsValid(current, 'missing-parent', new Map()),
+      assertTargetParentIsValid(current, 'missing-parent', [current]),
     ).toThrow(NotFoundException);
   });
 
@@ -204,15 +220,7 @@ describe('tree helpers', () => {
     };
 
     expect(() =>
-      assertTargetParentIsValid(
-        current,
-        rootA.id,
-        new Map([
-          [rootA.id, rootA],
-          [rootB.id, rootB],
-          [current.id, current],
-        ]),
-      ),
+      assertTargetParentIsValid(current, rootA.id, [rootA, rootB, current]),
     ).toThrow(ConflictException);
   });
 
@@ -225,18 +233,7 @@ describe('tree helpers', () => {
     };
 
     expect(() =>
-      assertTargetParentIsValid(
-        current,
-        undefined,
-        new Map([[current.id, current]]),
-      ),
-    ).not.toThrow();
-    expect(() =>
-      assertSiblingNameAvailable(
-        current,
-        undefined,
-        undefined as unknown as UnitData[],
-      ),
+      assertTargetParentIsValid(current, undefined, [current]),
     ).not.toThrow();
   });
 
@@ -255,7 +252,7 @@ describe('tree helpers', () => {
     };
 
     expect(() =>
-      assertSiblingNameAvailable(current, 'target-parent', [duplicate]),
+      assertTargetParentIsValid(current, 'target-parent', [current, duplicate]),
     ).toThrow(ConflictException);
   });
 });

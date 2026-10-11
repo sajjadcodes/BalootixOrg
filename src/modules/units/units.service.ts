@@ -8,11 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 import { CreateUnitDto } from './dto/create-unit.dto.js';
 import { UpdateUnitDto } from './dto/update-unit.dto.js';
 import type { UnitData, UnitTreeNode } from './types/unit.js';
-import {
-  assertSiblingNameAvailable,
-  assertTargetParentIsValid,
-  buildTree,
-} from './utils/tree.js';
+import { assertTargetParentIsValid, buildTree } from './utils/tree.js';
 
 @Injectable()
 export class UnitsService {
@@ -169,11 +165,8 @@ export class UnitsService {
         throw new ForbiddenException('Cannot move an inactive unit');
       }
 
-      // Assert that the target parent unit is valid for moving a unit.
-      assertTargetParentIsValid(unit, targetUnitId, unitsById);
-
-      // Assert that the target parent unit does not have a sibling with the same name.
-      assertSiblingNameAvailable(unit, targetUnitId, units);
+      // Validate the new parent and the duplicated sibling-name rule.
+      assertTargetParentIsValid(unit, targetUnitId, units);
 
       // Move the unit to the new parent unit.
       const movedUnit = await tx.orm.public.Unit.where({ id: unitId }).update({
