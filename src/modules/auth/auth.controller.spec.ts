@@ -28,6 +28,20 @@ const createResponse = () => ({
 });
 
 describe('AuthController', () => {
+  it('completes owner setup with the provided token and password', async () => {
+    const completeSetup = jest.fn(async () => ({ completed: true as const }));
+    const controller = new AuthController(
+      {} as AuthService,
+      { completeSetup } as never,
+    );
+    const input = { token: 'setup-token', password: 'securePassword123' };
+
+    await expect(controller.completeOwnerSetup(input)).resolves.toEqual({
+      completed: true,
+    });
+    expect(completeSetup).toHaveBeenCalledWith(input);
+  });
+
   it('passes registration input to the service and returns its result', async () => {
     const input: RegisterWithEmailPasswordDto = {
       email: 'person@example.com',
@@ -41,9 +55,12 @@ describe('AuthController', () => {
       isManager: false,
     };
     const registerWithEmailPassword = jest.fn(async () => user);
-    const controller = new AuthController({
-      registerWithEmailPassword,
-    } as unknown as AuthService);
+    const controller = new AuthController(
+      {
+        registerWithEmailPassword,
+      } as unknown as AuthService,
+      { completeSetup: jest.fn() } as never,
+    );
 
     await expect(controller.registerWithEmailPassword(input)).resolves.toBe(
       user,
@@ -53,9 +70,12 @@ describe('AuthController', () => {
 
   it('passes the verification token to the service', async () => {
     const verifyEmail = jest.fn(async () => ({ verified: true as const }));
-    const controller = new AuthController({
-      verifyEmail,
-    } as unknown as AuthService);
+    const controller = new AuthController(
+      {
+        verifyEmail,
+      } as unknown as AuthService,
+      { completeSetup: jest.fn() } as never,
+    );
 
     await expect(
       controller.verifyEmail({ token: 'verification-token' }),
@@ -75,9 +95,12 @@ describe('AuthController', () => {
       avatar: null,
     };
     const getCurrentUser = jest.fn(async () => user);
-    const controller = new AuthController({
-      getCurrentUser,
-    } as unknown as AuthService);
+    const controller = new AuthController(
+      {
+        getCurrentUser,
+      } as unknown as AuthService,
+      { completeSetup: jest.fn() } as never,
+    );
     const req = {
       user: { userId: 'user-1', email: user.email },
     } as unknown as AuthenticatedRequest;
@@ -91,9 +114,12 @@ describe('AuthController', () => {
       message:
         'If an account exists with this email, a reset link has been sent.',
     }));
-    const controller = new AuthController({
-      forgotPassword,
-    } as unknown as AuthService);
+    const controller = new AuthController(
+      {
+        forgotPassword,
+      } as unknown as AuthService,
+      { completeSetup: jest.fn() } as never,
+    );
 
     await expect(
       controller.forgotPassword({ email: 'person@example.com' }),
@@ -108,9 +134,12 @@ describe('AuthController', () => {
 
   it('resets a password with a valid token', async () => {
     const resetPassword = jest.fn(async () => ({ reset: true as const }));
-    const controller = new AuthController({
-      resetPassword,
-    } as unknown as AuthService);
+    const controller = new AuthController(
+      {
+        resetPassword,
+      } as unknown as AuthService,
+      { completeSetup: jest.fn() } as never,
+    );
 
     await expect(
       controller.resetPassword({
@@ -142,9 +171,12 @@ describe('AuthController', () => {
       refreshToken: 'refresh-token',
     };
     const loginWithEmailPassword = jest.fn(async () => ({ user, tokens }));
-    const controller = new AuthController({
-      loginWithEmailPassword,
-    } as unknown as AuthService);
+    const controller = new AuthController(
+      {
+        loginWithEmailPassword,
+      } as unknown as AuthService,
+      { completeSetup: jest.fn() } as never,
+    );
     const res = createResponse();
 
     await expect(
@@ -175,9 +207,12 @@ describe('AuthController', () => {
   it('refreshes tokens from the refresh cookie and replaces both cookies', async () => {
     const tokens = { accessToken: 'new-access', refreshToken: 'new-refresh' };
     const refresh = jest.fn(async () => ({ tokens }));
-    const controller = new AuthController({
-      refresh,
-    } as unknown as AuthService);
+    const controller = new AuthController(
+      {
+        refresh,
+      } as unknown as AuthService,
+      { completeSetup: jest.fn() } as never,
+    );
     const req = {
       user: { userId: 'user-1', email: 'person@example.com' },
       cookies: { [REFRESH_TOKEN_COOKIE]: 'old-refresh' },
@@ -206,9 +241,12 @@ describe('AuthController', () => {
     const refresh = jest.fn(async () => ({
       tokens: { accessToken: 'unused', refreshToken: 'unused' },
     }));
-    const controller = new AuthController({
-      refresh,
-    } as unknown as AuthService);
+    const controller = new AuthController(
+      {
+        refresh,
+      } as unknown as AuthService,
+      { completeSetup: jest.fn() } as never,
+    );
     const req = {
       user: { userId: 'user-1', email: 'person@example.com' },
       cookies: {},
@@ -232,7 +270,10 @@ describe('AuthController', () => {
 
   it('revokes the refresh token and clears auth cookies on logout', async () => {
     const logout = jest.fn(async () => undefined);
-    const controller = new AuthController({ logout } as unknown as AuthService);
+    const controller = new AuthController(
+      { logout } as unknown as AuthService,
+      { completeSetup: jest.fn() } as never,
+    );
     const req = {
       user: { userId: 'user-1', email: 'person@example.com' },
       cookies: { [REFRESH_TOKEN_COOKIE]: 'refresh-token' },

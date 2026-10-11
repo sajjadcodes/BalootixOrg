@@ -19,6 +19,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto.js';
 import { LoginWithEmailPasswordDto } from './dto/login-with-email-password.dto.js';
 import { ForgotPasswordDto } from './dto/forgot-password.dto.js';
 import { ResetPasswordDto } from './dto/reset-password.dto.js';
+import { OwnerSetupDto } from './dto/owner-setup.dto.js';
 
 import { AuthService } from './auth.service.js';
 import { REFRESH_TOKEN_COOKIE } from './auth.constants.js';
@@ -28,6 +29,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { RefreshTokenGuard } from './guards/refresh-token.guard.js';
 import { RequirePermission } from '../authorization/decorators/require-permission.decorator.js';
 import { AuthorizationGuard } from '../authorization/guards/authorization.guard.js';
+import { OwnerBootstrapService } from './owner-bootstrap.service.js';
 
 import type { Response } from 'express';
 import type { AuthenticatedRequest, LoginUserData } from './types/auth.js';
@@ -35,7 +37,17 @@ import type { AuthenticatedRequest, LoginUserData } from './types/auth.js';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly ownerBootstrapService: OwnerBootstrapService,
+  ) {}
+
+  @Post('owner-setup')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  completeOwnerSetup(@Body() input: OwnerSetupDto) {
+    return this.ownerBootstrapService.completeSetup(input);
+  }
 
   @Post('register')
   @RequirePermission('/auth/register', 'CREATE')

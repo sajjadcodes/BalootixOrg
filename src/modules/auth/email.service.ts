@@ -7,6 +7,7 @@ export class EmailService {
   private readonly resend: Resend;
   private readonly from: string;
   private readonly appUrl: string;
+  private readonly frontendUrl: string;
 
   constructor(configService: ConfigService) {
     this.resend = new Resend(
@@ -14,6 +15,7 @@ export class EmailService {
     );
     this.from = configService.getOrThrow<string>('RESEND_FROM_EMAIL');
     this.appUrl = configService.getOrThrow<string>('APP_URL');
+    this.frontendUrl = configService.getOrThrow<string>('FRONTEND_URL');
   }
 
   async sendVerificationEmail(email: string, token: string): Promise<void> {
@@ -46,6 +48,23 @@ export class EmailService {
     if (error) {
       throw new Error(
         `Resend failed to send password reset email: ${error.message}`,
+      );
+    }
+  }
+
+  async sendOwnerSetupEmail(email: string, token: string): Promise<void> {
+    const baseUrl = this.frontendUrl.replace(/\/$/, '');
+    const setupUrl = `${baseUrl}/owner-setup?token=${encodeURIComponent(token)}`;
+    const { error } = await this.resend.emails.send({
+      from: this.from,
+      to: email,
+      subject: 'Set up your OrgFlow owner account',
+      text: `Set up your OrgFlow owner account by opening this link: ${setupUrl}\n\nThis link expires in 30 minutes and can only be used once.`,
+    });
+
+    if (error) {
+      throw new Error(
+        `Resend failed to send owner setup email: ${error.message}`,
       );
     }
   }

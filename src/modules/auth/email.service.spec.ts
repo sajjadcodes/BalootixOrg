@@ -24,6 +24,7 @@ describe('EmailService', () => {
       RESEND_API_KEY: 'test-api-key',
       RESEND_FROM_EMAIL: 'OrgFlow <verify@example.com>',
       APP_URL: 'http://localhost:4000/api/',
+      FRONTEND_URL: 'http://localhost:3000/',
     };
     const configService = {
       getOrThrow: (key: string) => configValues[key],
@@ -54,6 +55,19 @@ describe('EmailService', () => {
       subject: 'Reset your password',
       text: expect.stringContaining(
         'http://localhost:4000/api/auth/reset-password?token=token%2B%2F%3D',
+      ),
+    });
+  });
+
+  it('sends an owner setup link through Resend', async () => {
+    await service.sendOwnerSetupEmail('owner@example.com', 'token+/=');
+
+    expect(send).toHaveBeenCalledWith({
+      from: 'OrgFlow <verify@example.com>',
+      to: 'owner@example.com',
+      subject: 'Set up your OrgFlow owner account',
+      text: expect.stringContaining(
+        'http://localhost:3000/owner-setup?token=token%2B%2F%3D',
       ),
     });
   });

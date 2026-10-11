@@ -12,6 +12,7 @@ import { ACCESS_TOKEN_TTL_SECONDS } from './auth.constants.js';
 import { RefreshTokenGuard } from './guards/refresh-token.guard.js';
 import { RefreshTokenStrategy } from './strategies/refresh-token.strategy.js';
 import { PrismaModule } from '../../prisma/prisma.module.js';
+import { OwnerBootstrapService } from './owner-bootstrap.service.js';
 
 @Module({
   imports: [
@@ -28,13 +29,14 @@ import { PrismaModule } from '../../prisma/prisma.module.js';
   ],
   providers: [
     AuthService,
+    OwnerBootstrapService,
     EmailService,
     JwtStrategy,
     RefreshTokenStrategy,
     JwtAuthGuard,
     RefreshTokenGuard,
   ],
-  exports: [JwtModule, PassportModule, JwtAuthGuard],
+  exports: [JwtModule, PassportModule, JwtAuthGuard, OwnerBootstrapService],
   controllers: [AuthController],
 })
 export class AuthModule {}
