@@ -30,6 +30,18 @@ model EmailVerificationToken {
   @@index([userId])
 }
 
+model OwnerSetupToken {
+  id          String             @id @default(uuid())
+  email       String
+  displayName String
+  tokenHash   String             @unique
+  expiresAt   TimestamptzString
+  usedAt      TimestamptzString?
+  createdAt   TimestamptzString  @default(now())
+
+  @@index([email])
+}
+
 //AUTHORIZATION
 enum RoleScopeEnum {
   SELF
@@ -73,6 +85,7 @@ model Permission {
 model Role {
   id              String                     @id @default(uuid())
   unitId          String
+  systemKey       String?                    @unique
   name            String
   description     String?
   scope           RoleScopeEnum              @default(DESCENDANTS)

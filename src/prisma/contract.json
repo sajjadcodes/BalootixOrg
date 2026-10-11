@@ -8,6 +8,10 @@
       "model": "EmailVerificationToken",
       "namespace": "public"
     },
+    "OwnerSetupToken": {
+      "model": "OwnerSetupToken",
+      "namespace": "public"
+    },
     "Permission": {
       "model": "Permission",
       "namespace": "public"
@@ -180,6 +184,87 @@
               },
               "namespaceId": "public",
               "table": "EmailVerificationToken"
+            }
+          },
+          "OwnerSetupToken": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "displayName": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "email": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "expiresAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "tokenHash": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "usedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "displayName": {
+                  "column": "displayName"
+                },
+                "email": {
+                  "column": "email"
+                },
+                "expiresAt": {
+                  "column": "expiresAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "tokenHash": {
+                  "column": "tokenHash"
+                },
+                "usedAt": {
+                  "column": "usedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "OwnerSetupToken"
             }
           },
           "Permission": {
@@ -398,6 +483,13 @@
                   "plane": "domain"
                 }
               },
+              "systemKey": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "unitId": {
                 "nullable": false,
                 "type": {
@@ -480,6 +572,9 @@
                 },
                 "scope": {
                   "column": "scope"
+                },
+                "systemKey": {
+                  "column": "systemKey"
                 },
                 "unitId": {
                   "column": "unitId"
@@ -1074,6 +1169,72 @@
                 }
               ]
             },
+            "OwnerSetupToken": {
+              "columns": {
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "displayName": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "email": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "expiresAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "tokenHash": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "usedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "email"
+                  ],
+                  "name": "OwnerSetupToken_email_idx_46df9cad",
+                  "prefix": "OwnerSetupToken_email_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "tokenHash"
+                  ]
+                }
+              ]
+            },
             "Permission": {
               "checks": [
                 {
@@ -1261,6 +1422,11 @@
                     "plane": "storage"
                   }
                 },
+                "systemKey": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "unitId": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -1307,6 +1473,11 @@
                 ]
               },
               "uniques": [
+                {
+                  "columns": [
+                    "systemKey"
+                  ]
+                },
                 {
                   "columns": [
                     "unitId",
@@ -1737,10 +1908,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "9f4d301b6de426d53fbc6dc601efaa7cbcbbd4dd6b0552554fbd9b98f66e8db7"
+    "storageHash": "461eff5efeb32e59ea53ac5ceceba937c359566d894918184dcb218f84a4d2dd"
   },
   "execution": {
-    "executionHash": "3addf4df375d8de37e9a8ab10b7835f6dcc248fa8466e7d027e11b04e303324e",
+    "executionHash": "76ed1f35006579c5145caf2f15314912d138b5d79ce9801b97c6e0a0ddb2b5ed",
     "mutations": {
       "defaults": [
         {
@@ -1750,6 +1921,17 @@
           },
           "ref": {
             "entry": "EmailVerificationToken",
+            "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "OwnerSetupToken",
             "field": "id",
             "namespace": "public"
           }
