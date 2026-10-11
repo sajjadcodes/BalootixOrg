@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'8c004bbff5864feb67e254aa6c3079df1e2f8c84a28757cadfe66d774ca7d283'>;
+  StorageHashBase<'9f4d301b6de426d53fbc6dc601efaa7cbcbbd4dd6b0552554fbd9b98f66e8db7'>;
 export type ExecutionHash =
   ExecutionHashBase<'3addf4df375d8de37e9a8ab10b7835f6dcc248fa8466e7d027e11b04e303324e'>;
 export type ProfileHash =
@@ -259,7 +259,7 @@ export type FieldOutputTypes = {
       readonly userId: CodecTypes['pg/text@1']['output'];
     };
     readonly Permission: {
-      readonly action: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'PATCH';
+      readonly action: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE';
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly resourceId: CodecTypes['pg/text@1']['output'];
@@ -332,7 +332,7 @@ export type FieldInputTypes = {
       readonly userId: CodecTypes['pg/text@1']['input'];
     };
     readonly Permission: {
-      readonly action: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'PATCH';
+      readonly action: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE';
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly resourceId: CodecTypes['pg/text@1']['input'];
@@ -405,7 +405,7 @@ export type StorageColumnTypes = {
       readonly userId: CodecTypes['pg/text@1']['output'];
     };
     readonly Permission: {
-      readonly action: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'PATCH';
+      readonly action: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE';
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly resourceId: CodecTypes['pg/text@1']['output'];
@@ -478,7 +478,7 @@ export type StorageColumnInputTypes = {
       readonly userId: CodecTypes['pg/text@1']['input'];
     };
     readonly Permission: {
-      readonly action: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'PATCH';
+      readonly action: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE';
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly resourceId: CodecTypes['pg/text@1']['input'];
@@ -553,7 +553,7 @@ export namespace Models {
     readonly [RelationKeys]?: 'user';
   };
   export type public_Permission = {
-    action: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'PATCH';
+    action: 'READ' | 'CREATE' | 'UPDATE' | 'DELETE';
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     id: CodecTypes['pg/text@1']['output'];
     resourceId: CodecTypes['pg/text@1']['output'];
@@ -1185,7 +1185,7 @@ type ContractBase = Omit<
           readonly valueSet: {
             readonly PermissionActionEnum: {
               readonly kind: 'valueSet';
-              readonly values: readonly ['READ', 'CREATE', 'UPDATE', 'DELETE', 'PATCH'];
+              readonly values: readonly ['READ', 'CREATE', 'UPDATE', 'DELETE'];
             };
             readonly RoleScopeEnum: {
               readonly kind: 'valueSet';
@@ -1815,7 +1815,6 @@ type ContractBase = Omit<
               { readonly name: 'CREATE'; readonly value: 'CREATE' },
               { readonly name: 'UPDATE'; readonly value: 'UPDATE' },
               { readonly name: 'DELETE'; readonly value: 'DELETE' },
-              { readonly name: 'PATCH'; readonly value: 'PATCH' },
             ];
           };
           readonly RoleScopeEnum: {

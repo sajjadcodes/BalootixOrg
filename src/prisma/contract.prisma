@@ -47,7 +47,6 @@ enum PermissionActionEnum {
   CREATE
   UPDATE
   DELETE
-  PATCH
 }
 
 model Resource {

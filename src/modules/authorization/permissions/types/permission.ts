@@ -3,7 +3,6 @@ export enum PermissionActionEnum {
   CREATE = 'CREATE',
   UPDATE = 'UPDATE',
   DELETE = 'DELETE',
-  PATCH = 'PATCH',
 }
 
 // Keep enum values compatible with Prisma string unions and incoming DTO strings.

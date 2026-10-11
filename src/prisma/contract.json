@@ -59,10 +59,6 @@
               {
                 "name": "DELETE",
                 "value": "DELETE"
-              },
-              {
-                "name": "PATCH",
-                "value": "PATCH"
               }
             ]
           },
@@ -1081,8 +1077,8 @@
             "Permission": {
               "checks": [
                 {
-                  "expression": "\"action\" IN ('READ', 'CREATE', 'UPDATE', 'DELETE', 'PATCH')",
-                  "name": "Permission_action_check_e9dee24b",
+                  "expression": "\"action\" IN ('READ', 'CREATE', 'UPDATE', 'DELETE')",
+                  "name": "Permission_action_check_7589694b",
                   "prefix": "Permission_action_check"
                 }
               ],
@@ -1717,8 +1713,7 @@
                 "READ",
                 "CREATE",
                 "UPDATE",
-                "DELETE",
-                "PATCH"
+                "DELETE"
               ]
             },
             "RoleScopeEnum": {
@@ -1742,7 +1737,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "8c004bbff5864feb67e254aa6c3079df1e2f8c84a28757cadfe66d774ca7d283"
+    "storageHash": "9f4d301b6de426d53fbc6dc601efaa7cbcbbd4dd6b0552554fbd9b98f66e8db7"
   },
   "execution": {
     "executionHash": "3addf4df375d8de37e9a8ab10b7835f6dcc248fa8466e7d027e11b04e303324e",
