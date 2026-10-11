@@ -19,6 +19,7 @@ const unit: UnitData = {
 const role: RoleData = {
   id: 'role-1',
   unitId: unit.id,
+  systemKey: null,
   name: 'Finance Manager',
   description: 'Approves payment workflows',
   scope: 'DESCENDANTS',
@@ -138,6 +139,14 @@ describe('RolesService', () => {
     expect(roleCreate).not.toHaveBeenCalled();
   });
 
+  it('rejects creating a role with the reserved OWNER name', async () => {
+    await expect(
+      service.createRole({ unitId: unit.id, name: ' owner ' }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(unitWhere).not.toHaveBeenCalled();
+    expect(roleCreate).not.toHaveBeenCalled();
+  });
+
   it('rejects duplicate role names in the same unit', async () => {
     unitFirst.mockResolvedValueOnce(unit);
     roleFirst.mockResolvedValueOnce(role);
@@ -245,6 +254,15 @@ describe('RolesService', () => {
     expect(roleUpdate).not.toHaveBeenCalled();
   });
 
+  it('prevents modifying a system role', async () => {
+    roleFirst.mockResolvedValueOnce({ ...role, systemKey: 'OWNER' });
+
+    await expect(
+      service.updateRole(role.id, { name: 'Renamed Owner' }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(roleUpdate).not.toHaveBeenCalled();
+  });
+
   it('deletes a role that has no permissions or assignments', async () => {
     roleFirst.mockResolvedValueOnce(role);
 
@@ -261,6 +279,16 @@ describe('RolesService', () => {
     await expect(service.deleteRole(role.id)).rejects.toBeInstanceOf(
       ConflictException,
     );
+    expect(roleDelete).not.toHaveBeenCalled();
+  });
+
+  it('prevents deleting a system role', async () => {
+    roleFirst.mockResolvedValueOnce({ ...role, systemKey: 'OWNER' });
+
+    await expect(service.deleteRole(role.id)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+    expect(rolePermissionWhere).not.toHaveBeenCalled();
     expect(roleDelete).not.toHaveBeenCalled();
   });
 

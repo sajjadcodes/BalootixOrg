@@ -6,6 +6,7 @@ import type { RoleData } from './types/role.js';
 const role: RoleData = {
   id: 'role-1',
   unitId: 'unit-1',
+  systemKey: null,
   name: 'Finance Manager',
   description: 'Approves payment workflows',
   scope: 'DESCENDANTS',

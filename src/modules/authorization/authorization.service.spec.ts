@@ -39,6 +39,7 @@ const user: UserData = {
 const roleSelf: RoleData = {
   id: 'role-self',
   unitId: 'unit-1',
+  systemKey: null,
   name: 'Finance Reader',
   description: 'Reads finance data',
   scope: 'SELF',
@@ -50,6 +51,7 @@ const roleSelf: RoleData = {
 const roleDescendants: RoleData = {
   id: 'role-desc',
   unitId: 'unit-1',
+  systemKey: null,
   name: 'Finance Leader',
   description: 'Reads finance descendants',
   scope: 'DESCENDANTS',
@@ -61,7 +63,8 @@ const roleDescendants: RoleData = {
 const ownerRole: RoleData = {
   id: 'role-owner',
   unitId: 'unit-1',
-  name: 'OWNER',
+  systemKey: 'OWNER',
+  name: 'Organization Owner',
   description: 'App-wide owner override',
   scope: 'SELF',
   isActive: true,
@@ -156,6 +159,17 @@ describe('OrganizationAuthorizationService', () => {
     await expect(
       service.canAccess(user.id, permission.action, resource.route, 'unit-1'),
     ).resolves.toBe(true);
+  });
+
+  it('does not grant the OWNER override to a role based only on its name', async () => {
+    const roleNamedOwner = { ...ownerRole, systemKey: null };
+    roleAssignmentAll.mockResolvedValueOnce([assignmentFor(roleNamedOwner)]);
+    roleWhere.mockResolvedValueOnce(roleNamedOwner);
+    resourceWhere.mockResolvedValueOnce(null);
+
+    await expect(
+      service.canAccess(user.id, permission.action, resource.route, 'unit-1'),
+    ).resolves.toBe(false);
   });
 
   it('allows access when the user has the permission directly on the selected SELF role', async () => {

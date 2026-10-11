@@ -53,8 +53,8 @@ export class AuthorizationService {
         continue;
       }
 
-      // If the user has an OWNER role, they automatically have access to all resources and actions.
-      if (role.name.toUpperCase() === 'OWNER') {
+      // The immutable system key identifies the global owner role.
+      if (role.systemKey === 'OWNER') {
         return true;
       }
 

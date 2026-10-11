@@ -9,6 +9,7 @@ export type RoleScope = `${RoleScopeEnum}`;
 export interface RoleData {
   id: string;
   unitId: string;
+  systemKey: string | null;
   name: string;
   description: string | null;
   scope: RoleScope;

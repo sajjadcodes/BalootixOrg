@@ -8,6 +8,7 @@ import type { PermissionData } from '../permissions/types/permission.js';
 const role: RoleData = {
   id: 'role-1',
   unitId: 'unit-1',
+  systemKey: null,
   name: 'Finance Manager',
   description: 'Approves payment workflows',
   scope: 'DESCENDANTS',

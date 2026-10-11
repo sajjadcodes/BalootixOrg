@@ -14,6 +14,12 @@ export class RolesService {
 
   // CREATE ROLE
   async createRole(input: CreateRoleDto): Promise<RoleData> {
+    const name = input.name.trim();
+
+    if (name.toUpperCase() === 'OWNER') {
+      throw new ConflictException('The OWNER role name is reserved');
+    }
+
     const unit = await this.prisma.public.Unit.where({
       id: input.unitId,
     }).first();
@@ -22,7 +28,6 @@ export class RolesService {
       throw new NotFoundException('Unit not found');
     }
 
-    const name = input.name.trim();
     const description = input.description?.trim() || null;
     const scope = input.scope ?? 'DESCENDANTS';
     const isActive = input.isActive ?? true;
@@ -73,9 +78,18 @@ export class RolesService {
       throw new NotFoundException('Role not found');
     }
 
+    if (existing.systemKey !== null) {
+      throw new ConflictException('System roles cannot be modified');
+    }
+
     // Determine the next values for the role, using existing values as defaults.
     const nextUnitId = input.unitId ?? existing.unitId;
     const nextName = input.name?.trim() ?? existing.name;
+
+    if (nextName.toUpperCase() === 'OWNER') {
+      throw new ConflictException('The OWNER role name is reserved');
+    }
+
     const nextScope = input.scope ?? existing.scope;
     const nextIsActive = input.isActive ?? existing.isActive;
     const nextDescription =
@@ -128,6 +142,10 @@ export class RolesService {
 
     if (!existing) {
       throw new NotFoundException('Role not found');
+    }
+
+    if (existing.systemKey !== null) {
+      throw new ConflictException('System roles cannot be deleted');
     }
 
     // Check for permissions or assignments before deletion
