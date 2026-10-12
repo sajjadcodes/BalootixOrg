@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'node:crypto';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { EmailService } from './email.service.js';
+import { normalizeTenantSlug } from '../platform-admin/tenant-slug.js';
 
 const OWNER_SYSTEM_KEY = 'OWNER';
 const OWNER_SETUP_TTL_MS = 30 * 60 * 1000; // 30 minutes in milliseconds
@@ -35,7 +36,7 @@ export class OwnerBootstrapService {
     }
 
     return this.prisma.public.Tenant.create({
-      slug: `platform-${Date.now()}`,
+      slug: normalizeTenantSlug(`platform-${Date.now()}`),
       name: 'Platform Tenant',
       status: 'ACTIVE',
     });

@@ -20,6 +20,7 @@ import type { RegisteredUserData } from './types/auth.js';
 import { EmailService } from './email.service.js';
 import { LoginWithEmailPasswordDto } from './dto/login-with-email-password.dto.js';
 import type { LoginUserData } from './types/auth.js';
+import { normalizeTenantSlug } from '../platform-admin/tenant-slug.js';
 
 @Injectable()
 export class AuthService {
@@ -43,7 +44,7 @@ export class AuthService {
     }
 
     return this.prisma.public.Tenant.create({
-      slug: `default-${Date.now()}`,
+      slug: normalizeTenantSlug(`default-${Date.now()}`),
       name: 'Default Tenant',
       status: 'ACTIVE',
     });
