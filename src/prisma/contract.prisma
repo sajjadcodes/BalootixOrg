@@ -145,3 +145,14 @@ model Unit {
 
   @@index([parentId])
 }
+
+// TENEANT & GlOBAL ADMIN
+model GlobalAdmin {
+  id             String                     @id @default(uuid())
+  email          String                     @unique
+  displayName    String
+  hashedPassword String?
+  isActive       Boolean                    @default(true)
+  createdAt      TimestamptzString          @default(now())
+  updatedAt      temporal.updatedAtString()
+}

@@ -8,6 +8,10 @@
       "model": "EmailVerificationToken",
       "namespace": "public"
     },
+    "GlobalAdmin": {
+      "model": "GlobalAdmin",
+      "namespace": "public"
+    },
     "OwnerSetupToken": {
       "model": "OwnerSetupToken",
       "namespace": "public"
@@ -184,6 +188,87 @@
               },
               "namespaceId": "public",
               "table": "EmailVerificationToken"
+            }
+          },
+          "GlobalAdmin": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "displayName": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "email": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "hashedPassword": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "isActive": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "displayName": {
+                  "column": "displayName"
+                },
+                "email": {
+                  "column": "email"
+                },
+                "hashedPassword": {
+                  "column": "hashedPassword"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "isActive": {
+                  "column": "isActive"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "GlobalAdmin"
             }
           },
           "OwnerSetupToken": {
@@ -1169,6 +1254,67 @@
                 }
               ]
             },
+            "GlobalAdmin": {
+              "columns": {
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "displayName": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "email": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "hashedPassword": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "isActive": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": true
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "email"
+                  ]
+                }
+              ]
+            },
             "OwnerSetupToken": {
               "columns": {
                 "createdAt": {
@@ -1908,10 +2054,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "461eff5efeb32e59ea53ac5ceceba937c359566d894918184dcb218f84a4d2dd"
+    "storageHash": "391e09f2b78120cef96e1524152aa00c1569fbb0e96f06c124938033368b1698"
   },
   "execution": {
-    "executionHash": "76ed1f35006579c5145caf2f15314912d138b5d79ce9801b97c6e0a0ddb2b5ed",
+    "executionHash": "8fb8c43758a7e50b6c4cc9406c6d18e900d84aa477fd9ef1836d1d386a9facbc",
     "mutations": {
       "defaults": [
         {
@@ -1922,6 +2068,32 @@
           "ref": {
             "entry": "EmailVerificationToken",
             "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "GlobalAdmin",
+            "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "GlobalAdmin",
+            "field": "updatedAt",
             "namespace": "public"
           }
         },
