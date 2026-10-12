@@ -13,19 +13,23 @@ export class PermissionsService {
   constructor(private readonly prisma: PrismaService) {}
 
   //CREATE PERMISSION
-  async createPermission(input: CreatePermissionDto): Promise<PermissionData> {
+  async createPermission(
+    input: CreatePermissionDto,
+    tenantId?: string,
+  ): Promise<PermissionData> {
     const resource = await this.prisma.public.Resource.where({
       id: input.resourceId,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (!resource) {
       throw new NotFoundException('Resource not found');
     }
 
-    // Keep each action unique within its resource.
     const existing = await this.prisma.public.Permission.where({
       resourceId: input.resourceId,
       action: input.action,
+      tenantId: resource.tenantId,
     }).first();
 
     if (existing) {
@@ -42,16 +46,20 @@ export class PermissionsService {
   }
 
   //READ PERMISSIONS
-  async listPermissions(): Promise<PermissionData[]> {
-    return await this.prisma.public.Permission.orderBy((permission) =>
-      permission.action.asc(),
-    ).all();
+  async listPermissions(tenantId?: string): Promise<PermissionData[]> {
+    const query = tenantId
+      ? this.prisma.public.Permission.where({ tenantId })
+      : this.prisma.public.Permission;
+
+    const permissions = await query.all();
+    return [...permissions].sort((a, b) => a.action.localeCompare(b.action));
   }
 
   //READ PERMISSION BY ID
-  async getPermission(id: string): Promise<PermissionData> {
+  async getPermission(id: string, tenantId?: string): Promise<PermissionData> {
     const permission = await this.prisma.public.Permission.where({
       id,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (!permission) {
@@ -65,8 +73,12 @@ export class PermissionsService {
   async updatePermission(
     id: string,
     input: UpdatePermissionDto,
+    tenantId?: string,
   ): Promise<PermissionData> {
-    const existing = await this.prisma.public.Permission.where({ id }).first();
+    const existing = await this.prisma.public.Permission.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).first();
 
     if (!existing) {
       throw new NotFoundException('Permission not found');
@@ -75,19 +87,19 @@ export class PermissionsService {
     const nextResourceId = input.resourceId ?? existing.resourceId;
     const nextAction = input.action ?? existing.action;
 
-    // Ensure the permission is linked to an existing resource.
     const resource = await this.prisma.public.Resource.where({
       id: nextResourceId,
+      tenantId: existing.tenantId,
     }).first();
 
     if (!resource) {
       throw new NotFoundException('Resource not found');
     }
 
-    // Keep each action unique within its resource.
     const duplicate = await this.prisma.public.Permission.where({
       resourceId: nextResourceId,
       action: nextAction,
+      tenantId: existing.tenantId,
     }).first();
 
     if (duplicate && duplicate.id !== id) {
@@ -96,13 +108,14 @@ export class PermissionsService {
       );
     }
 
-    // Save the updated resource/action pair.
-    const updated = await this.prisma.public.Permission.where({ id }).update({
+    const updated = await this.prisma.public.Permission.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).update({
       resourceId: nextResourceId,
       action: nextAction,
     });
 
-    // Handle a permission removed while the update was in progress.
     if (!updated) {
       throw new NotFoundException('Permission not found');
     }
@@ -111,16 +124,22 @@ export class PermissionsService {
   }
 
   //DELETE PERMISSION
-  async deletePermission(id: string): Promise<{ deleted: true }> {
-    const existing = await this.prisma.public.Permission.where({ id }).first();
+  async deletePermission(
+    id: string,
+    tenantId?: string,
+  ): Promise<{ deleted: true }> {
+    const existing = await this.prisma.public.Permission.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).first();
 
     if (!existing) {
       throw new NotFoundException('Permission not found');
     }
 
-    // Preserve role assignments that depend on this permission.
     const rolePermission = await this.prisma.public.RolePermission.where({
       permissionId: id,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (rolePermission) {
@@ -129,8 +148,10 @@ export class PermissionsService {
       );
     }
 
-    // Delete only after confirming no roles are assigned to the permission.
-    await this.prisma.public.Permission.where({ id }).delete();
+    await this.prisma.public.Permission.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).delete();
 
     return { deleted: true };
   }

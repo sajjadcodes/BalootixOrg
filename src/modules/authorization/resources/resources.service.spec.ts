@@ -26,8 +26,8 @@ const resourceWhere = jest.fn(() => ({
   first: resourceFirst,
   update: resourceUpdate,
   delete: resourceDelete,
+  all: resourceAll,
 }));
-const resourceOrderBy = jest.fn(() => ({ all: resourceAll }));
 const tenantFirst = jest.fn(async () => tenant);
 const tenantOrderBy = jest.fn(() => ({ first: tenantFirst }));
 const permissionFirst = jest.fn(async () => null as { id: string } | null);
@@ -38,7 +38,7 @@ const prisma = {
     Resource: {
       where: resourceWhere,
       create: resourceCreate,
-      orderBy: resourceOrderBy,
+      all: resourceAll,
     },
     Tenant: { orderBy: tenantOrderBy },
     Permission: { where: permissionWhere },
@@ -58,7 +58,6 @@ describe('ResourcesService', () => {
     }));
     resourceAll.mockReset().mockResolvedValue([]);
     resourceWhere.mockClear();
-    resourceOrderBy.mockClear();
     tenantFirst.mockReset().mockResolvedValue(tenant);
     tenantOrderBy.mockClear();
     permissionFirst.mockReset().mockResolvedValue(null);
@@ -90,7 +89,7 @@ describe('ResourcesService', () => {
     resourceAll.mockResolvedValueOnce([resource]);
 
     await expect(service.listResources()).resolves.toEqual([resource]);
-    expect(resourceOrderBy).toHaveBeenCalledTimes(1);
+    expect(resourceAll).toHaveBeenCalledTimes(1);
   });
 
   it('gets a resource by id', async () => {

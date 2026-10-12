@@ -8,10 +8,13 @@ import {
   Param,
   Patch,
   Post,
+  Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard.js';
+import type { AuthenticatedRequest } from '../../auth/types/auth.js';
 import { RequirePermission } from '../decorators/require-permission.decorator.js';
 import { AuthorizationGuard } from '../guards/authorization.guard.js';
 import { CreatePermissionDto } from './dto/create-permission.dto.js';
@@ -29,22 +32,38 @@ export class PermissionsController {
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
   createPermission(
     @Body() input: CreatePermissionDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<PermissionData> {
-    return this.permissionsService.createPermission(input);
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.permissionsService.createPermission(input, req.user.tenantId);
   }
 
   @Get()
   @RequirePermission('/authorization/permissions', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  listPermissions(): Promise<PermissionData[]> {
-    return this.permissionsService.listPermissions();
+  listPermissions(@Req() req: AuthenticatedRequest): Promise<PermissionData[]> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.permissionsService.listPermissions(req.user.tenantId);
   }
 
   @Get(':id')
   @RequirePermission('/authorization/permissions/:id', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  getPermission(@Param('id') id: string): Promise<PermissionData> {
-    return this.permissionsService.getPermission(id);
+  getPermission(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<PermissionData> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.permissionsService.getPermission(id, req.user.tenantId);
   }
 
   @Patch(':id')
@@ -54,15 +73,28 @@ export class PermissionsController {
   updatePermission(
     @Param('id') id: string,
     @Body() input: UpdatePermissionDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<PermissionData> {
-    return this.permissionsService.updatePermission(id, input);
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.permissionsService.updatePermission(
+      id,
+      input,
+      req.user.tenantId,
+    );
   }
 
   @Delete(':id')
   @RequirePermission('/authorization/permissions/:id', 'DELETE')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
   @HttpCode(HttpStatus.OK)
-  deletePermission(@Param('id') id: string) {
-    return this.permissionsService.deletePermission(id);
+  deletePermission(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.permissionsService.deletePermission(id, req.user.tenantId);
   }
 }

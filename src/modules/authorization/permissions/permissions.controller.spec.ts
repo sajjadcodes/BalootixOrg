@@ -10,6 +10,7 @@ const permission: PermissionData = {
   createdAt: '2026-10-09T00:00:00.000Z',
   updatedAt: '2026-10-09T00:00:00.000Z',
 };
+const req = { user: { tenantId: 'tenant-1' } } as any;
 
 describe('PermissionsController', () => {
   it('delegates permission creation', async () => {
@@ -19,15 +20,21 @@ describe('PermissionsController', () => {
     } as unknown as PermissionsService);
 
     await expect(
-      controller.createPermission({
+      controller.createPermission(
+        {
+          resourceId: permission.resourceId,
+          action: 'READ',
+        },
+        req,
+      ),
+    ).resolves.toBe(permission);
+    expect(createPermission).toHaveBeenCalledWith(
+      {
         resourceId: permission.resourceId,
         action: 'READ',
-      }),
-    ).resolves.toBe(permission);
-    expect(createPermission).toHaveBeenCalledWith({
-      resourceId: permission.resourceId,
-      action: 'READ',
-    });
+      },
+      'tenant-1',
+    );
   });
 
   it('delegates permission listing', async () => {
@@ -36,7 +43,9 @@ describe('PermissionsController', () => {
       listPermissions,
     } as unknown as PermissionsService);
 
-    await expect(controller.listPermissions()).resolves.toEqual([permission]);
+    await expect(controller.listPermissions(req)).resolves.toEqual([
+      permission,
+    ]);
   });
 
   it('delegates permission lookup', async () => {
@@ -45,10 +54,10 @@ describe('PermissionsController', () => {
       getPermission,
     } as unknown as PermissionsService);
 
-    await expect(controller.getPermission(permission.id)).resolves.toBe(
+    await expect(controller.getPermission(permission.id, req)).resolves.toBe(
       permission,
     );
-    expect(getPermission).toHaveBeenCalledWith(permission.id);
+    expect(getPermission).toHaveBeenCalledWith(permission.id, 'tenant-1');
   });
 
   it('delegates permission updates', async () => {
@@ -58,15 +67,23 @@ describe('PermissionsController', () => {
     } as unknown as PermissionsService);
 
     await expect(
-      controller.updatePermission(permission.id, {
+      controller.updatePermission(
+        permission.id,
+        {
+          resourceId: permission.resourceId,
+          action: 'UPDATE',
+        },
+        req,
+      ),
+    ).resolves.toBe(permission);
+    expect(updatePermission).toHaveBeenCalledWith(
+      permission.id,
+      {
         resourceId: permission.resourceId,
         action: 'UPDATE',
-      }),
-    ).resolves.toBe(permission);
-    expect(updatePermission).toHaveBeenCalledWith(permission.id, {
-      resourceId: permission.resourceId,
-      action: 'UPDATE',
-    });
+      },
+      'tenant-1',
+    );
   });
 
   it('delegates permission deletion', async () => {
@@ -75,9 +92,11 @@ describe('PermissionsController', () => {
       deletePermission,
     } as unknown as PermissionsService);
 
-    await expect(controller.deletePermission(permission.id)).resolves.toEqual({
+    await expect(
+      controller.deletePermission(permission.id, req),
+    ).resolves.toEqual({
       deleted: true,
     });
-    expect(deletePermission).toHaveBeenCalledWith(permission.id);
+    expect(deletePermission).toHaveBeenCalledWith(permission.id, 'tenant-1');
   });
 });

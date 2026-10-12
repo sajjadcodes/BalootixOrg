@@ -62,8 +62,8 @@ const roleAssignmentWhere = jest.fn(() => ({
   first: roleAssignmentFirst,
   update: roleAssignmentUpdate,
   delete: roleAssignmentDelete,
+  all: roleAssignmentAll,
 }));
-const roleAssignmentOrderBy = jest.fn(() => ({ all: roleAssignmentAll }));
 
 const prisma = {
   public: {
@@ -72,7 +72,7 @@ const prisma = {
     RoleAssignment: {
       where: roleAssignmentWhere,
       create: roleAssignmentCreate,
-      orderBy: roleAssignmentOrderBy,
+      all: roleAssignmentAll,
     },
   },
 };
@@ -94,7 +94,6 @@ describe('RoleAssignmentsService', () => {
     }));
     roleAssignmentAll.mockReset().mockResolvedValue([]);
     roleAssignmentWhere.mockClear();
-    roleAssignmentOrderBy.mockClear();
 
     service = new RoleAssignmentsService(prisma as unknown as PrismaService);
   });
@@ -162,7 +161,7 @@ describe('RoleAssignmentsService', () => {
     await expect(service.listRoleAssignments()).resolves.toEqual([
       roleAssignment,
     ]);
-    expect(roleAssignmentOrderBy).toHaveBeenCalledTimes(1);
+    expect(roleAssignmentAll).toHaveBeenCalledTimes(1);
   });
 
   it('gets a role assignment by id', async () => {

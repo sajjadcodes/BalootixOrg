@@ -15,36 +15,36 @@ export class RoleAssignmentsService {
   // CREATE ROLE ASSIGNMENT
   async createRoleAssignment(
     input: CreateRoleAssignmentDto,
+    tenantId?: string,
   ): Promise<RoleAssignmentData> {
-    // Check if the user exists
     const user = await this.prisma.public.User.where({
       id: input.userId,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    // Check if the role exists
     const role = await this.prisma.public.Role.where({
       id: input.roleId,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (!role) {
       throw new NotFoundException('Role not found');
     }
 
-    // Check if the role assignment already exists
     const existing = await this.prisma.public.RoleAssignment.where({
       userId: input.userId,
       roleId: input.roleId,
+      tenantId: role.tenantId,
     }).first();
 
     if (existing) {
       throw new ConflictException('This role is already assigned to the user');
     }
 
-    // Create the role assignment
     const created = await this.prisma.public.RoleAssignment.create({
       tenantId: role.tenantId,
       userId: input.userId,
@@ -63,25 +63,33 @@ export class RoleAssignmentsService {
   }
 
   // READ ROLE ASSIGNMENTS
-  async listRoleAssignments(): Promise<RoleAssignmentData[]> {
-    const roleAssignments = await this.prisma.public.RoleAssignment.orderBy(
-      (roleAssignment) => roleAssignment.createdAt.asc(),
-    ).all();
+  async listRoleAssignments(tenantId?: string): Promise<RoleAssignmentData[]> {
+    const query = tenantId
+      ? this.prisma.public.RoleAssignment.where({ tenantId })
+      : this.prisma.public.RoleAssignment;
 
-    return roleAssignments.map((roleAssignment) => ({
-      id: roleAssignment.id,
-      userId: roleAssignment.userId,
-      roleId: roleAssignment.roleId,
-      isActive: roleAssignment.isActive,
-      createdAt: roleAssignment.createdAt,
-      updatedAt: roleAssignment.updatedAt,
-    }));
+    const roleAssignments = await query.all();
+
+    return [...roleAssignments]
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+      .map((roleAssignment) => ({
+        id: roleAssignment.id,
+        userId: roleAssignment.userId,
+        roleId: roleAssignment.roleId,
+        isActive: roleAssignment.isActive,
+        createdAt: roleAssignment.createdAt,
+        updatedAt: roleAssignment.updatedAt,
+      }));
   }
 
   // READ ROLE ASSIGNMENT BY ID
-  async getRoleAssignment(id: string): Promise<RoleAssignmentData> {
+  async getRoleAssignment(
+    id: string,
+    tenantId?: string,
+  ): Promise<RoleAssignmentData> {
     const roleAssignment = await this.prisma.public.RoleAssignment.where({
       id,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (!roleAssignment) {
@@ -102,33 +110,33 @@ export class RoleAssignmentsService {
   async updateRoleAssignment(
     id: string,
     input: UpdateRoleAssignmentDto,
+    tenantId?: string,
   ): Promise<RoleAssignmentData> {
-    // Check if the role assignment exists
     const existing = await this.prisma.public.RoleAssignment.where({
       id,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (!existing) {
       throw new NotFoundException('Role assignment not found');
     }
 
-    // Determine the next values for userId, roleId, and isActive
     const nextUserId = input.userId ?? existing.userId;
     const nextRoleId = input.roleId ?? existing.roleId;
     const nextIsActive = input.isActive ?? existing.isActive;
 
-    // Check if the new user exists
     const user = await this.prisma.public.User.where({
       id: nextUserId,
+      tenantId: existing.tenantId,
     }).first();
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    // Check if the new role exists
     const role = await this.prisma.public.Role.where({
       id: nextRoleId,
+      tenantId: existing.tenantId,
     }).first();
 
     if (!role) {
@@ -136,13 +144,12 @@ export class RoleAssignmentsService {
     }
 
     if (input.userId !== undefined || input.roleId !== undefined) {
-      // Check if the new role assignment already exists
       const duplicate = await this.prisma.public.RoleAssignment.where({
         userId: nextUserId,
         roleId: nextRoleId,
+        tenantId: existing.tenantId,
       }).first();
 
-      // If a duplicate exists and it's not the same role assignment being updated, throw an exception
       if (duplicate && duplicate.id !== id) {
         throw new ConflictException(
           'This role is already assigned to the user',
@@ -150,16 +157,15 @@ export class RoleAssignmentsService {
       }
     }
 
-    // Update the role assignment
     const updated = await this.prisma.public.RoleAssignment.where({
       id,
+      ...(tenantId ? { tenantId } : {}),
     }).update({
       userId: nextUserId,
       roleId: nextRoleId,
       isActive: nextIsActive,
     });
 
-    // Check if the role assignment was updated
     if (!updated) {
       throw new NotFoundException('Role assignment not found');
     }
@@ -175,16 +181,23 @@ export class RoleAssignmentsService {
   }
 
   // DELETE ROLE ASSIGNMENT
-  async deleteRoleAssignment(id: string): Promise<{ deleted: true }> {
+  async deleteRoleAssignment(
+    id: string,
+    tenantId?: string,
+  ): Promise<{ deleted: true }> {
     const existing = await this.prisma.public.RoleAssignment.where({
       id,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (!existing) {
       throw new NotFoundException('Role assignment not found');
     }
 
-    await this.prisma.public.RoleAssignment.where({ id }).delete();
+    await this.prisma.public.RoleAssignment.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).delete();
 
     return { deleted: true };
   }

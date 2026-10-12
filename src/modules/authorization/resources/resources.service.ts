@@ -14,39 +14,55 @@ export class ResourcesService {
   constructor(private readonly prisma: PrismaService) {}
 
   //CREATE RESOURCE
-  async createResource(input: CreateResourceDto): Promise<ResourceData> {
+  async createResource(
+    input: CreateResourceDto,
+    tenantId?: string,
+  ): Promise<ResourceData> {
     const route = normalizeRoute(input.route);
 
-    const existing = await this.prisma.public.Resource.where({ route }).first();
+    const existing = await this.prisma.public.Resource.where({
+      route,
+      ...(tenantId ? { tenantId } : {}),
+    }).first();
 
     if (existing) {
       throw new ConflictException('A resource with this route already exists');
     }
 
-    const tenant = await this.prisma.public.Tenant.orderBy((item) =>
-      item.createdAt.asc(),
-    ).first();
+    const effectiveTenantId =
+      tenantId ??
+      (
+        await this.prisma.public.Tenant.orderBy((item) =>
+          item.createdAt.asc(),
+        ).first()
+      )?.id;
 
-    if (!tenant) {
+    if (!effectiveTenantId) {
       throw new NotFoundException('No tenant is available for this resource');
     }
 
     return this.prisma.public.Resource.create({
-      tenantId: tenant.id,
+      tenantId: effectiveTenantId,
       route,
     });
   }
 
   //READ RESOURCE
-  async listResources(): Promise<ResourceData[]> {
-    return await this.prisma.public.Resource.orderBy((resource) =>
-      resource.route.asc(),
-    ).all();
+  async listResources(tenantId?: string): Promise<ResourceData[]> {
+    const query = tenantId
+      ? this.prisma.public.Resource.where({ tenantId })
+      : this.prisma.public.Resource;
+
+    const resources = await query.all();
+    return [...resources].sort((a, b) => a.route.localeCompare(b.route));
   }
 
   //READ RESOURCE BY ID
-  async getResource(id: string): Promise<ResourceData> {
-    const resource = await this.prisma.public.Resource.where({ id }).first();
+  async getResource(id: string, tenantId?: string): Promise<ResourceData> {
+    const resource = await this.prisma.public.Resource.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).first();
 
     if (!resource) {
       throw new NotFoundException('Resource not found');
@@ -59,8 +75,12 @@ export class ResourcesService {
   async updateResource(
     id: string,
     input: UpdateResourceDto,
+    tenantId?: string,
   ): Promise<ResourceData> {
-    const existing = await this.prisma.public.Resource.where({ id }).first();
+    const existing = await this.prisma.public.Resource.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).first();
 
     if (!existing) {
       throw new NotFoundException('Resource not found');
@@ -72,6 +92,7 @@ export class ResourcesService {
     if (input.route !== undefined) {
       const duplicate = await this.prisma.public.Resource.where({
         route,
+        tenantId: existing.tenantId,
       }).first();
 
       if (duplicate && duplicate.id !== id) {
@@ -81,11 +102,13 @@ export class ResourcesService {
       }
     }
 
-    const updated = await this.prisma.public.Resource.where({ id }).update({
+    const updated = await this.prisma.public.Resource.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).update({
       route,
     });
 
-    // If no row is returned, the resource was removed while updating.
     if (!updated) {
       throw new NotFoundException('Resource not found');
     }
@@ -94,16 +117,22 @@ export class ResourcesService {
   }
 
   //DELETE RESOURCE
-  async deleteResource(id: string): Promise<{ deleted: true }> {
-    const existing = await this.prisma.public.Resource.where({ id }).first();
+  async deleteResource(
+    id: string,
+    tenantId?: string,
+  ): Promise<{ deleted: true }> {
+    const existing = await this.prisma.public.Resource.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).first();
 
     if (!existing) {
       throw new NotFoundException('Resource not found');
     }
 
-    // Preserve permissions and role assignments that depend on this resource.
     const permission = await this.prisma.public.Permission.where({
       resourceId: id,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (permission) {
@@ -112,8 +141,10 @@ export class ResourcesService {
       );
     }
 
-    // Delete the resource only after confirming it has no permissions.
-    await this.prisma.public.Resource.where({ id }).delete();
+    await this.prisma.public.Resource.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).delete();
 
     return { deleted: true };
   }

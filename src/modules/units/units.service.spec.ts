@@ -44,8 +44,8 @@ const unitWhere = jest.fn(() => ({
   first: unitFirst,
   update: unitUpdate,
   delete: unitDelete,
+  all: unitAll,
 }));
-const unitOrderBy = jest.fn(() => ({ all: unitAll }));
 const tenant = { id: 'tenant-1' };
 const tenantFirst = jest.fn(async () => tenant);
 const tenantOrderBy = jest.fn(() => ({ first: tenantFirst }));
@@ -57,7 +57,7 @@ const prisma = {
     Unit: {
       where: unitWhere,
       create: unitCreate,
-      orderBy: unitOrderBy,
+      all: unitAll,
     },
     Tenant: { orderBy: tenantOrderBy },
     Role: { where: roleWhere },
@@ -275,7 +275,6 @@ describe('UnitsService', () => {
     }));
     unitAll.mockReset().mockResolvedValue([]);
     unitWhere.mockClear();
-    unitOrderBy.mockClear();
     tenantFirst.mockReset().mockResolvedValue(tenant);
     tenantOrderBy.mockClear();
     roleFirst.mockReset().mockResolvedValue(null);
@@ -295,7 +294,11 @@ describe('UnitsService', () => {
       type: 'DEPARTMENT',
       description: null,
     });
-    expect(unitWhere).toHaveBeenCalledWith({ parentId: null, name: 'Finance' });
+    expect(unitWhere).toHaveBeenCalledWith({
+      parentId: null,
+      name: 'Finance',
+      tenantId: tenant.id,
+    });
   });
 
   it('creates a child unit when its parent exists', async () => {
@@ -344,7 +347,7 @@ describe('UnitsService', () => {
     unitAll.mockResolvedValueOnce([unit]);
 
     await expect(service.listUnits()).resolves.toEqual([unit]);
-    expect(unitOrderBy).toHaveBeenCalledTimes(1);
+    expect(unitAll).toHaveBeenCalledTimes(1);
   });
 
   it('gets a unit by id', async () => {

@@ -8,10 +8,13 @@ import {
   Param,
   Patch,
   Post,
+  Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard.js';
+import type { AuthenticatedRequest } from '../../auth/types/auth.js';
 import { RequirePermission } from '../decorators/require-permission.decorator.js';
 import { AuthorizationGuard } from '../guards/authorization.guard.js';
 import { CreateRoleAssignmentDto } from './dto/create-role-assignment.dto.js';
@@ -31,22 +34,43 @@ export class RoleAssignmentsController {
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
   createRoleAssignment(
     @Body() input: CreateRoleAssignmentDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<RoleAssignmentData> {
-    return this.roleAssignmentsService.createRoleAssignment(input);
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.roleAssignmentsService.createRoleAssignment(
+      input,
+      req.user.tenantId,
+    );
   }
 
   @Get()
   @RequirePermission('/authorization/role-assignments', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  listRoleAssignments(): Promise<RoleAssignmentData[]> {
-    return this.roleAssignmentsService.listRoleAssignments();
+  listRoleAssignments(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<RoleAssignmentData[]> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.roleAssignmentsService.listRoleAssignments(req.user.tenantId);
   }
 
   @Get(':id')
   @RequirePermission('/authorization/role-assignments/:id', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  getRoleAssignment(@Param('id') id: string): Promise<RoleAssignmentData> {
-    return this.roleAssignmentsService.getRoleAssignment(id);
+  getRoleAssignment(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<RoleAssignmentData> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.roleAssignmentsService.getRoleAssignment(id, req.user.tenantId);
   }
 
   @Patch(':id')
@@ -56,15 +80,34 @@ export class RoleAssignmentsController {
   updateRoleAssignment(
     @Param('id') id: string,
     @Body() input: UpdateRoleAssignmentDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<RoleAssignmentData> {
-    return this.roleAssignmentsService.updateRoleAssignment(id, input);
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.roleAssignmentsService.updateRoleAssignment(
+      id,
+      input,
+      req.user.tenantId,
+    );
   }
 
   @Delete(':id')
   @RequirePermission('/authorization/role-assignments/:id', 'DELETE')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
   @HttpCode(HttpStatus.OK)
-  deleteRoleAssignment(@Param('id') id: string) {
-    return this.roleAssignmentsService.deleteRoleAssignment(id);
+  deleteRoleAssignment(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.roleAssignmentsService.deleteRoleAssignment(
+      id,
+      req.user.tenantId,
+    );
   }
 }

@@ -8,6 +8,8 @@ import {
   Param,
   Patch,
   Post,
+  Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -20,6 +22,7 @@ import type { UnitData } from './types/unit.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { RequirePermission } from '../authorization/decorators/require-permission.decorator.js';
 import { AuthorizationGuard } from '../authorization/guards/authorization.guard.js';
+import type { AuthenticatedRequest } from '../auth/types/auth.js';
 
 @ApiTags('Units')
 @Controller('units')
@@ -29,29 +32,51 @@ export class UnitsController {
   @Post()
   @RequirePermission('/units', 'CREATE')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  createUnit(@Body() input: CreateUnitDto): Promise<UnitData> {
-    return this.unitsService.createUnit(input);
+  createUnit(
+    @Body() input: CreateUnitDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<UnitData> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.unitsService.createUnit(input, req.user.tenantId);
   }
 
   @Get()
   @RequirePermission('/units', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  listUnits(): Promise<UnitData[]> {
-    return this.unitsService.listUnits();
+  listUnits(@Req() req: AuthenticatedRequest): Promise<UnitData[]> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.unitsService.listUnits(req.user.tenantId);
   }
 
   @Get('tree')
   @RequirePermission('/units/tree', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  getUnitsTree() {
-    return this.unitsService.getUnitsTree();
+  getUnitsTree(@Req() req: AuthenticatedRequest) {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.unitsService.getUnitsTree(req.user.tenantId);
   }
 
   @Get(':id')
   @RequirePermission('/units/:id', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  getUnit(@Param('id') id: string): Promise<UnitData> {
-    return this.unitsService.getUnit(id);
+  getUnit(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<UnitData> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.unitsService.getUnit(id, req.user.tenantId);
   }
 
   @Patch(':id')
@@ -61,8 +86,13 @@ export class UnitsController {
   updateUnit(
     @Param('id') id: string,
     @Body() input: UpdateUnitDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<UnitData> {
-    return this.unitsService.updateUnit(id, input);
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.unitsService.updateUnit(id, input, req.user.tenantId);
   }
 
   @Patch(':id/status')
@@ -72,8 +102,17 @@ export class UnitsController {
   updateUnitStatus(
     @Param('id') id: string,
     @Body() input: SetUnitStatusDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<UnitData> {
-    return this.unitsService.updateUnitStatus(id, input.isActive);
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.unitsService.updateUnitStatus(
+      id,
+      input.isActive,
+      req.user.tenantId,
+    );
   }
 
   @Patch(':id/move')
@@ -83,15 +122,28 @@ export class UnitsController {
   moveUnit(
     @Param('id') id: string,
     @Body() input: MoveUnitDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<UnitData> {
-    return this.unitsService.moveUnit(id, input.targetUnitId ?? null);
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.unitsService.moveUnit(
+      id,
+      input.targetUnitId ?? null,
+      req.user.tenantId,
+    );
   }
 
   @Delete(':id')
   @RequirePermission('/units/:id', 'DELETE')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
   @HttpCode(HttpStatus.OK)
-  deleteUnit(@Param('id') id: string) {
-    return this.unitsService.deleteUnit(id);
+  deleteUnit(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.unitsService.deleteUnit(id, req.user.tenantId);
   }
 }

@@ -32,6 +32,7 @@ const rolePermission: RolePermissionData = {
   createdAt: '2026-10-09T00:00:00.000Z',
   updatedAt: '2026-10-09T00:00:00.000Z',
 };
+const req = { user: { tenantId: 'tenant-1' } } as any;
 
 describe('RolePermissionsController', () => {
   it('delegates role permission creation', async () => {
@@ -41,15 +42,21 @@ describe('RolePermissionsController', () => {
     } as unknown as RolePermissionsService);
 
     await expect(
-      controller.createRolePermission({
+      controller.createRolePermission(
+        {
+          roleId: role.id,
+          permissionId: permission.id,
+        },
+        req,
+      ),
+    ).resolves.toBe(rolePermission);
+    expect(createRolePermission).toHaveBeenCalledWith(
+      {
         roleId: role.id,
         permissionId: permission.id,
-      }),
-    ).resolves.toBe(rolePermission);
-    expect(createRolePermission).toHaveBeenCalledWith({
-      roleId: role.id,
-      permissionId: permission.id,
-    });
+      },
+      'tenant-1',
+    );
   });
 
   it('delegates role permission listing', async () => {
@@ -58,7 +65,7 @@ describe('RolePermissionsController', () => {
       listRolePermissions,
     } as unknown as RolePermissionsService);
 
-    await expect(controller.listRolePermissions()).resolves.toEqual([
+    await expect(controller.listRolePermissions(req)).resolves.toEqual([
       rolePermission,
     ]);
   });
@@ -69,10 +76,13 @@ describe('RolePermissionsController', () => {
       getRolePermission,
     } as unknown as RolePermissionsService);
 
-    await expect(controller.getRolePermission(rolePermission.id)).resolves.toBe(
-      rolePermission,
+    await expect(
+      controller.getRolePermission(rolePermission.id, req),
+    ).resolves.toBe(rolePermission);
+    expect(getRolePermission).toHaveBeenCalledWith(
+      rolePermission.id,
+      'tenant-1',
     );
-    expect(getRolePermission).toHaveBeenCalledWith(rolePermission.id);
   });
 
   it('delegates role permission updates', async () => {
@@ -82,15 +92,23 @@ describe('RolePermissionsController', () => {
     } as unknown as RolePermissionsService);
 
     await expect(
-      controller.updateRolePermission(rolePermission.id, {
+      controller.updateRolePermission(
+        rolePermission.id,
+        {
+          roleId: 'role-2',
+          permissionId: permission.id,
+        },
+        req,
+      ),
+    ).resolves.toBe(rolePermission);
+    expect(updateRolePermission).toHaveBeenCalledWith(
+      rolePermission.id,
+      {
         roleId: 'role-2',
         permissionId: permission.id,
-      }),
-    ).resolves.toBe(rolePermission);
-    expect(updateRolePermission).toHaveBeenCalledWith(rolePermission.id, {
-      roleId: 'role-2',
-      permissionId: permission.id,
-    });
+      },
+      'tenant-1',
+    );
   });
 
   it('delegates role permission deletion', async () => {
@@ -102,10 +120,13 @@ describe('RolePermissionsController', () => {
     } as unknown as RolePermissionsService);
 
     await expect(
-      controller.deleteRolePermission(rolePermission.id),
+      controller.deleteRolePermission(rolePermission.id, req),
     ).resolves.toEqual({
       deleted: true,
     });
-    expect(deleteRolePermission).toHaveBeenCalledWith(rolePermission.id);
+    expect(deleteRolePermission).toHaveBeenCalledWith(
+      rolePermission.id,
+      'tenant-1',
+    );
   });
 });

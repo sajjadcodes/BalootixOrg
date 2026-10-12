@@ -7,6 +7,8 @@ import {
   HttpStatus,
   Param,
   Patch,
+  Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -16,6 +18,7 @@ import type { UserData } from './types/user.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { RequirePermission } from '../authorization/decorators/require-permission.decorator.js';
 import { AuthorizationGuard } from '../authorization/guards/authorization.guard.js';
+import type { AuthenticatedRequest } from '../auth/types/auth.js';
 
 @ApiTags('Users')
 @Controller('users')
@@ -25,15 +28,26 @@ export class UsersController {
   @Get()
   @RequirePermission('/users', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  listUsers(): Promise<UserData[]> {
-    return this.usersService.listUsers();
+  listUsers(@Req() req: AuthenticatedRequest): Promise<UserData[]> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.usersService.listUsers(req.user.tenantId);
   }
 
   @Get(':id')
   @RequirePermission('/users/:id', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  getUser(@Param('id') id: string): Promise<UserData> {
-    return this.usersService.getUser(id);
+  getUser(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<UserData> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.usersService.getUser(id, req.user.tenantId);
   }
 
   @Patch(':id')
@@ -43,15 +57,24 @@ export class UsersController {
   updateUser(
     @Param('id') id: string,
     @Body() input: UpdateUserDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<UserData> {
-    return this.usersService.updateUser(id, input);
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.usersService.updateUser(id, input, req.user.tenantId);
   }
 
   @Delete(':id')
   @RequirePermission('/users/:id', 'DELETE')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
   @HttpCode(HttpStatus.OK)
-  deleteUser(@Param('id') id: string) {
-    return this.usersService.deleteUser(id);
+  deleteUser(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.usersService.deleteUser(id, req.user.tenantId);
   }
 }

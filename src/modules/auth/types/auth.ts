@@ -18,6 +18,7 @@ export type AuthenticatedRequest = Request & {
   user: {
     userId: string;
     email: string;
+    tenantId: string;
   };
   cookies: {
     refresh_token?: string;

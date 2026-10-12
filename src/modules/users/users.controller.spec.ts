@@ -14,6 +14,7 @@ const user: UserData = {
   createdAt: '2026-10-09T00:00:00.000Z',
   updatedAt: '2026-10-09T00:00:00.000Z',
 };
+const req = { user: { tenantId: 'tenant-1' } } as any;
 
 describe('UsersController', () => {
   it('delegates user listing', async () => {
@@ -22,7 +23,7 @@ describe('UsersController', () => {
       listUsers,
     } as unknown as UsersService);
 
-    await expect(controller.listUsers()).resolves.toEqual([user]);
+    await expect(controller.listUsers(req)).resolves.toEqual([user]);
   });
 
   it('delegates user lookup', async () => {
@@ -31,8 +32,8 @@ describe('UsersController', () => {
       getUser,
     } as unknown as UsersService);
 
-    await expect(controller.getUser(user.id)).resolves.toBe(user);
-    expect(getUser).toHaveBeenCalledWith(user.id);
+    await expect(controller.getUser(user.id, req)).resolves.toBe(user);
+    expect(getUser).toHaveBeenCalledWith(user.id, 'tenant-1');
   });
 
   it('delegates user updates', async () => {
@@ -42,11 +43,15 @@ describe('UsersController', () => {
     } as unknown as UsersService);
 
     await expect(
-      controller.updateUser(user.id, { displayName: 'Alice Smith' }),
+      controller.updateUser(user.id, { displayName: 'Alice Smith' }, req),
     ).resolves.toBe(user);
-    expect(updateUser).toHaveBeenCalledWith(user.id, {
-      displayName: 'Alice Smith',
-    });
+    expect(updateUser).toHaveBeenCalledWith(
+      user.id,
+      {
+        displayName: 'Alice Smith',
+      },
+      'tenant-1',
+    );
   });
 
   it('delegates user deletion', async () => {
@@ -55,9 +60,9 @@ describe('UsersController', () => {
       deleteUser,
     } as unknown as UsersService);
 
-    await expect(controller.deleteUser(user.id)).resolves.toEqual({
+    await expect(controller.deleteUser(user.id, req)).resolves.toEqual({
       deleted: true,
     });
-    expect(deleteUser).toHaveBeenCalledWith(user.id);
+    expect(deleteUser).toHaveBeenCalledWith(user.id, 'tenant-1');
   });
 });

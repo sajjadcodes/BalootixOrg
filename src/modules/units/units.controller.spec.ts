@@ -13,6 +13,7 @@ const unit: UnitData = {
   createdAt: '2026-10-10T00:00:00.000Z',
   updatedAt: '2026-10-10T00:00:00.000Z',
 };
+const req = { user: { tenantId: 'tenant-1' } } as any;
 
 describe('UnitsController', () => {
   it('delegates unit creation', async () => {
@@ -22,8 +23,8 @@ describe('UnitsController', () => {
     } as unknown as UnitsService);
     const input = { name: 'Finance', type: 'DEPARTMENT' as const };
 
-    await expect(controller.createUnit(input)).resolves.toBe(unit);
-    expect(createUnit).toHaveBeenCalledWith(input);
+    await expect(controller.createUnit(input, req)).resolves.toBe(unit);
+    expect(createUnit).toHaveBeenCalledWith(input, 'tenant-1');
   });
 
   it('delegates unit listing', async () => {
@@ -32,7 +33,7 @@ describe('UnitsController', () => {
       listUnits,
     } as unknown as UnitsService);
 
-    await expect(controller.listUnits()).resolves.toEqual([unit]);
+    await expect(controller.listUnits(req)).resolves.toEqual([unit]);
   });
 
   it('delegates unit lookup', async () => {
@@ -41,8 +42,8 @@ describe('UnitsController', () => {
       getUnit,
     } as unknown as UnitsService);
 
-    await expect(controller.getUnit(unit.id)).resolves.toBe(unit);
-    expect(getUnit).toHaveBeenCalledWith(unit.id);
+    await expect(controller.getUnit(unit.id, req)).resolves.toBe(unit);
+    expect(getUnit).toHaveBeenCalledWith(unit.id, 'tenant-1');
   });
 
   it('delegates unit tree retrieval', async () => {
@@ -52,7 +53,7 @@ describe('UnitsController', () => {
       getUnitsTree,
     } as unknown as UnitsService);
 
-    await expect(controller.getUnitsTree()).resolves.toEqual(tree);
+    await expect(controller.getUnitsTree(req)).resolves.toEqual(tree);
     expect(getUnitsTree).toHaveBeenCalledTimes(1);
   });
 
@@ -68,8 +69,10 @@ describe('UnitsController', () => {
       isActive: false,
     };
 
-    await expect(controller.updateUnit(unit.id, input)).resolves.toBe(unit);
-    expect(updateUnit).toHaveBeenCalledWith(unit.id, input);
+    await expect(controller.updateUnit(unit.id, input, req)).resolves.toBe(
+      unit,
+    );
+    expect(updateUnit).toHaveBeenCalledWith(unit.id, input, 'tenant-1');
   });
 
   it('delegates unit status updates', async () => {
@@ -80,9 +83,9 @@ describe('UnitsController', () => {
     } as unknown as UnitsService);
 
     await expect(
-      controller.updateUnitStatus(unit.id, { isActive: false }),
+      controller.updateUnitStatus(unit.id, { isActive: false }, req),
     ).resolves.toBe(inactiveUnit);
-    expect(updateUnitStatus).toHaveBeenCalledWith(unit.id, false);
+    expect(updateUnitStatus).toHaveBeenCalledWith(unit.id, false, 'tenant-1');
   });
 
   it('delegates unit moves using targetUnitId', async () => {
@@ -92,9 +95,9 @@ describe('UnitsController', () => {
     } as unknown as UnitsService);
 
     await expect(
-      controller.moveUnit(unit.id, { targetUnitId: 'target-unit-1' }),
+      controller.moveUnit(unit.id, { targetUnitId: 'target-unit-1' }, req),
     ).resolves.toBe(unit);
-    expect(moveUnit).toHaveBeenCalledWith(unit.id, 'target-unit-1');
+    expect(moveUnit).toHaveBeenCalledWith(unit.id, 'target-unit-1', 'tenant-1');
   });
 
   it('delegates unit deletion', async () => {
@@ -103,9 +106,9 @@ describe('UnitsController', () => {
       deleteUnit,
     } as unknown as UnitsService);
 
-    await expect(controller.deleteUnit(unit.id)).resolves.toEqual({
+    await expect(controller.deleteUnit(unit.id, req)).resolves.toEqual({
       deleted: true,
     });
-    expect(deleteUnit).toHaveBeenCalledWith(unit.id);
+    expect(deleteUnit).toHaveBeenCalledWith(unit.id, 'tenant-1');
   });
 });

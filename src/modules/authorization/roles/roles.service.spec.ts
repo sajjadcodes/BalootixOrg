@@ -55,8 +55,8 @@ const roleWhere = jest.fn(() => ({
   first: roleFirst,
   update: roleUpdate,
   delete: roleDelete,
+  all: roleAll,
 }));
-const roleOrderBy = jest.fn(() => ({ all: roleAll }));
 const rolePermissionFirst = jest.fn(async () => null as { id: string } | null);
 const rolePermissionWhere = jest.fn(() => ({ first: rolePermissionFirst }));
 const roleAssignmentFirst = jest.fn(async () => null as { id: string } | null);
@@ -68,7 +68,7 @@ const prisma = {
     Role: {
       where: roleWhere,
       create: roleCreate,
-      orderBy: roleOrderBy,
+      all: roleAll,
     },
     RolePermission: { where: rolePermissionWhere },
     RoleAssignment: { where: roleAssignmentWhere },
@@ -90,7 +90,6 @@ describe('RolesService', () => {
     }));
     roleAll.mockReset().mockResolvedValue([]);
     roleWhere.mockClear();
-    roleOrderBy.mockClear();
     rolePermissionFirst.mockReset().mockResolvedValue(null);
     rolePermissionWhere.mockClear();
     roleAssignmentFirst.mockReset().mockResolvedValue(null);
@@ -166,7 +165,7 @@ describe('RolesService', () => {
     roleAll.mockResolvedValueOnce([role]);
 
     await expect(service.listRoles()).resolves.toEqual([role]);
-    expect(roleOrderBy).toHaveBeenCalledTimes(1);
+    expect(roleAll).toHaveBeenCalledTimes(1);
   });
 
   it('gets a role by id', async () => {

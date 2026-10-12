@@ -14,6 +14,7 @@ const role: RoleData = {
   createdAt: '2026-10-09T00:00:00.000Z',
   updatedAt: '2026-10-09T00:00:00.000Z',
 };
+const req = { user: { tenantId: 'tenant-1' } } as any;
 
 describe('RolesController', () => {
   it('delegates role creation', async () => {
@@ -23,21 +24,27 @@ describe('RolesController', () => {
     } as unknown as RolesService);
 
     await expect(
-      controller.createRole({
+      controller.createRole(
+        {
+          unitId: role.unitId,
+          name: role.name,
+          description: role.description,
+          scope: 'DESCENDANTS',
+          isActive: true,
+        },
+        req,
+      ),
+    ).resolves.toBe(role);
+    expect(createRole).toHaveBeenCalledWith(
+      {
         unitId: role.unitId,
         name: role.name,
         description: role.description,
         scope: 'DESCENDANTS',
         isActive: true,
-      }),
-    ).resolves.toBe(role);
-    expect(createRole).toHaveBeenCalledWith({
-      unitId: role.unitId,
-      name: role.name,
-      description: role.description,
-      scope: 'DESCENDANTS',
-      isActive: true,
-    });
+      },
+      'tenant-1',
+    );
   });
 
   it('delegates role listing', async () => {
@@ -46,7 +53,7 @@ describe('RolesController', () => {
       listRoles,
     } as unknown as RolesService);
 
-    await expect(controller.listRoles()).resolves.toEqual([role]);
+    await expect(controller.listRoles(req)).resolves.toEqual([role]);
   });
 
   it('delegates role lookup', async () => {
@@ -55,8 +62,8 @@ describe('RolesController', () => {
       getRole,
     } as unknown as RolesService);
 
-    await expect(controller.getRole(role.id)).resolves.toBe(role);
-    expect(getRole).toHaveBeenCalledWith(role.id);
+    await expect(controller.getRole(role.id, req)).resolves.toBe(role);
+    expect(getRole).toHaveBeenCalledWith(role.id, 'tenant-1');
   });
 
   it('delegates role updates', async () => {
@@ -66,21 +73,29 @@ describe('RolesController', () => {
     } as unknown as RolesService);
 
     await expect(
-      controller.updateRole(role.id, {
+      controller.updateRole(
+        role.id,
+        {
+          unitId: role.unitId,
+          name: 'Senior Finance Manager',
+          description: role.description,
+          scope: 'SELF',
+          isActive: true,
+        },
+        req,
+      ),
+    ).resolves.toBe(role);
+    expect(updateRole).toHaveBeenCalledWith(
+      role.id,
+      {
         unitId: role.unitId,
         name: 'Senior Finance Manager',
         description: role.description,
         scope: 'SELF',
         isActive: true,
-      }),
-    ).resolves.toBe(role);
-    expect(updateRole).toHaveBeenCalledWith(role.id, {
-      unitId: role.unitId,
-      name: 'Senior Finance Manager',
-      description: role.description,
-      scope: 'SELF',
-      isActive: true,
-    });
+      },
+      'tenant-1',
+    );
   });
 
   it('delegates role deletion', async () => {
@@ -89,9 +104,9 @@ describe('RolesController', () => {
       deleteRole,
     } as unknown as RolesService);
 
-    await expect(controller.deleteRole(role.id)).resolves.toEqual({
+    await expect(controller.deleteRole(role.id, req)).resolves.toEqual({
       deleted: true,
     });
-    expect(deleteRole).toHaveBeenCalledWith(role.id);
+    expect(deleteRole).toHaveBeenCalledWith(role.id, 'tenant-1');
   });
 });

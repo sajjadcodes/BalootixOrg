@@ -24,8 +24,8 @@ const userWhere = jest.fn(() => ({
   first: userFirst,
   update: userUpdate,
   delete: userDelete,
+  all: userAll,
 }));
-const userOrderBy = jest.fn(() => ({ all: userAll }));
 const roleAssignmentFirst = jest.fn(async () => null as { id: string } | null);
 const roleAssignmentWhere = jest.fn(() => ({ first: roleAssignmentFirst }));
 
@@ -33,7 +33,6 @@ const prisma = {
   public: {
     User: {
       where: userWhere,
-      orderBy: userOrderBy,
     },
     RoleAssignment: { where: roleAssignmentWhere },
   },
@@ -48,24 +47,28 @@ describe('UsersService', () => {
     userDelete.mockReset().mockResolvedValue(user);
     userAll.mockReset().mockResolvedValue([]);
     userWhere.mockClear();
-    userOrderBy.mockClear();
     roleAssignmentFirst.mockReset().mockResolvedValue(null);
     roleAssignmentWhere.mockClear();
 
     service = new UsersService(prisma as unknown as PrismaService);
   });
 
-  it('lists users ordered by display name', async () => {
+  it('lists users ordered by display name within the current tenant', async () => {
     userAll.mockResolvedValueOnce([user]);
 
-    await expect(service.listUsers()).resolves.toEqual([user]);
-    expect(userOrderBy).toHaveBeenCalledTimes(1);
+    await expect(service.listUsers('tenant-a')).resolves.toEqual([user]);
+    expect(userWhere).toHaveBeenCalledWith({ tenantId: 'tenant-a' });
+    expect(userAll).toHaveBeenCalledTimes(1);
   });
 
-  it('gets a user by id', async () => {
+  it('gets a user by id within the current tenant', async () => {
     userFirst.mockResolvedValueOnce(user);
 
-    await expect(service.getUser(user.id)).resolves.toEqual(user);
+    await expect(service.getUser(user.id, 'tenant-a')).resolves.toEqual(user);
+    expect(userWhere).toHaveBeenCalledWith({
+      id: user.id,
+      tenantId: 'tenant-a',
+    });
   });
 
   it('rejects missing user lookup', async () => {

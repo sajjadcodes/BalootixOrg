@@ -8,10 +8,13 @@ import {
   Param,
   Patch,
   Post,
+  Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard.js';
+import type { AuthenticatedRequest } from '../../auth/types/auth.js';
 import { RequirePermission } from '../decorators/require-permission.decorator.js';
 import { AuthorizationGuard } from '../guards/authorization.guard.js';
 import { CreateResourceDto } from './dto/create-resource.dto.js';
@@ -27,22 +30,40 @@ export class ResourcesController {
   @Post()
   @RequirePermission('/authorization/resources', 'CREATE')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  createResource(@Body() input: CreateResourceDto): Promise<ResourceData> {
-    return this.resourcesService.createResource(input);
+  createResource(
+    @Body() input: CreateResourceDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<ResourceData> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.resourcesService.createResource(input, req.user.tenantId);
   }
 
   @Get()
   @RequirePermission('/authorization/resources', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  listResources(): Promise<ResourceData[]> {
-    return this.resourcesService.listResources();
+  listResources(@Req() req: AuthenticatedRequest): Promise<ResourceData[]> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.resourcesService.listResources(req.user.tenantId);
   }
 
   @Get(':id')
   @RequirePermission('/authorization/resources/:id', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  getResource(@Param('id') id: string): Promise<ResourceData> {
-    return this.resourcesService.getResource(id);
+  getResource(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<ResourceData> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.resourcesService.getResource(id, req.user.tenantId);
   }
 
   @Patch(':id')
@@ -52,15 +73,24 @@ export class ResourcesController {
   updateResource(
     @Param('id') id: string,
     @Body() input: UpdateResourceDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<ResourceData> {
-    return this.resourcesService.updateResource(id, input);
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.resourcesService.updateResource(id, input, req.user.tenantId);
   }
 
   @Delete(':id')
   @RequirePermission('/authorization/resources/:id', 'DELETE')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
   @HttpCode(HttpStatus.OK)
-  deleteResource(@Param('id') id: string) {
-    return this.resourcesService.deleteResource(id);
+  deleteResource(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.resourcesService.deleteResource(id, req.user.tenantId);
   }
 }

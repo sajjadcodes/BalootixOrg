@@ -15,29 +15,30 @@ export class RolePermissionsService {
   // CREATE ROLE PERMISSION
   async createRolePermission(
     input: CreateRolePermissionDto,
+    tenantId?: string,
   ): Promise<RolePermissionData> {
-    // Check if the role exists
     const role = await this.prisma.public.Role.where({
       id: input.roleId,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (!role) {
       throw new NotFoundException('Role not found');
     }
 
-    // Check if the permission exists
     const permission = await this.prisma.public.Permission.where({
       id: input.permissionId,
+      tenantId: role.tenantId,
     }).first();
 
     if (!permission) {
       throw new NotFoundException('Permission not found');
     }
 
-    // Check if the role permission already exists
     const existing = await this.prisma.public.RolePermission.where({
       roleId: input.roleId,
       permissionId: input.permissionId,
+      tenantId: role.tenantId,
     }).first();
 
     if (existing) {
@@ -62,24 +63,32 @@ export class RolePermissionsService {
   }
 
   // READ ROLE PERMISSIONS
-  async listRolePermissions(): Promise<RolePermissionData[]> {
-    const rolePermissions = await this.prisma.public.RolePermission.orderBy(
-      (rolePermission) => rolePermission.createdAt.asc(),
-    ).all();
+  async listRolePermissions(tenantId?: string): Promise<RolePermissionData[]> {
+    const query = tenantId
+      ? this.prisma.public.RolePermission.where({ tenantId })
+      : this.prisma.public.RolePermission;
 
-    return rolePermissions.map((rolePermission) => ({
-      id: rolePermission.id,
-      roleId: rolePermission.roleId,
-      permissionId: rolePermission.permissionId,
-      createdAt: rolePermission.createdAt,
-      updatedAt: rolePermission.updatedAt,
-    }));
+    const rolePermissions = await query.all();
+
+    return [...rolePermissions]
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+      .map((rolePermission) => ({
+        id: rolePermission.id,
+        roleId: rolePermission.roleId,
+        permissionId: rolePermission.permissionId,
+        createdAt: rolePermission.createdAt,
+        updatedAt: rolePermission.updatedAt,
+      }));
   }
 
   // READ ROLE PERMISSION BY ID
-  async getRolePermission(id: string): Promise<RolePermissionData> {
+  async getRolePermission(
+    id: string,
+    tenantId?: string,
+  ): Promise<RolePermissionData> {
     const rolePermission = await this.prisma.public.RolePermission.where({
       id,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (!rolePermission) {
@@ -99,56 +108,55 @@ export class RolePermissionsService {
   async updateRolePermission(
     id: string,
     input: UpdateRolePermissionDto,
+    tenantId?: string,
   ): Promise<RolePermissionData> {
-    // Check if the role permission exists
     const existing = await this.prisma.public.RolePermission.where({
       id,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (!existing) {
       throw new NotFoundException('Role permission not found');
     }
 
-    // Check if the new role exists
     const role = await this.prisma.public.Role.where({
       id: input.roleId,
+      tenantId: existing.tenantId,
     }).first();
 
     if (!role) {
       throw new NotFoundException('Role not found');
     }
 
-    // Check if the new permission exists
     const permission = await this.prisma.public.Permission.where({
       id: input.permissionId,
+      tenantId: existing.tenantId,
     }).first();
 
     if (!permission) {
       throw new NotFoundException('Permission not found');
     }
 
-    // Check if the new role-permission combination already exists
     const duplicate = await this.prisma.public.RolePermission.where({
       roleId: input.roleId,
       permissionId: input.permissionId,
+      tenantId: existing.tenantId,
     }).first();
 
-    // If a duplicate exists and it's not the same role permission being updated, throw an exception
     if (duplicate && duplicate.id !== id) {
       throw new ConflictException(
         'This permission is already assigned to the role',
       );
     }
 
-    // Update the role permission
     const updated = await this.prisma.public.RolePermission.where({
       id,
+      ...(tenantId ? { tenantId } : {}),
     }).update({
       roleId: input.roleId,
       permissionId: input.permissionId,
     });
 
-    // Check if the role permission was updated
     if (!updated) {
       throw new NotFoundException('Role permission not found');
     }
@@ -163,16 +171,23 @@ export class RolePermissionsService {
   }
 
   // DELETE ROLE PERMISSION
-  async deleteRolePermission(id: string): Promise<{ deleted: true }> {
+  async deleteRolePermission(
+    id: string,
+    tenantId?: string,
+  ): Promise<{ deleted: true }> {
     const existing = await this.prisma.public.RolePermission.where({
       id,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (!existing) {
       throw new NotFoundException('Role permission not found');
     }
 
-    await this.prisma.public.RolePermission.where({ id }).delete();
+    await this.prisma.public.RolePermission.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).delete();
 
     return { deleted: true };
   }

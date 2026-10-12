@@ -8,10 +8,13 @@ import {
   Param,
   Patch,
   Post,
+  Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard.js';
+import type { AuthenticatedRequest } from '../../auth/types/auth.js';
 import { RequirePermission } from '../decorators/require-permission.decorator.js';
 import { AuthorizationGuard } from '../guards/authorization.guard.js';
 import { CreateRoleDto } from './dto/create-role.dto.js';
@@ -27,22 +30,40 @@ export class RolesController {
   @Post()
   @RequirePermission('/authorization/roles', 'CREATE')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  createRole(@Body() input: CreateRoleDto): Promise<RoleData> {
-    return this.rolesService.createRole(input);
+  createRole(
+    @Body() input: CreateRoleDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<RoleData> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.rolesService.createRole(input, req.user.tenantId);
   }
 
   @Get()
   @RequirePermission('/authorization/roles', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  listRoles(): Promise<RoleData[]> {
-    return this.rolesService.listRoles();
+  listRoles(@Req() req: AuthenticatedRequest): Promise<RoleData[]> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.rolesService.listRoles(req.user.tenantId);
   }
 
   @Get(':id')
   @RequirePermission('/authorization/roles/:id', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  getRole(@Param('id') id: string): Promise<RoleData> {
-    return this.rolesService.getRole(id);
+  getRole(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<RoleData> {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.rolesService.getRole(id, req.user.tenantId);
   }
 
   @Patch(':id')
@@ -52,15 +73,24 @@ export class RolesController {
   updateRole(
     @Param('id') id: string,
     @Body() input: UpdateRoleDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<RoleData> {
-    return this.rolesService.updateRole(id, input);
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.rolesService.updateRole(id, input, req.user.tenantId);
   }
 
   @Delete(':id')
   @RequirePermission('/authorization/roles/:id', 'DELETE')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
   @HttpCode(HttpStatus.OK)
-  deleteRole(@Param('id') id: string) {
-    return this.rolesService.deleteRole(id);
+  deleteRole(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    if (!req?.user?.tenantId) {
+      throw new UnauthorizedException('Authentication context is required');
+    }
+
+    return this.rolesService.deleteRole(id, req.user.tenantId);
   }
 }

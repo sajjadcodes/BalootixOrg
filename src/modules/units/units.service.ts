@@ -15,24 +15,25 @@ export class UnitsService {
   constructor(private readonly prisma: PrismaService) {}
 
   //CREATE UNIT
-  async createUnit(input: CreateUnitDto): Promise<UnitData> {
+  async createUnit(input: CreateUnitDto, tenantId?: string): Promise<UnitData> {
     const parentId = input.parentId ?? null;
     const name = input.name.trim();
     const description = input.description?.trim() || null;
 
-    let tenantId: string | null = null;
+    let effectiveTenantId: string | null = tenantId ?? null;
 
     if (parentId) {
       const parent = await this.prisma.public.Unit.where({
         id: parentId,
+        ...(effectiveTenantId ? { tenantId: effectiveTenantId } : {}),
       }).first();
 
       if (!parent) {
         throw new NotFoundException('Parent unit not found');
       }
 
-      tenantId = parent.tenantId;
-    } else {
+      effectiveTenantId = parent.tenantId;
+    } else if (!effectiveTenantId) {
       const defaultTenant = await this.prisma.public.Tenant.orderBy((tenant) =>
         tenant.createdAt.asc(),
       ).first();
@@ -41,13 +42,13 @@ export class UnitsService {
         throw new NotFoundException('No tenant is available for this unit');
       }
 
-      tenantId = defaultTenant.id;
+      effectiveTenantId = defaultTenant.id;
     }
 
-    // Keep sibling unit names unique, including root units.
     const duplicate = await this.prisma.public.Unit.where({
       parentId,
       name,
+      tenantId: effectiveTenantId,
     }).first();
 
     if (duplicate) {
@@ -57,7 +58,7 @@ export class UnitsService {
     }
 
     return this.prisma.public.Unit.create({
-      tenantId,
+      tenantId: effectiveTenantId,
       parentId,
       name,
       description,
@@ -66,15 +67,21 @@ export class UnitsService {
   }
 
   //READ UNITS
-  async listUnits(): Promise<UnitData[]> {
-    return await this.prisma.public.Unit.orderBy((unit) =>
-      unit.name.asc(),
-    ).all();
+  async listUnits(tenantId?: string): Promise<UnitData[]> {
+    const query = tenantId
+      ? this.prisma.public.Unit.where({ tenantId })
+      : this.prisma.public.Unit;
+
+    const units = await query.all();
+    return [...units].sort((a, b) => a.name.localeCompare(b.name));
   }
 
   //READ UNIT BY ID
-  async getUnit(id: string): Promise<UnitData> {
-    const unit = await this.prisma.public.Unit.where({ id }).first();
+  async getUnit(id: string, tenantId?: string): Promise<UnitData> {
+    const unit = await this.prisma.public.Unit.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).first();
 
     if (!unit) {
       throw new NotFoundException('Unit not found');
@@ -84,8 +91,15 @@ export class UnitsService {
   }
 
   //UPDATE UNIT
-  async updateUnit(id: string, input: UpdateUnitDto): Promise<UnitData> {
-    const existing = await this.prisma.public.Unit.where({ id }).first();
+  async updateUnit(
+    id: string,
+    input: UpdateUnitDto,
+    tenantId?: string,
+  ): Promise<UnitData> {
+    const existing = await this.prisma.public.Unit.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).first();
 
     if (!existing) {
       throw new NotFoundException('Unit not found');
@@ -93,10 +107,10 @@ export class UnitsService {
 
     const name = input.name.trim();
 
-    // Keep sibling unit names unique, including root units.
     const duplicate = await this.prisma.public.Unit.where({
       parentId: existing.parentId,
       name,
+      tenantId: existing.tenantId,
     }).first();
 
     if (duplicate && duplicate.id !== id) {
@@ -105,7 +119,10 @@ export class UnitsService {
       );
     }
 
-    const updated = await this.prisma.public.Unit.where({ id }).update({
+    const updated = await this.prisma.public.Unit.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).update({
       name,
       type: input.type,
       description: input.description?.trim() || null,
@@ -120,8 +137,15 @@ export class UnitsService {
   }
 
   //UPDATE UNIT STATUS
-  async updateUnitStatus(id: string, isActive: boolean): Promise<UnitData> {
-    const unit = await this.prisma.public.Unit.where({ id }).update({
+  async updateUnitStatus(
+    id: string,
+    isActive: boolean,
+    tenantId?: string,
+  ): Promise<UnitData> {
+    const unit = await this.prisma.public.Unit.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).update({
       isActive,
     });
 
@@ -133,15 +157,20 @@ export class UnitsService {
   }
 
   //DELETE UNIT
-  async deleteUnit(id: string): Promise<{ deleted: true }> {
-    const existing = await this.prisma.public.Unit.where({ id }).first();
+  async deleteUnit(id: string, tenantId?: string): Promise<{ deleted: true }> {
+    const existing = await this.prisma.public.Unit.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).first();
 
     if (!existing) {
       throw new NotFoundException('Unit not found');
     }
 
-    // Check for child units or roles before deletion
-    const child = await this.prisma.public.Unit.where({ parentId: id }).first();
+    const child = await this.prisma.public.Unit.where({
+      parentId: id,
+      ...(tenantId ? { tenantId } : {}),
+    }).first();
 
     if (child) {
       throw new ConflictException(
@@ -149,15 +178,19 @@ export class UnitsService {
       );
     }
 
-    // Check for roles associated with the unit before deletion
-    const role = await this.prisma.public.Role.where({ unitId: id }).first();
+    const role = await this.prisma.public.Role.where({
+      unitId: id,
+      ...(tenantId ? { tenantId } : {}),
+    }).first();
 
     if (role) {
       throw new ConflictException('Cannot delete a unit while it has roles');
     }
 
-    // Delete the unit if no child units or roles are associated with it
-    await this.prisma.public.Unit.where({ id }).delete();
+    await this.prisma.public.Unit.where({
+      id,
+      ...(tenantId ? { tenantId } : {}),
+    }).delete();
 
     return { deleted: true };
   }
@@ -166,9 +199,12 @@ export class UnitsService {
   async moveUnit(
     unitId: string,
     targetUnitId: string | null,
+    tenantId?: string,
   ): Promise<UnitData> {
     return this.prisma.client.transaction(async (tx) => {
-      const units = await tx.orm.public.Unit.all();
+      const units = tenantId
+        ? await tx.orm.public.Unit.where({ tenantId }).all()
+        : await tx.orm.public.Unit.all();
       const unitsById = new Map(units.map((unit) => [unit.id, unit] as const));
       const unit = unitsById.get(unitId);
 
@@ -180,11 +216,12 @@ export class UnitsService {
         throw new ForbiddenException('Cannot move an inactive unit');
       }
 
-      // Validate the new parent and the duplicated sibling-name rule.
       assertTargetParentIsValid(unit, targetUnitId, units);
 
-      // Move the unit to the new parent unit.
-      const movedUnit = await tx.orm.public.Unit.where({ id: unitId }).update({
+      const movedUnit = await tx.orm.public.Unit.where({
+        id: unitId,
+        ...(tenantId ? { tenantId } : {}),
+      }).update({
         parentId: targetUnitId,
       });
 
@@ -197,8 +234,8 @@ export class UnitsService {
   }
 
   // GET UNITS TREE
-  async getUnitsTree(): Promise<UnitTreeNode[]> {
-    const units = await this.listUnits();
+  async getUnitsTree(tenantId?: string): Promise<UnitTreeNode[]> {
+    const units = await this.listUnits(tenantId);
     return buildTree(units);
   }
 }

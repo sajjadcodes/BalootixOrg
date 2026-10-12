@@ -9,6 +9,7 @@ const resource: ResourceData = {
   createdAt: '2026-10-09T00:00:00.000Z',
   updatedAt: '2026-10-09T00:00:00.000Z',
 };
+const req = { user: { tenantId: 'tenant-1' } } as any;
 
 describe('ResourcesController', () => {
   it('delegates resource creation', async () => {
@@ -17,10 +18,13 @@ describe('ResourcesController', () => {
       createResource,
     } as unknown as ResourcesService);
 
-    await expect(controller.createResource({ route: '/users' })).resolves.toBe(
-      resource,
+    await expect(
+      controller.createResource({ route: '/users' }, req),
+    ).resolves.toBe(resource);
+    expect(createResource).toHaveBeenCalledWith(
+      { route: '/users' },
+      'tenant-1',
     );
-    expect(createResource).toHaveBeenCalledWith({ route: '/users' });
   });
 
   it('delegates resource listing', async () => {
@@ -29,7 +33,7 @@ describe('ResourcesController', () => {
       listResources,
     } as unknown as ResourcesService);
 
-    await expect(controller.listResources()).resolves.toEqual([resource]);
+    await expect(controller.listResources(req)).resolves.toEqual([resource]);
   });
 
   it('delegates resource lookup', async () => {
@@ -38,8 +42,10 @@ describe('ResourcesController', () => {
       getResource,
     } as unknown as ResourcesService);
 
-    await expect(controller.getResource(resource.id)).resolves.toBe(resource);
-    expect(getResource).toHaveBeenCalledWith(resource.id);
+    await expect(controller.getResource(resource.id, req)).resolves.toBe(
+      resource,
+    );
+    expect(getResource).toHaveBeenCalledWith(resource.id, 'tenant-1');
   });
 
   it('delegates resource updates', async () => {
@@ -49,11 +55,15 @@ describe('ResourcesController', () => {
     } as unknown as ResourcesService);
 
     await expect(
-      controller.updateResource(resource.id, { route: '/members' }),
+      controller.updateResource(resource.id, { route: '/members' }, req),
     ).resolves.toBe(resource);
-    expect(updateResource).toHaveBeenCalledWith(resource.id, {
-      route: '/members',
-    });
+    expect(updateResource).toHaveBeenCalledWith(
+      resource.id,
+      {
+        route: '/members',
+      },
+      'tenant-1',
+    );
   });
 
   it('delegates resource deletion', async () => {
@@ -62,9 +72,9 @@ describe('ResourcesController', () => {
       deleteResource,
     } as unknown as ResourcesService);
 
-    await expect(controller.deleteResource(resource.id)).resolves.toEqual({
+    await expect(controller.deleteResource(resource.id, req)).resolves.toEqual({
       deleted: true,
     });
-    expect(deleteResource).toHaveBeenCalledWith(resource.id);
+    expect(deleteResource).toHaveBeenCalledWith(resource.id, 'tenant-1');
   });
 });

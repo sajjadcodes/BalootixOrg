@@ -11,6 +11,7 @@ const roleAssignment: RoleAssignmentData = {
   createdAt: '2026-10-09T00:00:00.000Z',
   updatedAt: '2026-10-09T00:00:00.000Z',
 };
+const req = { user: { tenantId: 'tenant-1' } } as any;
 
 describe('RoleAssignmentsController', () => {
   it('delegates role assignment creation', async () => {
@@ -20,17 +21,23 @@ describe('RoleAssignmentsController', () => {
     } as unknown as RoleAssignmentsService);
 
     await expect(
-      controller.createRoleAssignment({
+      controller.createRoleAssignment(
+        {
+          userId: roleAssignment.userId,
+          roleId: roleAssignment.roleId,
+          isActive: true,
+        },
+        req,
+      ),
+    ).resolves.toBe(roleAssignment);
+    expect(createRoleAssignment).toHaveBeenCalledWith(
+      {
         userId: roleAssignment.userId,
         roleId: roleAssignment.roleId,
         isActive: true,
-      }),
-    ).resolves.toBe(roleAssignment);
-    expect(createRoleAssignment).toHaveBeenCalledWith({
-      userId: roleAssignment.userId,
-      roleId: roleAssignment.roleId,
-      isActive: true,
-    });
+      },
+      'tenant-1',
+    );
   });
 
   it('delegates role assignment listing', async () => {
@@ -39,7 +46,7 @@ describe('RoleAssignmentsController', () => {
       listRoleAssignments,
     } as unknown as RoleAssignmentsService);
 
-    await expect(controller.listRoleAssignments()).resolves.toEqual([
+    await expect(controller.listRoleAssignments(req)).resolves.toEqual([
       roleAssignment,
     ]);
   });
@@ -50,10 +57,13 @@ describe('RoleAssignmentsController', () => {
       getRoleAssignment,
     } as unknown as RoleAssignmentsService);
 
-    await expect(controller.getRoleAssignment(roleAssignment.id)).resolves.toBe(
-      roleAssignment,
+    await expect(
+      controller.getRoleAssignment(roleAssignment.id, req),
+    ).resolves.toBe(roleAssignment);
+    expect(getRoleAssignment).toHaveBeenCalledWith(
+      roleAssignment.id,
+      'tenant-1',
     );
-    expect(getRoleAssignment).toHaveBeenCalledWith(roleAssignment.id);
   });
 
   it('delegates role assignment updates', async () => {
@@ -63,17 +73,25 @@ describe('RoleAssignmentsController', () => {
     } as unknown as RoleAssignmentsService);
 
     await expect(
-      controller.updateRoleAssignment(roleAssignment.id, {
+      controller.updateRoleAssignment(
+        roleAssignment.id,
+        {
+          userId: 'user-2',
+          roleId: roleAssignment.roleId,
+          isActive: false,
+        },
+        req,
+      ),
+    ).resolves.toBe(roleAssignment);
+    expect(updateRoleAssignment).toHaveBeenCalledWith(
+      roleAssignment.id,
+      {
         userId: 'user-2',
         roleId: roleAssignment.roleId,
         isActive: false,
-      }),
-    ).resolves.toBe(roleAssignment);
-    expect(updateRoleAssignment).toHaveBeenCalledWith(roleAssignment.id, {
-      userId: 'user-2',
-      roleId: roleAssignment.roleId,
-      isActive: false,
-    });
+      },
+      'tenant-1',
+    );
   });
 
   it('delegates role assignment deletion', async () => {
@@ -85,10 +103,13 @@ describe('RoleAssignmentsController', () => {
     } as unknown as RoleAssignmentsService);
 
     await expect(
-      controller.deleteRoleAssignment(roleAssignment.id),
+      controller.deleteRoleAssignment(roleAssignment.id, req),
     ).resolves.toEqual({
       deleted: true,
     });
-    expect(deleteRoleAssignment).toHaveBeenCalledWith(roleAssignment.id);
+    expect(deleteRoleAssignment).toHaveBeenCalledWith(
+      roleAssignment.id,
+      'tenant-1',
+    );
   });
 });

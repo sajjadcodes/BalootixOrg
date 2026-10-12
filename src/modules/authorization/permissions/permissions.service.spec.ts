@@ -37,8 +37,8 @@ const permissionWhere = jest.fn(() => ({
   first: permissionFirst,
   update: permissionUpdate,
   delete: permissionDelete,
+  all: permissionAll,
 }));
-const permissionOrderBy = jest.fn(() => ({ all: permissionAll }));
 const rolePermissionFirst = jest.fn(async () => null as { id: string } | null);
 const rolePermissionWhere = jest.fn(() => ({ first: rolePermissionFirst }));
 
@@ -48,7 +48,7 @@ const prisma = {
     Permission: {
       where: permissionWhere,
       create: permissionCreate,
-      orderBy: permissionOrderBy,
+      all: permissionAll,
     },
     RolePermission: { where: rolePermissionWhere },
   },
@@ -69,7 +69,6 @@ describe('PermissionsService', () => {
     }));
     permissionAll.mockReset().mockResolvedValue([]);
     permissionWhere.mockClear();
-    permissionOrderBy.mockClear();
     rolePermissionFirst.mockReset().mockResolvedValue(null);
     rolePermissionWhere.mockClear();
 
@@ -109,7 +108,7 @@ describe('PermissionsService', () => {
     permissionAll.mockResolvedValueOnce([permission]);
 
     await expect(service.listPermissions()).resolves.toEqual([permission]);
-    expect(permissionOrderBy).toHaveBeenCalledTimes(1);
+    expect(permissionAll).toHaveBeenCalledTimes(1);
   });
 
   it('gets a permission by id', async () => {

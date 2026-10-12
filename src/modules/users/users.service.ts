@@ -12,27 +12,32 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   // READ USERS
-  async listUsers(): Promise<UserData[]> {
-    const users = await this.prisma.public.User.orderBy((user) =>
-      user.displayName.asc(),
-    ).all();
+  async listUsers(tenantId?: string): Promise<UserData[]> {
+    const query = tenantId
+      ? this.prisma.public.User.where({ tenantId })
+      : this.prisma.public.User;
 
-    return users.map((user) => ({
-      id: user.id,
-      email: user.email,
-      displayName: user.displayName,
-      avatarUrl: user.avatarUrl,
-      mobile: user.mobile,
-      isManager: user.isManager,
-      emailVerifiedAt: user.emailVerifiedAt,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    }));
+    const users = await query.all();
+
+    return [...users]
+      .sort((a, b) => a.displayName.localeCompare(b.displayName))
+      .map((user) => ({
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        avatarUrl: user.avatarUrl,
+        mobile: user.mobile,
+        isManager: user.isManager,
+        emailVerifiedAt: user.emailVerifiedAt,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      }));
   }
 
   // READ USER BY ID
-  async getUser(id: string): Promise<UserData> {
-    const user = await this.prisma.public.User.where({ id }).first();
+  async getUser(id: string, tenantId?: string): Promise<UserData> {
+    const filter = tenantId ? { id, tenantId } : { id };
+    const user = await this.prisma.public.User.where(filter).first();
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -52,8 +57,14 @@ export class UsersService {
   }
 
   // UPDATE USER
-  async updateUser(id: string, input: UpdateUserDto): Promise<UserData> {
-    const existing = await this.prisma.public.User.where({ id }).first();
+  async updateUser(
+    id: string,
+    input: UpdateUserDto,
+    tenantId?: string,
+  ): Promise<UserData> {
+    const existing = await this.prisma.public.User.where(
+      tenantId ? { id, tenantId } : { id },
+    ).first();
 
     if (!existing) {
       throw new NotFoundException('User not found');
@@ -72,9 +83,9 @@ export class UsersService {
     }
 
     // Update the user in the database
-    const updated = await this.prisma.public.User.where({ id }).update(
-      updateData,
-    );
+    const updated = await this.prisma.public.User.where(
+      tenantId ? { id, tenantId } : { id },
+    ).update(updateData);
 
     // Check if the user was updated
     if (!updated) {
@@ -95,8 +106,10 @@ export class UsersService {
   }
 
   // DELETE USER
-  async deleteUser(id: string): Promise<{ deleted: true }> {
-    const existing = await this.prisma.public.User.where({ id }).first();
+  async deleteUser(id: string, tenantId?: string): Promise<{ deleted: true }> {
+    const existing = await this.prisma.public.User.where(
+      tenantId ? { id, tenantId } : { id },
+    ).first();
 
     if (!existing) {
       throw new NotFoundException('User not found');
@@ -105,6 +118,7 @@ export class UsersService {
     // Check if the user has any assigned roles before deletion
     const roleAssignment = await this.prisma.public.RoleAssignment.where({
       userId: id,
+      ...(tenantId ? { tenantId } : {}),
     }).first();
 
     if (roleAssignment) {
@@ -113,7 +127,9 @@ export class UsersService {
       );
     }
 
-    await this.prisma.public.User.where({ id }).delete();
+    await this.prisma.public.User.where(
+      tenantId ? { id, tenantId } : { id },
+    ).delete();
 
     return { deleted: true };
   }
