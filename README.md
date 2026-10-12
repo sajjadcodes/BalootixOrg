@@ -214,6 +214,36 @@ Errors use the same status/code relationship and never include stack traces or i
 
 `message` is human-readable and may vary by error. Clients should branch on the HTTP status or `code`, not parse message text. Validation messages are currently joined into a single string. Unexpected server errors always return code 500 and the generic `Internal server error` message.
 
+### Platform-admin tenant summaries
+
+Platform-admin tenant lists use the same paginated envelope. Each tenant item contains its public tenant identity and lifecycle `status`, a nullable `subscription` summary (`plan`, subscription `status`, `currentPeriodStart`, `currentPeriodEnd`, and `cancelAt`), and a `usage` summary. Usage counts include total and verified users, total and active units, and total and active roles. These are counts, not entitlements or billing quantities.
+
+The dashboard payload contains `generatedAt`, total tenant count, tenant counts by lifecycle status, subscription counts by subscription status, tenants without a subscription, aggregate usage, and the paginated tenant list. Tenant lifecycle status and subscription status remain distinct; a missing subscription is represented as `null` and counted separately. Payment-provider identifiers and payment details are intentionally excluded.
+
+```json
+{
+  "id": "tenant-id",
+  "slug": "northwind",
+  "name": "Northwind",
+  "status": "ACTIVE",
+  "subscription": {
+    "plan": "GROWTH",
+    "status": "ACTIVE",
+    "currentPeriodStart": "2026-10-01T00:00:00.000Z",
+    "currentPeriodEnd": "2026-11-01T00:00:00.000Z",
+    "cancelAt": null
+  },
+  "usage": {
+    "userCount": 42,
+    "verifiedUserCount": 39,
+    "unitCount": 8,
+    "activeUnitCount": 7,
+    "roleCount": 12,
+    "activeRoleCount": 11
+  }
+}
+```
+
 ## Relationship cardinalities
 
 The following describes the model relationships. The relation fields are ORM navigation fields; the foreign-key scalar fields are the actual database columns.
