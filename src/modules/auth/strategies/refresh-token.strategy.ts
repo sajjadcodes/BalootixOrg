@@ -19,11 +19,20 @@ export class RefreshTokenStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: { sub: string; email: string; tokenType: string }) {
+  async validate(payload: {
+    sub: string;
+    email: string;
+    tenantId: string;
+    tokenType: string;
+  }) {
     if (payload.tokenType !== 'refresh') {
       throw new UnauthorizedException('Invalid token type');
     }
 
-    return { userId: payload.sub, email: payload.email };
+    return {
+      userId: payload.sub,
+      email: payload.email,
+      tenantId: payload.tenantId,
+    };
   }
 }

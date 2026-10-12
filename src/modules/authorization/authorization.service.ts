@@ -30,6 +30,14 @@ export class AuthorizationService {
       return false;
     }
 
+    const globalAdmin = await this.prisma.public.GlobalAdmin.where({
+      email: user.email,
+    }).first();
+
+    if (globalAdmin?.isActive) {
+      return true;
+    }
+
     const tenantId = user.tenantId;
 
     // Load assignments only from the user's tenant.

@@ -264,7 +264,11 @@ export class AuthService {
       );
     }
 
-    const tokens = await this.generateTokens(user.id, user.email);
+    const tokens = await this.generateTokens(
+      user.id,
+      user.email,
+      user.tenantId,
+    );
 
     await this.storeRefreshTokenHash(user.id, tokens.refreshToken);
 
@@ -286,17 +290,21 @@ export class AuthService {
   }
 
   // GENERATE TOKENS
-  private async generateTokens(userId: string, email: string) {
+  private async generateTokens(
+    userId: string,
+    email: string,
+    tenantId: string,
+  ) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
-        { sub: userId, email, tokenType: 'access' },
+        { sub: userId, email, tenantId, tokenType: 'access' },
         {
           secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
           expiresIn: ACCESS_TOKEN_TTL_SECONDS,
         },
       ),
       this.jwtService.signAsync(
-        { sub: userId, email, tokenType: 'refresh' },
+        { sub: userId, email, tenantId, tokenType: 'refresh' },
         {
           secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
           expiresIn: REFRESH_TOKEN_TTL_SECONDS,
@@ -322,7 +330,7 @@ export class AuthService {
   // REFRESH TOKEN
   async refresh(userId: string, refreshToken: string) {
     const user = await this.prisma.public.User.where({ id: userId })
-      .select('id', 'email', 'refreshTokenHash')
+      .select('id', 'email', 'tenantId', 'refreshTokenHash')
       .first();
 
     if (!user?.refreshTokenHash) {
@@ -335,7 +343,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const tokens = await this.generateTokens(user.id, user.email);
+    const tokens = await this.generateTokens(
+      user.id,
+      user.email,
+      user.tenantId,
+    );
 
     // Rotate the refresh token by storing the new token's hash.
     await this.storeRefreshTokenHash(user.id, tokens.refreshToken);

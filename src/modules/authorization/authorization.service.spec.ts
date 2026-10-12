@@ -149,10 +149,15 @@ const unitAll = jest.fn(async () => [] as (typeof unitRoot)[]);
 const unitFilter = jest.fn((_filter?: { tenantId?: string }) => ({
   all: unitAll,
 }));
+const globalAdminFirst = jest.fn(async () => null as { email: string } | null);
+const globalAdminFilter = jest.fn((_filter?: { email?: string }) => ({
+  first: globalAdminFirst,
+}));
 
 const prisma = {
   public: {
     User: { where: userWhere },
+    GlobalAdmin: { where: globalAdminFilter },
     Resource: { where: resourceFilter },
     Permission: { where: permissionFilter },
     RoleAssignment: { where: roleAssignmentFilter },
@@ -183,6 +188,21 @@ describe('OrganizationAuthorizationService', () => {
     unitFilter.mockClear();
 
     service = new AuthorizationService(prisma as unknown as PrismaService);
+  });
+
+  it('allows platform access to an active GlobalAdmin even without a tenant assignment', async () => {
+    const globalAdmin = {
+      id: 'global-admin-1',
+      email: user.email,
+      isActive: true,
+    };
+    userFirst.mockResolvedValueOnce({ ...tenantUser, email: user.email });
+    globalAdminFirst.mockResolvedValueOnce(globalAdmin);
+
+    await expect(
+      service.canAccess(user.id, 'READ', '/platform/admin', null),
+    ).resolves.toBe(true);
+    expect(globalAdminFilter).toHaveBeenCalledWith({ email: user.email });
   });
 
   it('allows access when the user has an active OWNER role regardless of normal permissions', async () => {

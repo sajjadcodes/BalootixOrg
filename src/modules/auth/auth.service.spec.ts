@@ -381,7 +381,12 @@ describe('AuthService', () => {
     );
     expect(signToken).toHaveBeenNthCalledWith(
       1,
-      { sub: createdUser.id, email: createdUser.email, tokenType: 'access' },
+      {
+        sub: createdUser.id,
+        email: createdUser.email,
+        tenantId: defaultTenant.id,
+        tokenType: 'access',
+      },
       {
         secret: 'JWT_ACCESS_SECRET-value',
         expiresIn: ACCESS_TOKEN_TTL_SECONDS,
@@ -389,7 +394,12 @@ describe('AuthService', () => {
     );
     expect(signToken).toHaveBeenNthCalledWith(
       2,
-      { sub: createdUser.id, email: createdUser.email, tokenType: 'refresh' },
+      {
+        sub: createdUser.id,
+        email: createdUser.email,
+        tenantId: defaultTenant.id,
+        tokenType: 'refresh',
+      },
       {
         secret: 'JWT_REFRESH_SECRET-value',
         expiresIn: REFRESH_TOKEN_TTL_SECONDS,
@@ -510,6 +520,7 @@ describe('AuthService', () => {
     expect(userQuery.select).toHaveBeenCalledWith(
       'id',
       'email',
+      'tenantId',
       'refreshTokenHash',
     );
     expect(userUpdate).toHaveBeenCalledWith({
