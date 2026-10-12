@@ -8,6 +8,7 @@ import { SuccessResponseInterceptor } from './common/interceptors/success-respon
 import { AuthorizationModule } from './modules/authorization/authorization.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { UnitsModule } from './modules/units/units.module.js';
+import { PlatformAdminModule } from './modules/platform-admin/platform-admin.module.js';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UnitsModule } from './modules/units/units.module.js';
     AuthorizationModule,
     UsersModule,
     UnitsModule,
+    PlatformAdminModule,
   ],
   controllers: [AppController],
   providers: [

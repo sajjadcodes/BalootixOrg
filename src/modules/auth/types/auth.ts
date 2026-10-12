@@ -18,7 +18,8 @@ export type AuthenticatedRequest = Request & {
   user: {
     userId: string;
     email: string;
-    tenantId: string;
+    tenantId?: string;
+    isGlobalAdmin?: boolean;
   };
   cookies: {
     refresh_token?: string;
