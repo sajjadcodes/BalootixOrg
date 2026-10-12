@@ -4,3 +4,11 @@ export interface SuccessResponse<T> {
   message: string;
   data: T;
 }
+
+export interface ErrorResponse {
+  success: false;
+  code: number;
+  message: string;
+}
+
+export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse;

@@ -187,6 +187,33 @@ Cycle prevention and unit-deletion rules require explicit enforcement beyond a s
 
 Verification, password-reset, and owner-setup token rows contain only token hashes. Cleanup retains unused tokens until 7 days after expiry and consumed tokens for 30 days after use. Run `pnpm auth-tokens:cleanup` daily from the deployment scheduler; the command deletes in batches of 500 and can safely overlap another run. It requires `DATABASE_URL` and does not run an in-process timer.
 
+## Public API response contract
+
+JSON success responses use this envelope. `code` matches the HTTP status, and `data` is the endpoint payload:
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "Successful request!",
+  "data": {}
+}
+```
+
+Paginated list endpoints place `items` and `pagination` inside `data`. Pagination includes `page`, `pageSize`, `total`, `totalPages`, `hasPreviousPage`, and `hasNextPage`. Requests default to page 1 and 25 items, and page size is capped at 100. Each endpoint documents its supported filter and sort fields through its query validation; unsupported sort/filter fields return 400.
+
+Errors use the same status/code relationship and never include stack traces or internal exception details:
+
+```json
+{
+  "success": false,
+  "code": 404,
+  "message": "Resource not found"
+}
+```
+
+`message` is human-readable and may vary by error. Clients should branch on the HTTP status or `code`, not parse message text. Validation messages are currently joined into a single string. Unexpected server errors always return code 500 and the generic `Internal server error` message.
+
 ## Relationship cardinalities
 
 The following describes the model relationships. The relation fields are ORM navigation fields; the foreign-key scalar fields are the actual database columns.
