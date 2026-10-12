@@ -4,6 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
+import { ListQueryDto } from '../../../common/dto/list-query.dto.js';
+import type { PaginatedResult } from '../../../common/types/paginated-result.js';
+import { paginateListQuery } from '../../../common/utils/list-query.js';
 import { CreateRoleAssignmentDto } from './dto/create-role-assignment.dto.js';
 import { UpdateRoleAssignmentDto } from './dto/update-role-assignment.dto.js';
 import type { RoleAssignmentData } from './types/role-assignment.js';
@@ -63,23 +66,36 @@ export class RoleAssignmentsService {
   }
 
   // READ ROLE ASSIGNMENTS
-  async listRoleAssignments(tenantId?: string): Promise<RoleAssignmentData[]> {
-    const query = tenantId
-      ? this.prisma.public.RoleAssignment.where({ tenantId })
-      : this.prisma.public.RoleAssignment;
+  async listRoleAssignments(
+    tenantId?: string,
+    input: ListQueryDto = new ListQueryDto(),
+  ): Promise<PaginatedResult<RoleAssignmentData>> {
+    const result = await paginateListQuery<RoleAssignmentData>(
+      this.prisma.public.RoleAssignment,
+      input,
+      {
+        tenantId,
+        defaultSortBy: 'createdAt',
+        sortFields: {
+          createdAt: 'createdAt',
+          userId: 'userId',
+          roleId: 'roleId',
+        },
+        filters: { userId: 'userId', roleId: 'roleId', isActive: 'isActive' },
+      },
+    );
 
-    const roleAssignments = await query.all();
-
-    return [...roleAssignments]
-      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
-      .map((roleAssignment) => ({
+    return {
+      ...result,
+      items: result.items.map((roleAssignment) => ({
         id: roleAssignment.id,
         userId: roleAssignment.userId,
         roleId: roleAssignment.roleId,
         isActive: roleAssignment.isActive,
         createdAt: roleAssignment.createdAt,
         updatedAt: roleAssignment.updatedAt,
-      }));
+      })),
+    };
   }
 
   // READ ROLE ASSIGNMENT BY ID

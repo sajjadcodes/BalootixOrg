@@ -51,12 +51,19 @@ const roleCreate = jest.fn(
   }) => ({ ...role, ...data }),
 );
 const roleAll = jest.fn(async () => [] as RoleData[]);
-const roleWhere = jest.fn(() => ({
+const roleCount = jest.fn(async () => 0);
+const roleQuery = {
   first: roleFirst,
   update: roleUpdate,
   delete: roleDelete,
   all: roleAll,
-}));
+  count: roleCount,
+  where: jest.fn(() => roleQuery),
+  orderBy: jest.fn(() => roleQuery),
+  limit: jest.fn(() => roleQuery),
+  offset: jest.fn(() => roleQuery),
+};
+const roleWhere = jest.fn(() => roleQuery);
 const rolePermissionFirst = jest.fn(async () => null as { id: string } | null);
 const rolePermissionWhere = jest.fn(() => ({ first: rolePermissionFirst }));
 const roleAssignmentFirst = jest.fn(async () => null as { id: string } | null);
@@ -89,6 +96,7 @@ describe('RolesService', () => {
       ...data,
     }));
     roleAll.mockReset().mockResolvedValue([]);
+    roleCount.mockReset().mockResolvedValue(0);
     roleWhere.mockClear();
     rolePermissionFirst.mockReset().mockResolvedValue(null);
     rolePermissionWhere.mockClear();
@@ -163,9 +171,14 @@ describe('RolesService', () => {
 
   it('lists roles ordered by name', async () => {
     roleAll.mockResolvedValueOnce([role]);
+    roleCount.mockResolvedValueOnce(1);
 
-    await expect(service.listRoles()).resolves.toEqual([role]);
+    await expect(service.listRoles()).resolves.toMatchObject({
+      items: [role],
+      pagination: { page: 1, pageSize: 25, total: 1 },
+    });
     expect(roleAll).toHaveBeenCalledTimes(1);
+    expect(roleQuery.limit).toHaveBeenCalledWith(25);
   });
 
   it('gets a role by id', async () => {

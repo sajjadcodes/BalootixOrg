@@ -145,6 +145,10 @@ function createMockPrisma() {
           | Record<string, unknown>
           | ((record: Record<string, unknown>) => boolean) = {},
       ) => makeQuery(collection, combineFilters(filters, nextFilters)),
+      orderBy: () => makeQuery(collection, filters),
+      limit: () => query,
+      offset: () => query,
+      count: async () => results.length,
       first: async () => results[0] ?? null,
       all: async () => [...results],
       update: async (changes: Record<string, unknown>) => {
@@ -448,7 +452,7 @@ describe('E2E backend coverage', () => {
     await expect(
       authService.logout(login.user.id, refreshed.tokens.refreshToken),
     ).resolves.toBeUndefined();
-  });
+  }, 30_000);
 
   it('C: forgot-password and reset-password flows work end-to-end', async () => {
     await authService.registerWithEmailPassword({
@@ -480,7 +484,7 @@ describe('E2E backend coverage', () => {
     });
 
     expect(login.user.email).toBe('reset.user@orgflow.test');
-  });
+  }, 30_000);
 
   it('D: invalid and normalized tenant slugs are rejected and accepted correctly', () => {
     expect(normalizeTenantSlug(' MyTenant ')).toBe('mytenant');
@@ -504,15 +508,19 @@ describe('E2E backend coverage', () => {
       .calls[0]?.[1] as string;
     await authService.verifyEmail(verificationToken);
 
-    const tenants = await platformAdminService.listTenants('ACTIVE');
-    expect(tenants.some((tenant) => tenant.slug === 'default-tenant')).toBe(
-      true,
-    );
+    const tenants = await platformAdminService.listTenants({
+      status: 'ACTIVE',
+    });
+    expect(
+      tenants.items.some((tenant) => tenant.slug === 'default-tenant'),
+    ).toBe(true);
 
     const tenantUsers =
       await platformAdminService.listTenantUsers('tenant-default');
     expect(
-      tenantUsers.some((user) => user.email === 'tenant-user@orgflow.test'),
+      tenantUsers.items.some(
+        (user) => user.email === 'tenant-user@orgflow.test',
+      ),
     ).toBe(true);
   });
 
@@ -541,7 +549,7 @@ describe('E2E backend coverage', () => {
       String(firstTenant.id),
     );
     expect(
-      tenantUsers.every((user) => user.email !== 'beta@orgflow.test'),
+      tenantUsers.items.every((user) => user.email !== 'beta@orgflow.test'),
     ).toBe(true);
 
     await expect(

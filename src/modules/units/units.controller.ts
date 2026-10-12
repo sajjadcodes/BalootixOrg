@@ -8,11 +8,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { ListQueryDto } from '../../common/dto/list-query.dto.js';
+import type { PaginatedResult } from '../../common/types/paginated-result.js';
 import { CreateUnitDto } from './dto/create-unit.dto.js';
 import { MoveUnitDto } from './dto/move-unit.dto.js';
 import { SetUnitStatusDto } from './dto/set-unit-status.dto.js';
@@ -46,12 +49,15 @@ export class UnitsController {
   @Get()
   @RequirePermission('/units', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  listUnits(@Req() req: AuthenticatedRequest): Promise<UnitData[]> {
+  listUnits(
+    @Req() req: AuthenticatedRequest,
+    @Query() query: ListQueryDto = new ListQueryDto(),
+  ): Promise<PaginatedResult<UnitData>> {
     if (!req?.user?.tenantId) {
       throw new UnauthorizedException('Authentication context is required');
     }
 
-    return this.unitsService.listUnits(req.user.tenantId);
+    return this.unitsService.listUnits(req.user.tenantId, query);
   }
 
   @Get('tree')

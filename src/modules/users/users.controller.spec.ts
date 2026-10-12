@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 import { UsersController } from './users.controller.js';
+import { ListQueryDto } from '../../common/dto/list-query.dto.js';
 import type { UsersService } from './users.service.js';
 import type { UserData } from './types/user.js';
 
@@ -18,12 +19,25 @@ const req = { user: { tenantId: 'tenant-1' } } as any;
 
 describe('UsersController', () => {
   it('delegates user listing', async () => {
-    const listUsers = jest.fn(async () => [user]);
+    const result = {
+      items: [user],
+      pagination: {
+        page: 1,
+        pageSize: 25,
+        total: 1,
+        totalPages: 1,
+        hasPreviousPage: false,
+        hasNextPage: false,
+      },
+    };
+    const listUsers = jest.fn(async () => result);
     const controller = new UsersController({
       listUsers,
     } as unknown as UsersService);
 
-    await expect(controller.listUsers(req)).resolves.toEqual([user]);
+    const query = new ListQueryDto();
+    await expect(controller.listUsers(req, query)).resolves.toEqual(result);
+    expect(listUsers).toHaveBeenCalledWith('tenant-1', query);
   });
 
   it('delegates user lookup', async () => {

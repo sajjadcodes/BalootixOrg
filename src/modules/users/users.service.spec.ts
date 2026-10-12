@@ -1,4 +1,8 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { jest } from '@jest/globals';
 import type { PrismaService } from '../../prisma/prisma.service.js';
 import { UsersService } from './users.service.js';
@@ -20,12 +24,19 @@ const userFirst = jest.fn(async () => null as UserData | null);
 const userUpdate = jest.fn(async (_data: Record<string, unknown>) => user);
 const userDelete = jest.fn(async () => user);
 const userAll = jest.fn(async () => [] as UserData[]);
-const userWhere = jest.fn(() => ({
+const userCount = jest.fn(async () => 0);
+const userQuery = {
   first: userFirst,
   update: userUpdate,
   delete: userDelete,
   all: userAll,
-}));
+  count: userCount,
+  orderBy: jest.fn(() => userQuery),
+  limit: jest.fn(() => userQuery),
+  offset: jest.fn(() => userQuery),
+  where: jest.fn(() => userQuery),
+};
+const userWhere = jest.fn(() => userQuery);
 const roleAssignmentFirst = jest.fn(async () => null as { id: string } | null);
 const roleAssignmentWhere = jest.fn(() => ({ first: roleAssignmentFirst }));
 
@@ -46,19 +57,96 @@ describe('UsersService', () => {
     userUpdate.mockReset().mockResolvedValue(user);
     userDelete.mockReset().mockResolvedValue(user);
     userAll.mockReset().mockResolvedValue([]);
+    userCount.mockReset().mockResolvedValue(0);
     userWhere.mockClear();
+    userQuery.orderBy.mockClear();
+    userQuery.limit.mockClear();
+    userQuery.offset.mockClear();
+    userQuery.where.mockClear();
     roleAssignmentFirst.mockReset().mockResolvedValue(null);
     roleAssignmentWhere.mockClear();
 
     service = new UsersService(prisma as unknown as PrismaService);
   });
 
-  it('lists users ordered by display name within the current tenant', async () => {
+  it('lists a database-paginated user page within the current tenant', async () => {
     userAll.mockResolvedValueOnce([user]);
+    userCount.mockResolvedValueOnce(1);
 
-    await expect(service.listUsers('tenant-a')).resolves.toEqual([user]);
+    await expect(service.listUsers('tenant-a')).resolves.toEqual({
+      items: [user],
+      pagination: {
+        page: 1,
+        pageSize: 25,
+        total: 1,
+        totalPages: 1,
+        hasPreviousPage: false,
+        hasNextPage: false,
+      },
+    });
     expect(userWhere).toHaveBeenCalledWith({ tenantId: 'tenant-a' });
     expect(userAll).toHaveBeenCalledTimes(1);
+    expect(userQuery.limit).toHaveBeenCalledWith(25);
+    expect(userQuery.offset).toHaveBeenCalledWith(0);
+  });
+
+  it('caps large result sets and reports pagination boundaries', async () => {
+    const pageItems = Array.from({ length: 100 }, (_, index) => ({
+      ...user,
+      id: `user-${index + 1}`,
+    }));
+    userAll.mockResolvedValueOnce(pageItems);
+    userCount.mockResolvedValueOnce(25_000);
+
+    const result = await service.listUsers('tenant-a', {
+      page: 250,
+      pageSize: 100,
+      sortBy: 'email',
+      sortOrder: 'desc',
+    });
+
+    expect(result.items).toHaveLength(100);
+    expect(result.pagination).toEqual({
+      page: 250,
+      pageSize: 100,
+      total: 25_000,
+      totalPages: 250,
+      hasPreviousPage: true,
+      hasNextPage: false,
+    });
+    expect(userQuery.limit).toHaveBeenCalledWith(100);
+    expect(userQuery.offset).toHaveBeenCalledWith(24_900);
+  });
+
+  it('returns an empty page with accurate metadata beyond the last page', async () => {
+    userAll.mockResolvedValueOnce([]);
+    userCount.mockResolvedValueOnce(51);
+
+    await expect(
+      service.listUsers('tenant-a', { page: 4, pageSize: 25 }),
+    ).resolves.toMatchObject({
+      items: [],
+      pagination: {
+        page: 4,
+        pageSize: 25,
+        total: 51,
+        totalPages: 3,
+        hasPreviousPage: true,
+        hasNextPage: false,
+      },
+    });
+    expect(userQuery.limit).toHaveBeenCalledWith(25);
+    expect(userQuery.offset).toHaveBeenCalledWith(75);
+  });
+
+  it('rejects unsupported sort and filter fields', async () => {
+    await expect(
+      service.listUsers('tenant-a', { sortBy: 'hashedPassword' }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(
+      service.listUsers('tenant-a', { status: 'ACTIVE' } as never),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(userAll).not.toHaveBeenCalled();
   });
 
   it('gets a user by id within the current tenant', async () => {

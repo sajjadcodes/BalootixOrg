@@ -4,6 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { ListQueryDto } from '../../common/dto/list-query.dto.js';
+import { paginateListQuery } from '../../common/utils/list-query.js';
+import type { PaginatedResult } from '../../common/types/paginated-result.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import type { UserData } from './types/user.js';
 
@@ -12,16 +15,32 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   // READ USERS
-  async listUsers(tenantId?: string): Promise<UserData[]> {
-    const query = tenantId
-      ? this.prisma.public.User.where({ tenantId })
-      : this.prisma.public.User;
+  async listUsers(
+    tenantId?: string,
+    input: ListQueryDto = new ListQueryDto(),
+  ): Promise<PaginatedResult<UserData>> {
+    const result = await paginateListQuery<UserData>(
+      this.prisma.public.User,
+      input,
+      {
+        tenantId,
+        defaultSortBy: 'displayName',
+        sortFields: {
+          displayName: 'displayName',
+          email: 'email',
+          createdAt: 'createdAt',
+        },
+        filters: {
+          email: { field: 'email', normalize: 'email' },
+          isManager: 'isManager',
+          emailVerified: { field: 'emailVerifiedAt', nullable: true },
+        },
+      },
+    );
 
-    const users = await query.all();
-
-    return [...users]
-      .sort((a, b) => a.displayName.localeCompare(b.displayName))
-      .map((user) => ({
+    return {
+      ...result,
+      items: result.items.map((user) => ({
         id: user.id,
         email: user.email,
         displayName: user.displayName,
@@ -31,7 +50,8 @@ export class UsersService {
         emailVerifiedAt: user.emailVerifiedAt,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
-      }));
+      })),
+    };
   }
 
   // READ USER BY ID

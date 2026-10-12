@@ -4,6 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
+import { ListQueryDto } from '../../../common/dto/list-query.dto.js';
+import type { PaginatedResult } from '../../../common/types/paginated-result.js';
+import { paginateListQuery } from '../../../common/utils/list-query.js';
 import { CreatePermissionDto } from './dto/create-permission.dto.js';
 import { UpdatePermissionDto } from './dto/update-permission.dto.js';
 import type { PermissionData } from './types/permission.js';
@@ -46,13 +49,20 @@ export class PermissionsService {
   }
 
   //READ PERMISSIONS
-  async listPermissions(tenantId?: string): Promise<PermissionData[]> {
-    const query = tenantId
-      ? this.prisma.public.Permission.where({ tenantId })
-      : this.prisma.public.Permission;
-
-    const permissions = await query.all();
-    return [...permissions].sort((a, b) => a.action.localeCompare(b.action));
+  async listPermissions(
+    tenantId?: string,
+    input: ListQueryDto = new ListQueryDto(),
+  ): Promise<PaginatedResult<PermissionData>> {
+    return paginateListQuery<PermissionData>(
+      this.prisma.public.Permission,
+      input,
+      {
+        tenantId,
+        defaultSortBy: 'action',
+        sortFields: { action: 'action', resourceId: 'resourceId' },
+        filters: { action: 'action', resourceId: 'resourceId' },
+      },
+    );
   }
 
   //READ PERMISSION BY ID

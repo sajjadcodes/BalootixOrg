@@ -8,11 +8,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { ListQueryDto } from '../../../common/dto/list-query.dto.js';
+import type { PaginatedResult } from '../../../common/types/paginated-result.js';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard.js';
 import type { AuthenticatedRequest } from '../../auth/types/auth.js';
 import { RequirePermission } from '../decorators/require-permission.decorator.js';
@@ -44,12 +47,15 @@ export class RolesController {
   @Get()
   @RequirePermission('/authorization/roles', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  listRoles(@Req() req: AuthenticatedRequest): Promise<RoleData[]> {
+  listRoles(
+    @Req() req: AuthenticatedRequest,
+    @Query() query: ListQueryDto = new ListQueryDto(),
+  ): Promise<PaginatedResult<RoleData>> {
     if (!req?.user?.tenantId) {
       throw new UnauthorizedException('Authentication context is required');
     }
 
-    return this.rolesService.listRoles(req.user.tenantId);
+    return this.rolesService.listRoles(req.user.tenantId, query);
   }
 
   @Get(':id')

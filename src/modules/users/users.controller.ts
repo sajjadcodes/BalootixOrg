@@ -7,11 +7,14 @@ import {
   HttpStatus,
   Param,
   Patch,
+  Query,
   Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { ListQueryDto } from '../../common/dto/list-query.dto.js';
+import type { PaginatedResult } from '../../common/types/paginated-result.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { UsersService } from './users.service.js';
 import type { UserData } from './types/user.js';
@@ -28,12 +31,15 @@ export class UsersController {
   @Get()
   @RequirePermission('/users', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  listUsers(@Req() req: AuthenticatedRequest): Promise<UserData[]> {
+  listUsers(
+    @Req() req: AuthenticatedRequest,
+    @Query() query: ListQueryDto,
+  ): Promise<PaginatedResult<UserData>> {
     if (!req?.user?.tenantId) {
       throw new UnauthorizedException('Authentication context is required');
     }
 
-    return this.usersService.listUsers(req.user.tenantId);
+    return this.usersService.listUsers(req.user.tenantId, query);
   }
 
   @Get(':id')

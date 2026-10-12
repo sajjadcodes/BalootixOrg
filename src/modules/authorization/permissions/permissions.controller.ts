@@ -8,11 +8,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { ListQueryDto } from '../../../common/dto/list-query.dto.js';
+import type { PaginatedResult } from '../../../common/types/paginated-result.js';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard.js';
 import type { AuthenticatedRequest } from '../../auth/types/auth.js';
 import { RequirePermission } from '../decorators/require-permission.decorator.js';
@@ -44,12 +47,15 @@ export class PermissionsController {
   @Get()
   @RequirePermission('/authorization/permissions', 'READ')
   @UseGuards(JwtAuthGuard, AuthorizationGuard)
-  listPermissions(@Req() req: AuthenticatedRequest): Promise<PermissionData[]> {
+  listPermissions(
+    @Req() req: AuthenticatedRequest,
+    @Query() query: ListQueryDto = new ListQueryDto(),
+  ): Promise<PaginatedResult<PermissionData>> {
     if (!req?.user?.tenantId) {
       throw new UnauthorizedException('Authentication context is required');
     }
 
-    return this.permissionsService.listPermissions(req.user.tenantId);
+    return this.permissionsService.listPermissions(req.user.tenantId, query);
   }
 
   @Get(':id')

@@ -15,7 +15,16 @@ describe('PlatformAdminService', () => {
       }[]
     >
   >();
-  const tenantWhere = jest.fn(() => ({ all: tenantAll }));
+  const tenantCount = jest.fn(async () => 0);
+  const tenantQuery = {
+    all: tenantAll,
+    count: tenantCount,
+    where: jest.fn(() => tenantQuery),
+    orderBy: jest.fn(() => tenantQuery),
+    limit: jest.fn(() => tenantQuery),
+    offset: jest.fn(() => tenantQuery),
+  };
+  const tenantWhere = jest.fn(() => tenantQuery);
   const userAll = jest.fn<
     () => Promise<
       {
@@ -31,7 +40,16 @@ describe('PlatformAdminService', () => {
       }[]
     >
   >();
-  const userWhere = jest.fn(() => ({ all: userAll }));
+  const userCount = jest.fn(async () => 0);
+  const userQuery = {
+    all: userAll,
+    count: userCount,
+    where: jest.fn(() => userQuery),
+    orderBy: jest.fn(() => userQuery),
+    limit: jest.fn(() => userQuery),
+    offset: jest.fn(() => userQuery),
+  };
+  const userWhere = jest.fn(() => userQuery);
 
   const prisma = {
     public: {
@@ -44,6 +62,8 @@ describe('PlatformAdminService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    tenantCount.mockReset().mockResolvedValue(0);
+    userCount.mockReset().mockResolvedValue(0);
     service = new PlatformAdminService(prisma as unknown as PrismaService);
   });
 
@@ -61,18 +81,32 @@ describe('PlatformAdminService', () => {
 
     tenantAll.mockResolvedValue(rows);
 
-    await expect(service.listTenants('ACTIVE')).resolves.toEqual([
-      {
-        id: 'tenant-1',
-        slug: 'acme',
-        name: 'Acme',
-        status: 'ACTIVE',
-        createdAt: '2026-10-10T00:00:00.000Z',
-        updatedAt: '2026-10-10T00:00:00.000Z',
-      },
-    ]);
+    tenantCount.mockResolvedValue(1);
 
-    expect(tenantWhere).toHaveBeenCalledWith({ status: 'ACTIVE' });
+    await expect(service.listTenants({ status: 'ACTIVE' })).resolves.toEqual({
+      items: [
+        {
+          id: 'tenant-1',
+          slug: 'acme',
+          name: 'Acme',
+          status: 'ACTIVE',
+          createdAt: '2026-10-10T00:00:00.000Z',
+          updatedAt: '2026-10-10T00:00:00.000Z',
+        },
+      ],
+      pagination: {
+        page: 1,
+        pageSize: 25,
+        total: 1,
+        totalPages: 1,
+        hasPreviousPage: false,
+        hasNextPage: false,
+      },
+    });
+
+    expect(tenantWhere).toHaveBeenCalledWith({});
+    expect(tenantQuery.where).toHaveBeenCalledWith(expect.any(Function));
+    expect(tenantQuery.limit).toHaveBeenCalledWith(25);
   });
 
   it('maps tenant users into the public response shape', async () => {
@@ -92,18 +126,25 @@ describe('PlatformAdminService', () => {
 
     userAll.mockResolvedValue(rows);
 
-    await expect(service.listTenantUsers('tenant-1')).resolves.toEqual([
-      {
-        id: 'user-1',
-        email: 'ops@example.com',
-        displayName: 'Ops',
-        avatarUrl: null,
-        mobile: null,
-        isManager: true,
-        emailVerifiedAt: '2026-10-10T00:00:00.000Z',
-        createdAt: '2026-10-10T00:00:00.000Z',
-        updatedAt: '2026-10-10T00:00:00.000Z',
-      },
-    ]);
+    userCount.mockResolvedValue(1);
+
+    await expect(service.listTenantUsers('tenant-1')).resolves.toMatchObject({
+      items: [
+        {
+          id: 'user-1',
+          email: 'ops@example.com',
+          displayName: 'Ops',
+          avatarUrl: null,
+          mobile: null,
+          isManager: true,
+          emailVerifiedAt: '2026-10-10T00:00:00.000Z',
+          createdAt: '2026-10-10T00:00:00.000Z',
+          updatedAt: '2026-10-10T00:00:00.000Z',
+        },
+      ],
+      pagination: { total: 1, page: 1, pageSize: 25 },
+    });
+    expect(userWhere).toHaveBeenCalledWith({ tenantId: 'tenant-1' });
+    expect(userQuery.limit).toHaveBeenCalledWith(25);
   });
 });

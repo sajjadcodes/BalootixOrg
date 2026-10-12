@@ -40,12 +40,19 @@ const unitCreate = jest.fn(
   }) => ({ ...unit, ...data }),
 );
 const unitAll = jest.fn(async () => [] as UnitData[]);
-const unitWhere = jest.fn(() => ({
+const unitCount = jest.fn(async () => 0);
+const unitQuery = {
   first: unitFirst,
   update: unitUpdate,
   delete: unitDelete,
   all: unitAll,
-}));
+  count: unitCount,
+  where: jest.fn(() => unitQuery),
+  orderBy: jest.fn(() => unitQuery),
+  limit: jest.fn(() => unitQuery),
+  offset: jest.fn(() => unitQuery),
+};
+const unitWhere = jest.fn(() => unitQuery);
 const tenant = { id: 'tenant-1' };
 const tenantFirst = jest.fn(async () => tenant);
 const tenantOrderBy = jest.fn(() => ({ first: tenantFirst }));
@@ -345,9 +352,15 @@ describe('UnitsService', () => {
 
   it('lists units ordered by name', async () => {
     unitAll.mockResolvedValueOnce([unit]);
+    unitCount.mockResolvedValueOnce(1);
 
-    await expect(service.listUnits()).resolves.toEqual([unit]);
+    await expect(service.listUnits()).resolves.toMatchObject({
+      items: [unit],
+      pagination: { page: 1, pageSize: 25, total: 1 },
+    });
     expect(unitAll).toHaveBeenCalledTimes(1);
+    expect(unitQuery.limit).toHaveBeenCalledWith(25);
+    expect(unitQuery.offset).toHaveBeenCalledWith(0);
   });
 
   it('gets a unit by id', async () => {

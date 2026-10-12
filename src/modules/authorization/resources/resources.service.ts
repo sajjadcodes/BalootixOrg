@@ -4,6 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
+import { ListQueryDto } from '../../../common/dto/list-query.dto.js';
+import type { PaginatedResult } from '../../../common/types/paginated-result.js';
+import { paginateListQuery } from '../../../common/utils/list-query.js';
 import { CreateResourceDto } from './dto/create-resource.dto.js';
 import { UpdateResourceDto } from './dto/update-resource.dto.js';
 import type { ResourceData } from './types/resource.js';
@@ -48,13 +51,16 @@ export class ResourcesService {
   }
 
   //READ RESOURCE
-  async listResources(tenantId?: string): Promise<ResourceData[]> {
-    const query = tenantId
-      ? this.prisma.public.Resource.where({ tenantId })
-      : this.prisma.public.Resource;
-
-    const resources = await query.all();
-    return [...resources].sort((a, b) => a.route.localeCompare(b.route));
+  async listResources(
+    tenantId?: string,
+    input: ListQueryDto = new ListQueryDto(),
+  ): Promise<PaginatedResult<ResourceData>> {
+    return paginateListQuery<ResourceData>(this.prisma.public.Resource, input, {
+      tenantId,
+      defaultSortBy: 'route',
+      sortFields: { route: 'route', createdAt: 'createdAt' },
+      filters: { route: 'route' },
+    });
   }
 
   //READ RESOURCE BY ID

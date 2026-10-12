@@ -52,12 +52,19 @@ const rolePermissionCreate = jest.fn(
   }),
 );
 const rolePermissionAll = jest.fn(async () => [] as RolePermissionData[]);
-const rolePermissionWhere = jest.fn(() => ({
+const rolePermissionCount = jest.fn(async () => 0);
+const rolePermissionQuery = {
   first: rolePermissionFirst,
   update: rolePermissionUpdate,
   delete: rolePermissionDelete,
   all: rolePermissionAll,
-}));
+  count: rolePermissionCount,
+  where: jest.fn(() => rolePermissionQuery),
+  orderBy: jest.fn(() => rolePermissionQuery),
+  limit: jest.fn(() => rolePermissionQuery),
+  offset: jest.fn(() => rolePermissionQuery),
+};
+const rolePermissionWhere = jest.fn(() => rolePermissionQuery);
 
 const prisma = {
   public: {
@@ -87,6 +94,7 @@ describe('RolePermissionsService', () => {
       ...data,
     }));
     rolePermissionAll.mockReset().mockResolvedValue([]);
+    rolePermissionCount.mockReset().mockResolvedValue(0);
     rolePermissionWhere.mockClear();
 
     service = new RolePermissionsService(prisma as unknown as PrismaService);
@@ -146,11 +154,14 @@ describe('RolePermissionsService', () => {
 
   it('lists role permissions ordered by createdAt', async () => {
     rolePermissionAll.mockResolvedValueOnce([rolePermission]);
+    rolePermissionCount.mockResolvedValueOnce(1);
 
-    await expect(service.listRolePermissions()).resolves.toEqual([
-      rolePermission,
-    ]);
+    await expect(service.listRolePermissions()).resolves.toMatchObject({
+      items: [rolePermission],
+      pagination: { page: 1, pageSize: 25, total: 1 },
+    });
     expect(rolePermissionAll).toHaveBeenCalledTimes(1);
+    expect(rolePermissionQuery.limit).toHaveBeenCalledWith(25);
   });
 
   it('gets a role permission by id', async () => {

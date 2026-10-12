@@ -5,6 +5,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { ListQueryDto } from '../../common/dto/list-query.dto.js';
+import type { PaginatedResult } from '../../common/types/paginated-result.js';
+import { paginateListQuery } from '../../common/utils/list-query.js';
 import { CreateUnitDto } from './dto/create-unit.dto.js';
 import { UpdateUnitDto } from './dto/update-unit.dto.js';
 import type { UnitData, UnitTreeNode } from './types/unit.js';
@@ -67,13 +70,21 @@ export class UnitsService {
   }
 
   //READ UNITS
-  async listUnits(tenantId?: string): Promise<UnitData[]> {
-    const query = tenantId
-      ? this.prisma.public.Unit.where({ tenantId })
-      : this.prisma.public.Unit;
-
-    const units = await query.all();
-    return [...units].sort((a, b) => a.name.localeCompare(b.name));
+  async listUnits(
+    tenantId?: string,
+    input: ListQueryDto = new ListQueryDto(),
+  ): Promise<PaginatedResult<UnitData>> {
+    return paginateListQuery<UnitData>(this.prisma.public.Unit, input, {
+      tenantId,
+      defaultSortBy: 'name',
+      sortFields: { name: 'name', type: 'type', createdAt: 'createdAt' },
+      filters: {
+        name: 'name',
+        parentId: 'parentId',
+        type: 'type',
+        isActive: 'isActive',
+      },
+    });
   }
 
   //READ UNIT BY ID
@@ -235,7 +246,10 @@ export class UnitsService {
 
   // GET UNITS TREE
   async getUnitsTree(tenantId?: string): Promise<UnitTreeNode[]> {
-    const units = await this.listUnits(tenantId);
-    return buildTree(units);
+    const query = tenantId
+      ? this.prisma.public.Unit.where({ tenantId })
+      : this.prisma.public.Unit;
+    const units = await query.all();
+    return buildTree([...units]);
   }
 }

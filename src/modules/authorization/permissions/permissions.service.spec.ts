@@ -33,12 +33,19 @@ const permissionCreate = jest.fn(
   }),
 );
 const permissionAll = jest.fn(async () => [] as PermissionData[]);
-const permissionWhere = jest.fn(() => ({
+const permissionCount = jest.fn(async () => 0);
+const permissionQuery = {
   first: permissionFirst,
   update: permissionUpdate,
   delete: permissionDelete,
   all: permissionAll,
-}));
+  count: permissionCount,
+  where: jest.fn(() => permissionQuery),
+  orderBy: jest.fn(() => permissionQuery),
+  limit: jest.fn(() => permissionQuery),
+  offset: jest.fn(() => permissionQuery),
+};
+const permissionWhere = jest.fn(() => permissionQuery);
 const rolePermissionFirst = jest.fn(async () => null as { id: string } | null);
 const rolePermissionWhere = jest.fn(() => ({ first: rolePermissionFirst }));
 
@@ -68,6 +75,7 @@ describe('PermissionsService', () => {
       ...data,
     }));
     permissionAll.mockReset().mockResolvedValue([]);
+    permissionCount.mockReset().mockResolvedValue(0);
     permissionWhere.mockClear();
     rolePermissionFirst.mockReset().mockResolvedValue(null);
     rolePermissionWhere.mockClear();
@@ -106,9 +114,14 @@ describe('PermissionsService', () => {
 
   it('lists permissions ordered by action', async () => {
     permissionAll.mockResolvedValueOnce([permission]);
+    permissionCount.mockResolvedValueOnce(1);
 
-    await expect(service.listPermissions()).resolves.toEqual([permission]);
+    await expect(service.listPermissions()).resolves.toMatchObject({
+      items: [permission],
+      pagination: { page: 1, pageSize: 25, total: 1 },
+    });
     expect(permissionAll).toHaveBeenCalledTimes(1);
+    expect(permissionQuery.limit).toHaveBeenCalledWith(25);
   });
 
   it('gets a permission by id', async () => {

@@ -58,12 +58,19 @@ const roleAssignmentCreate = jest.fn(
   }),
 );
 const roleAssignmentAll = jest.fn(async () => [] as RoleAssignmentData[]);
-const roleAssignmentWhere = jest.fn(() => ({
+const roleAssignmentCount = jest.fn(async () => 0);
+const roleAssignmentQuery = {
   first: roleAssignmentFirst,
   update: roleAssignmentUpdate,
   delete: roleAssignmentDelete,
   all: roleAssignmentAll,
-}));
+  count: roleAssignmentCount,
+  where: jest.fn(() => roleAssignmentQuery),
+  orderBy: jest.fn(() => roleAssignmentQuery),
+  limit: jest.fn(() => roleAssignmentQuery),
+  offset: jest.fn(() => roleAssignmentQuery),
+};
+const roleAssignmentWhere = jest.fn(() => roleAssignmentQuery);
 
 const prisma = {
   public: {
@@ -93,6 +100,7 @@ describe('RoleAssignmentsService', () => {
       ...data,
     }));
     roleAssignmentAll.mockReset().mockResolvedValue([]);
+    roleAssignmentCount.mockReset().mockResolvedValue(0);
     roleAssignmentWhere.mockClear();
 
     service = new RoleAssignmentsService(prisma as unknown as PrismaService);
@@ -157,11 +165,14 @@ describe('RoleAssignmentsService', () => {
 
   it('lists role assignments ordered by createdAt', async () => {
     roleAssignmentAll.mockResolvedValueOnce([roleAssignment]);
+    roleAssignmentCount.mockResolvedValueOnce(1);
 
-    await expect(service.listRoleAssignments()).resolves.toEqual([
-      roleAssignment,
-    ]);
+    await expect(service.listRoleAssignments()).resolves.toMatchObject({
+      items: [roleAssignment],
+      pagination: { page: 1, pageSize: 25, total: 1 },
+    });
     expect(roleAssignmentAll).toHaveBeenCalledTimes(1);
+    expect(roleAssignmentQuery.limit).toHaveBeenCalledWith(25);
   });
 
   it('gets a role assignment by id', async () => {

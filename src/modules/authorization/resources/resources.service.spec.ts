@@ -22,12 +22,19 @@ const resourceCreate = jest.fn(
   }),
 );
 const resourceAll = jest.fn(async () => [] as ResourceData[]);
-const resourceWhere = jest.fn(() => ({
+const resourceCount = jest.fn(async () => 0);
+const resourceQuery = {
   first: resourceFirst,
   update: resourceUpdate,
   delete: resourceDelete,
   all: resourceAll,
-}));
+  count: resourceCount,
+  where: jest.fn(() => resourceQuery),
+  orderBy: jest.fn(() => resourceQuery),
+  limit: jest.fn(() => resourceQuery),
+  offset: jest.fn(() => resourceQuery),
+};
+const resourceWhere = jest.fn(() => resourceQuery);
 const tenantFirst = jest.fn(async () => tenant);
 const tenantOrderBy = jest.fn(() => ({ first: tenantFirst }));
 const permissionFirst = jest.fn(async () => null as { id: string } | null);
@@ -57,6 +64,7 @@ describe('ResourcesService', () => {
       route,
     }));
     resourceAll.mockReset().mockResolvedValue([]);
+    resourceCount.mockReset().mockResolvedValue(0);
     resourceWhere.mockClear();
     tenantFirst.mockReset().mockResolvedValue(tenant);
     tenantOrderBy.mockClear();
@@ -87,9 +95,14 @@ describe('ResourcesService', () => {
 
   it('lists resources in route order', async () => {
     resourceAll.mockResolvedValueOnce([resource]);
+    resourceCount.mockResolvedValueOnce(1);
 
-    await expect(service.listResources()).resolves.toEqual([resource]);
+    await expect(service.listResources()).resolves.toMatchObject({
+      items: [resource],
+      pagination: { page: 1, pageSize: 25, total: 1 },
+    });
     expect(resourceAll).toHaveBeenCalledTimes(1);
+    expect(resourceQuery.limit).toHaveBeenCalledWith(25);
   });
 
   it('gets a resource by id', async () => {

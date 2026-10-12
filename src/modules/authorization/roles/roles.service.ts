@@ -4,6 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
+import { ListQueryDto } from '../../../common/dto/list-query.dto.js';
+import type { PaginatedResult } from '../../../common/types/paginated-result.js';
+import { paginateListQuery } from '../../../common/utils/list-query.js';
 import { CreateRoleDto } from './dto/create-role.dto.js';
 import { UpdateRoleDto } from './dto/update-role.dto.js';
 import type { RoleData } from './types/role.js';
@@ -56,13 +59,21 @@ export class RolesService {
   }
 
   // READ ROLES
-  async listRoles(tenantId?: string): Promise<RoleData[]> {
-    const query = tenantId
-      ? this.prisma.public.Role.where({ tenantId })
-      : this.prisma.public.Role;
-
-    const roles = await query.all();
-    return [...roles].sort((a, b) => a.name.localeCompare(b.name));
+  async listRoles(
+    tenantId?: string,
+    input: ListQueryDto = new ListQueryDto(),
+  ): Promise<PaginatedResult<RoleData>> {
+    return paginateListQuery<RoleData>(this.prisma.public.Role, input, {
+      tenantId,
+      defaultSortBy: 'name',
+      sortFields: { name: 'name', unitId: 'unitId', createdAt: 'createdAt' },
+      filters: {
+        name: 'name',
+        unitId: 'unitId',
+        scope: 'scope',
+        isActive: 'isActive',
+      },
+    });
   }
 
   // READ ROLE BY ID

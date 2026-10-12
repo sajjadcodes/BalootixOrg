@@ -4,6 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
+import { ListQueryDto } from '../../../common/dto/list-query.dto.js';
+import type { PaginatedResult } from '../../../common/types/paginated-result.js';
+import { paginateListQuery } from '../../../common/utils/list-query.js';
 import { CreateRolePermissionDto } from './dto/create-role-permission.dto.js';
 import { UpdateRolePermissionDto } from './dto/update-role-permission.dto.js';
 import type { RolePermissionData } from './types/role-permission.js';
@@ -63,22 +66,35 @@ export class RolePermissionsService {
   }
 
   // READ ROLE PERMISSIONS
-  async listRolePermissions(tenantId?: string): Promise<RolePermissionData[]> {
-    const query = tenantId
-      ? this.prisma.public.RolePermission.where({ tenantId })
-      : this.prisma.public.RolePermission;
+  async listRolePermissions(
+    tenantId?: string,
+    input: ListQueryDto = new ListQueryDto(),
+  ): Promise<PaginatedResult<RolePermissionData>> {
+    const result = await paginateListQuery<RolePermissionData>(
+      this.prisma.public.RolePermission,
+      input,
+      {
+        tenantId,
+        defaultSortBy: 'createdAt',
+        sortFields: {
+          createdAt: 'createdAt',
+          roleId: 'roleId',
+          permissionId: 'permissionId',
+        },
+        filters: { roleId: 'roleId', permissionId: 'permissionId' },
+      },
+    );
 
-    const rolePermissions = await query.all();
-
-    return [...rolePermissions]
-      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
-      .map((rolePermission) => ({
+    return {
+      ...result,
+      items: result.items.map((rolePermission) => ({
         id: rolePermission.id,
         roleId: rolePermission.roleId,
         permissionId: rolePermission.permissionId,
         createdAt: rolePermission.createdAt,
         updatedAt: rolePermission.updatedAt,
-      }));
+      })),
+    };
   }
 
   // READ ROLE PERMISSION BY ID
