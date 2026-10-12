@@ -20,11 +20,26 @@ export class OwnerBootstrapService {
     private readonly emailService: EmailService,
   ) {}
 
-  // The owner bootstrap flow is a one-time setup process that provisions 
-  // the first privileged account for the platform. It consists of two main steps: 
-  // issuing a secure invite and completing the setup with a password. 
+  // The owner bootstrap flow is a one-time setup process that provisions
+  // the first privileged account for the platform. It consists of two main steps:
+  // issuing a secure invite and completing the setup with a password.
   // The service ensures that only one OWNER can exist, and all operations are performed
   // in a transaction to maintain data integrity.
+  private async ensurePlatformTenant() {
+    const existing = await this.prisma.public.Tenant.orderBy((tenant) =>
+      tenant.createdAt.asc(),
+    ).first();
+
+    if (existing) {
+      return existing;
+    }
+
+    return this.prisma.public.Tenant.create({
+      slug: `platform-${Date.now()}`,
+      name: 'Platform Tenant',
+      status: 'ACTIVE',
+    });
+  }
   async issueSetupInvite(input: {
     email: string;
     displayName: string;
@@ -56,7 +71,10 @@ export class OwnerBootstrapService {
     const tokenHash = createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + OWNER_SETUP_TTL_MS).toISOString();
 
+    const tenant = await this.ensurePlatformTenant();
+
     await this.prisma.public.OwnerSetupToken.create({
+      tenantId: tenant.id,
       email,
       displayName,
       tokenHash,
@@ -128,8 +146,11 @@ export class OwnerBootstrapService {
         throw new BadRequestException(INVALID_SETUP_LINK_MESSAGE);
       }
 
+      const tenant = await this.ensurePlatformTenant();
+
       // Create the root management unit that all platform-wide roles can hang off.
       const systemUnit = await tx.orm.public.Unit.create({
+        tenantId: tenant.id,
         parentId: null,
         name: 'System',
         type: 'MANAGEMENT',
@@ -139,6 +160,7 @@ export class OwnerBootstrapService {
 
       // Create the first verified user for the platform owner account.
       const createdUser = await tx.orm.public.User.create({
+        tenantId: tenant.id,
         email: setupToken.email,
         displayName: setupToken.displayName,
         hashedPassword,
@@ -148,6 +170,7 @@ export class OwnerBootstrapService {
 
       // Create the reserved OWNER role attached to the system unit.
       const createdRole = await tx.orm.public.Role.create({
+        tenantId: tenant.id,
         unitId: systemUnit.id,
         systemKey: OWNER_SYSTEM_KEY,
         name: 'Organization Owner',
@@ -158,6 +181,7 @@ export class OwnerBootstrapService {
 
       // Link the newly created user to the reserved OWNER role
       await tx.orm.public.RoleAssignment.create({
+        tenantId: tenant.id,
         userId: createdUser.id,
         roleId: createdRole.id,
         isActive: true,

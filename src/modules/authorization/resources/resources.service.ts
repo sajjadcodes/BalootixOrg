@@ -23,7 +23,18 @@ export class ResourcesService {
       throw new ConflictException('A resource with this route already exists');
     }
 
-    return this.prisma.public.Resource.create({ route });
+    const tenant = await this.prisma.public.Tenant.orderBy((item) =>
+      item.createdAt.asc(),
+    ).first();
+
+    if (!tenant) {
+      throw new NotFoundException('No tenant is available for this resource');
+    }
+
+    return this.prisma.public.Resource.create({
+      tenantId: tenant.id,
+      route,
+    });
   }
 
   //READ RESOURCE

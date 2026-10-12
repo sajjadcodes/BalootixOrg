@@ -47,6 +47,7 @@ export class RolePermissionsService {
     }
 
     const created = await this.prisma.public.RolePermission.create({
+      tenantId: role.tenantId,
       roleId: input.roleId,
       permissionId: input.permissionId,
     });

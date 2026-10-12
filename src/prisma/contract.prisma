@@ -3,6 +3,7 @@
 // USER
 model User {
   id                      String                     @id @default(uuid())
+  tenantId                String
   email                   String                     @unique
   hashedPassword          String?
   displayName             String
@@ -13,25 +14,35 @@ model User {
   emailVerifiedAt         TimestamptzString?
   createdAt               TimestamptzString          @default(now())
   updatedAt               temporal.updatedAtString()
+  tenant                  Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   emailVerificationTokens EmailVerificationToken[]
   roleAssignments         RoleAssignment[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@index([email])
 }
 
 // AUTHENTICATION
 model EmailVerificationToken {
   id        String             @id @default(uuid())
+  tenantId  String
   userId    String
   tokenHash String             @unique
   expiresAt TimestamptzString
   usedAt    TimestamptzString?
   createdAt TimestamptzString  @default(now())
   user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant    Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  @@unique([tenantId, tokenHash])
+  @@index([tenantId])
   @@index([userId])
 }
 
 model OwnerSetupToken {
   id          String             @id @default(uuid())
+  tenantId    String
   email       String
   displayName String
   tokenHash   String             @unique
@@ -39,7 +50,11 @@ model OwnerSetupToken {
   usedAt      TimestamptzString?
   createdAt   TimestamptzString  @default(now())
 
-  @@index([email])
+  tenant      Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, tokenHash])
+  @@index([tenantId])
+  @@index([tenantId, email])
 }
 
 //AUTHORIZATION
@@ -63,27 +78,37 @@ enum PermissionActionEnum {
 
 model Resource {
   id          String                     @id @default(uuid())
+  tenantId    String
   route       String                     @unique
   createdAt   TimestamptzString          @default(now())
   updatedAt   temporal.updatedAtString()
+
+  tenant      Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   permissions Permission[]
+
+  @@unique([tenantId, route])
+  @@index([tenantId])
 }
 
 model Permission {
   id              String                     @id @default(uuid())
+  tenantId        String
   resourceId      String
   action          PermissionActionEnum
   createdAt       TimestamptzString          @default(now())
   updatedAt       temporal.updatedAtString()
+  tenant          Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   resource        Resource                   @relation(fields: [resourceId], references: [id], onDelete: Cascade)
   rolePermissions RolePermission[]
 
-  @@unique([resourceId, action])
+  @@unique([tenantId, resourceId, action])
+  @@index([tenantId])
   @@index([resourceId])
 }
 
 model Role {
   id              String                     @id @default(uuid())
+  tenantId        String
   unitId          String
   systemKey       String?                    @unique
   name            String
@@ -92,39 +117,47 @@ model Role {
   isActive        Boolean                    @default(true)
   createdAt       TimestamptzString          @default(now())
   updatedAt       temporal.updatedAtString()
+  tenant          Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   unit            Unit                       @relation(fields: [unitId], references: [id], onDelete: Cascade)
   rolePermissions RolePermission[]
   roleAssignments RoleAssignment[]
 
-  @@unique([unitId, name])
-  @@index([unitId])
+  @@unique([tenantId, unitId, name])
+  @@index([tenantId])
+  @@index([tenantId, systemKey])
 }
 
 model RolePermission {
   id           String                     @id @default(uuid())
+  tenantId     String
   roleId       String
   permissionId String
   createdAt    TimestamptzString          @default(now())
   updatedAt    temporal.updatedAtString()
+  tenant       Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   role         Role                       @relation(fields: [roleId], references: [id], onDelete: Cascade)
   permission   Permission                 @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
-  @@unique([roleId, permissionId])
+  @@unique([tenantId, roleId, permissionId])
+  @@index([tenantId])
   @@index([roleId])
   @@index([permissionId])
 }
 
 model RoleAssignment {
   id        String                     @id @default(uuid())
+  tenantId  String
   userId    String
   roleId    String
   isActive  Boolean                    @default(true)
   createdAt TimestamptzString          @default(now())
   updatedAt temporal.updatedAtString()
+  tenant    Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user      User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
   role      Role                       @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, roleId])
+  @@unique([tenantId, userId, roleId])
+  @@index([tenantId])
   @@index([userId])
   @@index([roleId])
 }
@@ -132,6 +165,7 @@ model RoleAssignment {
 // UNITS
 model Unit {
   id          String                     @id @default(uuid())
+  tenantId    String
   parentId    String?
   name        String
   type        UnitTypeEnum
@@ -139,14 +173,18 @@ model Unit {
   isActive    Boolean                    @default(true)
   createdAt   TimestamptzString          @default(now())
   updatedAt   temporal.updatedAtString()
+
+  tenant      Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   parent      Unit?                      @relation("UnitHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
   children    Unit[]                     @relation("UnitHierarchy")
   roles       Role[]
 
+  @@unique([tenantId, parentId, name])
+  @@index([tenantId])
   @@index([parentId])
 }
 
-// TENEANT & GlOBAL ADMIN
+// TENEANT & GlOBAL ADMIN & Subscription
 model GlobalAdmin {
   id             String                     @id @default(uuid())
   email          String                     @unique
@@ -155,4 +193,58 @@ model GlobalAdmin {
   isActive       Boolean                    @default(true)
   createdAt      TimestamptzString          @default(now())
   updatedAt      temporal.updatedAtString()
+}
+
+enum TenantStatusEnum {
+  ACTIVE
+  TRIAL
+  SUSPENDED
+  ARCHIVED
+}
+
+enum SubscriptionPlanEnum {
+  TRIAL
+  STARTER
+  GROWTH
+  ENTERPRISE
+}
+
+enum SubscriptionStatusEnum {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+model Tenant {
+  id               String                     @id @default(uuid())
+  slug             String                     @unique
+  name             String
+  status           TenantStatusEnum           @default(ACTIVE)
+  createdAt        TimestamptzString          @default(now())
+  updatedAt        temporal.updatedAtString()
+
+  subscription     Subscription?
+
+  users            User[]
+  units            Unit[]
+  roles            Role[]
+  resources        Resource[]
+  permissions      Permission[]
+  ownerSetupTokens OwnerSetupToken[]
+}
+
+model Subscription {
+  id                 String                     @id @default(uuid())
+  tenantId           String                     @unique
+  plan               SubscriptionPlanEnum       @default(TRIAL)
+  status             SubscriptionStatusEnum     @default(TRIAL)
+  currentPeriodStart TimestamptzString?
+  currentPeriodEnd   TimestamptzString?
+  cancelAt           TimestamptzString?
+  createdAt          TimestamptzString          @default(now())
+  updatedAt          temporal.updatedAtString()
+
+  tenant             Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }

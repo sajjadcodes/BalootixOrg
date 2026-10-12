@@ -33,12 +33,29 @@ export class AuthService {
   ) {}
 
   // REGISTER
+  private async ensureDefaultTenant() {
+    const existing = await this.prisma.public.Tenant.orderBy((tenant) =>
+      tenant.createdAt.asc(),
+    ).first();
+
+    if (existing) {
+      return existing;
+    }
+
+    return this.prisma.public.Tenant.create({
+      slug: `default-${Date.now()}`,
+      name: 'Default Tenant',
+      status: 'ACTIVE',
+    });
+  }
+
   async registerWithEmailPassword(
     input: RegisterWithEmailPasswordDto,
   ): Promise<RegisteredUserData> {
     const hashedPassword = await bcrypt.hash(input.password, 12);
 
     const email = input.email.trim().toLowerCase();
+    const tenant = await this.ensureDefaultTenant();
 
     const exists = await this.prisma.public.User.where({
       email,
@@ -49,6 +66,7 @@ export class AuthService {
     }
 
     const result = await this.prisma.public.User.create({
+      tenantId: tenant.id,
       email,
       hashedPassword,
       displayName: input.displayName?.trim(),
@@ -66,6 +84,7 @@ export class AuthService {
 
     // Persist the token hash and its expiry against the new user.
     await this.prisma.public.EmailVerificationToken.create({
+      tenantId: tenant.id,
       userId: result.id,
       tokenHash,
       expiresAt,
@@ -143,7 +162,7 @@ export class AuthService {
     const email = input.email.trim().toLowerCase();
 
     const user = await this.prisma.public.User.where({ email })
-      .select('id', 'email')
+      .select('id', 'email', 'tenantId')
       .first();
 
     if (!user) {
@@ -158,6 +177,7 @@ export class AuthService {
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
     await this.prisma.public.EmailVerificationToken.create({
+      tenantId: user.tenantId,
       userId: user.id,
       tokenHash,
       expiresAt,

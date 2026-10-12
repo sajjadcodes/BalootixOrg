@@ -35,6 +35,7 @@ export class PermissionsService {
     }
 
     return this.prisma.public.Permission.create({
+      tenantId: resource.tenantId,
       resourceId: input.resourceId,
       action: input.action,
     });

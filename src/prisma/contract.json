@@ -36,6 +36,14 @@
       "model": "RolePermission",
       "namespace": "public"
     },
+    "Subscription": {
+      "model": "Subscription",
+      "namespace": "public"
+    },
+    "Tenant": {
+      "model": "Tenant",
+      "namespace": "public"
+    },
     "Unit": {
       "model": "Unit",
       "namespace": "public"
@@ -83,6 +91,73 @@
               }
             ]
           },
+          "SubscriptionPlanEnum": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "TRIAL",
+                "value": "TRIAL"
+              },
+              {
+                "name": "STARTER",
+                "value": "STARTER"
+              },
+              {
+                "name": "GROWTH",
+                "value": "GROWTH"
+              },
+              {
+                "name": "ENTERPRISE",
+                "value": "ENTERPRISE"
+              }
+            ]
+          },
+          "SubscriptionStatusEnum": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "TRIAL",
+                "value": "TRIAL"
+              },
+              {
+                "name": "ACTIVE",
+                "value": "ACTIVE"
+              },
+              {
+                "name": "PAST_DUE",
+                "value": "PAST_DUE"
+              },
+              {
+                "name": "CANCELED",
+                "value": "CANCELED"
+              },
+              {
+                "name": "INCOMPLETE",
+                "value": "INCOMPLETE"
+              }
+            ]
+          },
+          "TenantStatusEnum": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "ACTIVE",
+                "value": "ACTIVE"
+              },
+              {
+                "name": "TRIAL",
+                "value": "TRIAL"
+              },
+              {
+                "name": "SUSPENDED",
+                "value": "SUSPENDED"
+              },
+              {
+                "name": "ARCHIVED",
+                "value": "ARCHIVED"
+              }
+            ]
+          },
           "UnitTypeEnum": {
             "codecId": "pg/text@1",
             "members": [
@@ -125,6 +200,13 @@
                   "kind": "scalar"
                 }
               },
+              "tenantId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "tokenHash": {
                 "nullable": false,
                 "type": {
@@ -148,6 +230,22 @@
               }
             },
             "relations": {
+              "tenant": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "tenantId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Tenant",
+                  "namespace": "public"
+                }
+              },
               "user": {
                 "cardinality": "N:1",
                 "nullable": false,
@@ -175,6 +273,9 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "tenantId": {
+                  "column": "tenantId"
                 },
                 "tokenHash": {
                   "column": "tokenHash"
@@ -308,6 +409,13 @@
                   "kind": "scalar"
                 }
               },
+              "tenantId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "tokenHash": {
                 "nullable": false,
                 "type": {
@@ -323,7 +431,24 @@
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "tenant": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "tenantId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Tenant",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
                 "createdAt": {
@@ -340,6 +465,9 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "tenantId": {
+                  "column": "tenantId"
                 },
                 "tokenHash": {
                   "column": "tokenHash"
@@ -388,6 +516,13 @@
                   "kind": "scalar"
                 }
               },
+              "tenantId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "updatedAt": {
                 "nullable": false,
                 "type": {
@@ -427,6 +562,22 @@
                   "model": "RolePermission",
                   "namespace": "public"
                 }
+              },
+              "tenant": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "tenantId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Tenant",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -442,6 +593,9 @@
                 },
                 "resourceId": {
                   "column": "resourceId"
+                },
+                "tenantId": {
+                  "column": "tenantId"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
@@ -474,6 +628,13 @@
                   "kind": "scalar"
                 }
               },
+              "tenantId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "updatedAt": {
                 "nullable": false,
                 "type": {
@@ -497,6 +658,22 @@
                   "model": "Permission",
                   "namespace": "public"
                 }
+              },
+              "tenant": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "tenantId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Tenant",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -509,6 +686,9 @@
                 },
                 "route": {
                   "column": "route"
+                },
+                "tenantId": {
+                  "column": "tenantId"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
@@ -575,6 +755,13 @@
                   "kind": "scalar"
                 }
               },
+              "tenantId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "unitId": {
                 "nullable": false,
                 "type": {
@@ -621,6 +808,22 @@
                   "namespace": "public"
                 }
               },
+              "tenant": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "tenantId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Tenant",
+                  "namespace": "public"
+                }
+              },
               "unit": {
                 "cardinality": "N:1",
                 "nullable": false,
@@ -660,6 +863,9 @@
                 },
                 "systemKey": {
                   "column": "systemKey"
+                },
+                "tenantId": {
+                  "column": "tenantId"
                 },
                 "unitId": {
                   "column": "unitId"
@@ -702,6 +908,13 @@
                   "kind": "scalar"
                 }
               },
+              "tenantId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "updatedAt": {
                 "nullable": false,
                 "type": {
@@ -731,6 +944,22 @@
                 },
                 "to": {
                   "model": "Role",
+                  "namespace": "public"
+                }
+              },
+              "tenant": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "tenantId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Tenant",
                   "namespace": "public"
                 }
               },
@@ -764,6 +993,9 @@
                 },
                 "roleId": {
                   "column": "roleId"
+                },
+                "tenantId": {
+                  "column": "tenantId"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
@@ -800,6 +1032,13 @@
                 }
               },
               "roleId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "tenantId": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
@@ -846,6 +1085,22 @@
                   "model": "Role",
                   "namespace": "public"
                 }
+              },
+              "tenant": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "tenantId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Tenant",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -862,12 +1117,329 @@
                 "roleId": {
                   "column": "roleId"
                 },
+                "tenantId": {
+                  "column": "tenantId"
+                },
                 "updatedAt": {
                   "column": "updatedAt"
                 }
               },
               "namespaceId": "public",
               "table": "RolePermission"
+            }
+          },
+          "Subscription": {
+            "fields": {
+              "cancelAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "currentPeriodEnd": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "currentPeriodStart": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "plan": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "SubscriptionPlanEnum",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "SubscriptionStatusEnum",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "tenantId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "tenant": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "tenantId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Tenant",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "cancelAt": {
+                  "column": "cancelAt"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "currentPeriodEnd": {
+                  "column": "currentPeriodEnd"
+                },
+                "currentPeriodStart": {
+                  "column": "currentPeriodStart"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "plan": {
+                  "column": "plan"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "tenantId": {
+                  "column": "tenantId"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "Subscription"
+            }
+          },
+          "Tenant": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "slug": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "TenantStatusEnum",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "ownerSetupTokens": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "tenantId"
+                  ]
+                },
+                "to": {
+                  "model": "OwnerSetupToken",
+                  "namespace": "public"
+                }
+              },
+              "permissions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "tenantId"
+                  ]
+                },
+                "to": {
+                  "model": "Permission",
+                  "namespace": "public"
+                }
+              },
+              "resources": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "tenantId"
+                  ]
+                },
+                "to": {
+                  "model": "Resource",
+                  "namespace": "public"
+                }
+              },
+              "roles": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "tenantId"
+                  ]
+                },
+                "to": {
+                  "model": "Role",
+                  "namespace": "public"
+                }
+              },
+              "subscription": {
+                "cardinality": "1:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "tenantId"
+                  ]
+                },
+                "to": {
+                  "model": "Subscription",
+                  "namespace": "public"
+                }
+              },
+              "units": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "tenantId"
+                  ]
+                },
+                "to": {
+                  "model": "Unit",
+                  "namespace": "public"
+                }
+              },
+              "users": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "tenantId"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "slug": {
+                  "column": "slug"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "Tenant"
             }
           },
           "Unit": {
@@ -909,6 +1481,13 @@
               },
               "parentId": {
                 "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "tenantId": {
+                "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -981,6 +1560,22 @@
                   "model": "Role",
                   "namespace": "public"
                 }
+              },
+              "tenant": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "tenantId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Tenant",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -1002,6 +1597,9 @@
                 },
                 "parentId": {
                   "column": "parentId"
+                },
+                "tenantId": {
+                  "column": "tenantId"
                 },
                 "type": {
                   "column": "type"
@@ -1086,6 +1684,13 @@
                   "kind": "scalar"
                 }
               },
+              "tenantId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "updatedAt": {
                 "nullable": false,
                 "type": {
@@ -1124,6 +1729,22 @@
                   "model": "RoleAssignment",
                   "namespace": "public"
                 }
+              },
+              "tenant": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "tenantId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Tenant",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -1157,6 +1778,9 @@
                 },
                 "refreshTokenHash": {
                   "column": "refreshTokenHash"
+                },
+                "tenantId": {
+                  "column": "tenantId"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
@@ -1196,6 +1820,11 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "tenantId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "tokenHash": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -1229,9 +1858,34 @@
                     "namespaceId": "public",
                     "tableName": "User"
                   }
+                },
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "tenantId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "EmailVerificationToken"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Tenant"
+                  }
                 }
               ],
               "indexes": [
+                {
+                  "columns": [
+                    "tenantId"
+                  ],
+                  "name": "EmailVerificationToken_tenantId_idx_c93ed4f1",
+                  "prefix": "EmailVerificationToken_tenantId_idx",
+                  "unique": false
+                },
                 {
                   "columns": [
                     "userId"
@@ -1249,6 +1903,12 @@
               "uniques": [
                 {
                   "columns": [
+                    "tokenHash"
+                  ]
+                },
+                {
+                  "columns": [
+                    "tenantId",
                     "tokenHash"
                   ]
                 }
@@ -1346,6 +2006,11 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "tenantId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "tokenHash": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -1357,14 +2022,41 @@
                   "nullable": true
                 }
               },
-              "foreignKeys": [],
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "tenantId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "OwnerSetupToken"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Tenant"
+                  }
+                }
+              ],
               "indexes": [
                 {
                   "columns": [
+                    "tenantId",
                     "email"
                   ],
-                  "name": "OwnerSetupToken_email_idx_46df9cad",
-                  "prefix": "OwnerSetupToken_email_idx",
+                  "name": "OwnerSetupToken_tenantId_email_idx_88e149c0",
+                  "prefix": "OwnerSetupToken_tenantId_email_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "tenantId"
+                  ],
+                  "name": "OwnerSetupToken_tenantId_idx_c93ed4f1",
+                  "prefix": "OwnerSetupToken_tenantId_idx",
                   "unique": false
                 }
               ],
@@ -1376,6 +2068,12 @@
               "uniques": [
                 {
                   "columns": [
+                    "tokenHash"
+                  ]
+                },
+                {
+                  "columns": [
+                    "tenantId",
                     "tokenHash"
                   ]
                 }
@@ -1420,6 +2118,11 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "tenantId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
@@ -1427,6 +2130,23 @@
                 }
               },
               "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "tenantId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Permission"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Tenant"
+                  }
+                },
                 {
                   "onDelete": "cascade",
                   "source": {
@@ -1453,6 +2173,14 @@
                   "name": "Permission_resourceId_idx_72964925",
                   "prefix": "Permission_resourceId_idx",
                   "unique": false
+                },
+                {
+                  "columns": [
+                    "tenantId"
+                  ],
+                  "name": "Permission_tenantId_idx_c93ed4f1",
+                  "prefix": "Permission_tenantId_idx",
+                  "unique": false
                 }
               ],
               "primaryKey": {
@@ -1463,6 +2191,7 @@
               "uniques": [
                 {
                   "columns": [
+                    "tenantId",
                     "resourceId",
                     "action"
                   ]
@@ -1490,14 +2219,46 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "tenantId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
                   "nullable": false
                 }
               },
-              "foreignKeys": [],
-              "indexes": [],
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "tenantId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Resource"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Tenant"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "tenantId"
+                  ],
+                  "name": "Resource_tenantId_idx_c93ed4f1",
+                  "prefix": "Resource_tenantId_idx",
+                  "unique": false
+                }
+              ],
               "primaryKey": {
                 "columns": [
                   "id"
@@ -1506,6 +2267,12 @@
               "uniques": [
                 {
                   "columns": [
+                    "route"
+                  ]
+                },
+                {
+                  "columns": [
+                    "tenantId",
                     "route"
                   ]
                 }
@@ -1573,6 +2340,11 @@
                   "nativeType": "text",
                   "nullable": true
                 },
+                "tenantId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "unitId": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -1585,6 +2357,23 @@
                 }
               },
               "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "tenantId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Role"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Tenant"
+                  }
+                },
                 {
                   "onDelete": "cascade",
                   "source": {
@@ -1604,6 +2393,23 @@
                 }
               ],
               "indexes": [
+                {
+                  "columns": [
+                    "tenantId"
+                  ],
+                  "name": "Role_tenantId_idx_c93ed4f1",
+                  "prefix": "Role_tenantId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "tenantId",
+                    "systemKey"
+                  ],
+                  "name": "Role_tenantId_systemKey_idx_b361b661",
+                  "prefix": "Role_tenantId_systemKey_idx",
+                  "unique": false
+                },
                 {
                   "columns": [
                     "unitId"
@@ -1626,6 +2432,7 @@
                 },
                 {
                   "columns": [
+                    "tenantId",
                     "unitId",
                     "name"
                   ]
@@ -1662,6 +2469,11 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "tenantId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
@@ -1674,6 +2486,23 @@
                 }
               },
               "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "tenantId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "RoleAssignment"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Tenant"
+                  }
+                },
                 {
                   "onDelete": "cascade",
                   "source": {
@@ -1720,6 +2549,14 @@
                 },
                 {
                   "columns": [
+                    "tenantId"
+                  ],
+                  "name": "RoleAssignment_tenantId_idx_c93ed4f1",
+                  "prefix": "RoleAssignment_tenantId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
                     "userId"
                   ],
                   "name": "RoleAssignment_userId_idx_a489d58a",
@@ -1735,6 +2572,7 @@
               "uniques": [
                 {
                   "columns": [
+                    "tenantId",
                     "userId",
                     "roleId"
                   ]
@@ -1767,6 +2605,11 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "tenantId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
@@ -1774,6 +2617,23 @@
                 }
               },
               "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "tenantId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "RolePermission"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Tenant"
+                  }
+                },
                 {
                   "onDelete": "cascade",
                   "source": {
@@ -1825,6 +2685,14 @@
                   "name": "RolePermission_roleId_idx_ffccc9a4",
                   "prefix": "RolePermission_roleId_idx",
                   "unique": false
+                },
+                {
+                  "columns": [
+                    "tenantId"
+                  ],
+                  "name": "RolePermission_tenantId_idx_c93ed4f1",
+                  "prefix": "RolePermission_tenantId_idx",
+                  "unique": false
                 }
               ],
               "primaryKey": {
@@ -1835,8 +2703,195 @@
               "uniques": [
                 {
                   "columns": [
+                    "tenantId",
                     "roleId",
                     "permissionId"
+                  ]
+                }
+              ]
+            },
+            "Subscription": {
+              "checks": [
+                {
+                  "expression": "\"plan\" IN ('TRIAL', 'STARTER', 'GROWTH', 'ENTERPRISE')",
+                  "name": "Subscription_plan_check_04a44069",
+                  "prefix": "Subscription_plan_check"
+                },
+                {
+                  "expression": "\"status\" IN ('TRIAL', 'ACTIVE', 'PAST_DUE', 'CANCELED', 'INCOMPLETE')",
+                  "name": "Subscription_status_check_b176c373",
+                  "prefix": "Subscription_status_check"
+                }
+              ],
+              "columns": {
+                "cancelAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "currentPeriodEnd": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "currentPeriodStart": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "plan": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "TRIAL"
+                  },
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "SubscriptionPlanEnum",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "status": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "TRIAL"
+                  },
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "SubscriptionStatusEnum",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "tenantId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "tenantId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Subscription"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Tenant"
+                  }
+                }
+              ],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "tenantId"
+                  ]
+                }
+              ]
+            },
+            "Tenant": {
+              "checks": [
+                {
+                  "expression": "\"status\" IN ('ACTIVE', 'TRIAL', 'SUSPENDED', 'ARCHIVED')",
+                  "name": "Tenant_status_check_a76535eb",
+                  "prefix": "Tenant_status_check"
+                }
+              ],
+              "columns": {
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "slug": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "status": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "ACTIVE"
+                  },
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "TenantStatusEnum",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "slug"
                   ]
                 }
               ]
@@ -1888,6 +2943,11 @@
                   "nativeType": "text",
                   "nullable": true
                 },
+                "tenantId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "type": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -1906,6 +2966,23 @@
                 }
               },
               "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "tenantId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Unit"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Tenant"
+                  }
+                },
                 {
                   "onDelete": "cascade",
                   "source": {
@@ -1932,6 +3009,14 @@
                   "name": "Unit_parentId_idx_6a68f597",
                   "prefix": "Unit_parentId_idx",
                   "unique": false
+                },
+                {
+                  "columns": [
+                    "tenantId"
+                  ],
+                  "name": "Unit_tenantId_idx_c93ed4f1",
+                  "prefix": "Unit_tenantId_idx",
+                  "unique": false
                 }
               ],
               "primaryKey": {
@@ -1939,7 +3024,15 @@
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "tenantId",
+                    "parentId",
+                    "name"
+                  ]
+                }
+              ]
             },
             "User": {
               "columns": {
@@ -2001,14 +3094,54 @@
                   "nativeType": "text",
                   "nullable": true
                 },
+                "tenantId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "updatedAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "nativeType": "timestamptz",
                   "nullable": false
                 }
               },
-              "foreignKeys": [],
-              "indexes": [],
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "tenantId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "User"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Tenant"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "email"
+                  ],
+                  "name": "User_email_idx_46df9cad",
+                  "prefix": "User_email_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "tenantId"
+                  ],
+                  "name": "User_tenantId_idx_c93ed4f1",
+                  "prefix": "User_tenantId_idx",
+                  "unique": false
+                }
+              ],
               "primaryKey": {
                 "columns": [
                   "id"
@@ -2017,6 +3150,12 @@
               "uniques": [
                 {
                   "columns": [
+                    "email"
+                  ]
+                },
+                {
+                  "columns": [
+                    "tenantId",
                     "email"
                   ]
                 }
@@ -2040,6 +3179,34 @@
                 "DESCENDANTS"
               ]
             },
+            "SubscriptionPlanEnum": {
+              "kind": "valueSet",
+              "values": [
+                "TRIAL",
+                "STARTER",
+                "GROWTH",
+                "ENTERPRISE"
+              ]
+            },
+            "SubscriptionStatusEnum": {
+              "kind": "valueSet",
+              "values": [
+                "TRIAL",
+                "ACTIVE",
+                "PAST_DUE",
+                "CANCELED",
+                "INCOMPLETE"
+              ]
+            },
+            "TenantStatusEnum": {
+              "kind": "valueSet",
+              "values": [
+                "ACTIVE",
+                "TRIAL",
+                "SUSPENDED",
+                "ARCHIVED"
+              ]
+            },
             "UnitTypeEnum": {
               "kind": "valueSet",
               "values": [
@@ -2054,10 +3221,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "391e09f2b78120cef96e1524152aa00c1569fbb0e96f06c124938033368b1698"
+    "storageHash": "199d6d5ce9ff96b61d64583e35dfd5016df2741363eb1ae3761794105b535bc8"
   },
   "execution": {
-    "executionHash": "8fb8c43758a7e50b6c4cc9406c6d18e900d84aa477fd9ef1836d1d386a9facbc",
+    "executionHash": "9a8358150cdec86ef120156bfc641fb74b2c68d39a9d1307126d659ccd3b8e97",
     "mutations": {
       "defaults": [
         {
@@ -2234,6 +3401,58 @@
           },
           "ref": {
             "entry": "RolePermission",
+            "field": "updatedAt",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "Subscription",
+            "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "Subscription",
+            "field": "updatedAt",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "Tenant",
+            "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "Tenant",
             "field": "updatedAt",
             "namespace": "public"
           }

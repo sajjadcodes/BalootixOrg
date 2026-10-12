@@ -44,6 +44,7 @@ export class RolesService {
     }
 
     return this.prisma.public.Role.create({
+      tenantId: unit.tenantId,
       unitId: input.unitId,
       name,
       description,

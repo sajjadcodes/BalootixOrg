@@ -174,6 +174,14 @@ These rules should be enforced in the data model and app logic:
 
 Cycle prevention and unit-deletion rules require explicit enforcement beyond a simple foreign-key relation.
 
+## Prisma database recovery
+
+- For a new, empty dev database, run `pnpm prisma db init --advance-ref db`.
+- For an existing database, preview the changes with `pnpm prisma db migrate --show`, then apply them with `pnpm prisma db migrate --advance-ref db`.
+- If you edit a migration, re-emit it with `node migrations/app/<migration>/migration.ts` before applying it. Plan each contract change only once.
+- If a migration hash keeps changing, check whether its backfill updates `updatedAt`; use stable SQL so each emit produces the same migration.
+- Check the final schema with `pnpm prisma db verify --log-level info`.
+
 ## Relationship cardinalities
 
 The following describes the model relationships. The relation fields are ORM navigation fields; the foreign-key scalar fields are the actual database columns.

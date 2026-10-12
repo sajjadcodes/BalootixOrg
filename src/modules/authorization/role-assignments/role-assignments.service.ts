@@ -46,6 +46,7 @@ export class RoleAssignmentsService {
 
     // Create the role assignment
     const created = await this.prisma.public.RoleAssignment.create({
+      tenantId: role.tenantId,
       userId: input.userId,
       roleId: input.roleId,
       isActive: input.isActive ?? true,

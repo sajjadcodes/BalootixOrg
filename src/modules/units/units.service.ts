@@ -20,6 +20,8 @@ export class UnitsService {
     const name = input.name.trim();
     const description = input.description?.trim() || null;
 
+    let tenantId: string | null = null;
+
     if (parentId) {
       const parent = await this.prisma.public.Unit.where({
         id: parentId,
@@ -28,6 +30,18 @@ export class UnitsService {
       if (!parent) {
         throw new NotFoundException('Parent unit not found');
       }
+
+      tenantId = parent.tenantId;
+    } else {
+      const defaultTenant = await this.prisma.public.Tenant.orderBy((tenant) =>
+        tenant.createdAt.asc(),
+      ).first();
+
+      if (!defaultTenant) {
+        throw new NotFoundException('No tenant is available for this unit');
+      }
+
+      tenantId = defaultTenant.id;
     }
 
     // Keep sibling unit names unique, including root units.
@@ -43,6 +57,7 @@ export class UnitsService {
     }
 
     return this.prisma.public.Unit.create({
+      tenantId,
       parentId,
       name,
       description,

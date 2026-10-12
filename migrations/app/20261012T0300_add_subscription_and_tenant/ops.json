@@ -1,0 +1,2761 @@
+[
+  {
+    "id": "dropIndex.OwnerSetupToken.OwnerSetupToken_email_idx_46df9cad",
+    "label": "Drop index \"OwnerSetupToken_email_idx_46df9cad\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "OwnerSetupToken_email_idx_46df9cad",
+        "table": "OwnerSetupToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"OwnerSetupToken_email_idx_46df9cad\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"OwnerSetupToken_email_idx_46df9cad\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop index \"OwnerSetupToken_email_idx_46df9cad\"",
+        "sql": "DROP INDEX \"public\".\"OwnerSetupToken_email_idx_46df9cad\"",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"OwnerSetupToken_email_idx_46df9cad\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"OwnerSetupToken_email_idx_46df9cad\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropConstraint.Permission.Permission_resourceId_action_key",
+    "label": "Drop constraint \"Permission_resourceId_action_key\" on \"Permission\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Permission_resourceId_action_key",
+        "table": "Permission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Permission_resourceId_action_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Permission_resourceId_action_key",
+          "public",
+          "\"public\".\"Permission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"Permission_resourceId_action_key\"",
+        "sql": "ALTER TABLE \"public\".\"Permission\" DROP CONSTRAINT \"Permission_resourceId_action_key\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Permission_resourceId_action_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Permission_resourceId_action_key",
+          "public",
+          "\"public\".\"Permission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropConstraint.Role.Role_unitId_name_key",
+    "label": "Drop constraint \"Role_unitId_name_key\" on \"Role\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Role_unitId_name_key",
+        "table": "Role"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Role_unitId_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Role_unitId_name_key",
+          "public",
+          "\"public\".\"Role\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"Role_unitId_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"Role\" DROP CONSTRAINT \"Role_unitId_name_key\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Role_unitId_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Role_unitId_name_key",
+          "public",
+          "\"public\".\"Role\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropConstraint.RoleAssignment.RoleAssignment_userId_roleId_key",
+    "label": "Drop constraint \"RoleAssignment_userId_roleId_key\" on \"RoleAssignment\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "RoleAssignment_userId_roleId_key",
+        "table": "RoleAssignment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"RoleAssignment_userId_roleId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RoleAssignment_userId_roleId_key",
+          "public",
+          "\"public\".\"RoleAssignment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"RoleAssignment_userId_roleId_key\"",
+        "sql": "ALTER TABLE \"public\".\"RoleAssignment\" DROP CONSTRAINT \"RoleAssignment_userId_roleId_key\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"RoleAssignment_userId_roleId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RoleAssignment_userId_roleId_key",
+          "public",
+          "\"public\".\"RoleAssignment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropConstraint.RolePermission.RolePermission_roleId_permissionId_key",
+    "label": "Drop constraint \"RolePermission_roleId_permissionId_key\" on \"RolePermission\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "RolePermission_roleId_permissionId_key",
+        "table": "RolePermission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"RolePermission_roleId_permissionId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RolePermission_roleId_permissionId_key",
+          "public",
+          "\"public\".\"RolePermission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"RolePermission_roleId_permissionId_key\"",
+        "sql": "ALTER TABLE \"public\".\"RolePermission\" DROP CONSTRAINT \"RolePermission_roleId_permissionId_key\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"RolePermission_roleId_permissionId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RolePermission_roleId_permissionId_key",
+          "public",
+          "\"public\".\"RolePermission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Subscription",
+    "label": "Create table \"Subscription\"",
+    "summary": "Creates table \"Subscription\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Subscription"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Subscription\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Subscription\"",
+        "sql": "CREATE TABLE \"public\".\"Subscription\" (\n  \"cancelAt\" timestamptz,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"currentPeriodEnd\" timestamptz,\n  \"currentPeriodStart\" timestamptz,\n  \"id\" text NOT NULL,\n  \"plan\" text DEFAULT 'TRIAL' NOT NULL,\n  \"status\" text DEFAULT 'TRIAL' NOT NULL,\n  \"tenantId\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"Subscription_plan_check_04a44069\" CHECK (\"plan\" IN ('TRIAL', 'STARTER', 'GROWTH', 'ENTERPRISE')),\n  CONSTRAINT \"Subscription_status_check_b176c373\" CHECK (\"status\" IN ('TRIAL', 'ACTIVE', 'PAST_DUE', 'CANCELED', 'INCOMPLETE'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Subscription\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Tenant",
+    "label": "Create table \"Tenant\"",
+    "summary": "Creates table \"Tenant\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Tenant"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Tenant\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Tenant\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Tenant\"",
+        "sql": "CREATE TABLE \"public\".\"Tenant\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"name\" text NOT NULL,\n  \"slug\" text NOT NULL,\n  \"status\" text DEFAULT 'ACTIVE' NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"Tenant_status_check_a76535eb\" CHECK (\"status\" IN ('ACTIVE', 'TRIAL', 'SUSPENDED', 'ARCHIVED'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Tenant\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Tenant\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.seed-legacy-tenant",
+    "label": "Data transform: seed-legacy-tenant",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check seed-legacy-tenant has work to do",
+        "sql": "SELECT EXISTS (\n            SELECT 1 AS \"needsTenant\"\n            WHERE NOT EXISTS (\n              SELECT 1 FROM \"public\".\"Tenant\" WHERE \"id\" = $1\n            )\n            AND (\n              EXISTS (SELECT 1 FROM \"public\".\"EmailVerificationToken\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"OwnerSetupToken\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"Permission\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"Resource\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"Role\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"RoleAssignment\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"RolePermission\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"Unit\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"User\")\n            )\n            LIMIT 1\n          ) AS ok",
+        "params": [
+          "legacy-tenant"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run seed-legacy-tenant",
+        "sql": "\n            INSERT INTO \"public\".\"Tenant\"\n              (\"id\", \"slug\", \"name\", \"status\", \"createdAt\", \"updatedAt\")\n            VALUES\n              ($1, 'legacy', 'Migrated tenant', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)\n            ON CONFLICT (\"id\") DO NOTHING\n          ",
+        "params": [
+          "legacy-tenant"
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify seed-legacy-tenant resolved all violations",
+        "sql": "SELECT NOT EXISTS (\n            SELECT 1 AS \"needsTenant\"\n            WHERE NOT EXISTS (\n              SELECT 1 FROM \"public\".\"Tenant\" WHERE \"id\" = $1\n            )\n            AND (\n              EXISTS (SELECT 1 FROM \"public\".\"EmailVerificationToken\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"OwnerSetupToken\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"Permission\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"Resource\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"Role\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"RoleAssignment\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"RolePermission\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"Unit\") OR\n              EXISTS (SELECT 1 FROM \"public\".\"User\")\n            )\n            LIMIT 1\n          ) AS ok",
+        "params": [
+          "legacy-tenant"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.EmailVerificationToken.tenantId",
+    "label": "Add column \"tenantId\" to \"EmailVerificationToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "EmailVerificationToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "EmailVerificationToken",
+          "tenantId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"EmailVerificationToken\" ADD COLUMN \"tenantId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "EmailVerificationToken",
+          "tenantId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-EmailVerificationToken-tenantId",
+    "label": "Data transform: backfill-EmailVerificationToken-tenantId",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-EmailVerificationToken-tenantId has work to do",
+        "sql": "SELECT EXISTS (\n            SELECT \"id\" FROM \"public\".\"EmailVerificationToken\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-EmailVerificationToken-tenantId",
+        "sql": "\n            UPDATE \"public\".\"EmailVerificationToken\"\n            SET \"tenantId\" = $1\n            WHERE \"tenantId\" IS NULL\n          ",
+        "params": [
+          "legacy-tenant"
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-EmailVerificationToken-tenantId resolved all violations",
+        "sql": "SELECT NOT EXISTS (\n            SELECT \"id\" FROM \"public\".\"EmailVerificationToken\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.EmailVerificationToken.tenantId",
+    "label": "Set NOT NULL on \"EmailVerificationToken\".\"tenantId\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "EmailVerificationToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "EmailVerificationToken",
+          "tenantId"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"tenantId\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"EmailVerificationToken\" WHERE \"tenantId\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"EmailVerificationToken\" ALTER COLUMN \"tenantId\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "EmailVerificationToken",
+          "tenantId",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.OwnerSetupToken.tenantId",
+    "label": "Add column \"tenantId\" to \"OwnerSetupToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "OwnerSetupToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "OwnerSetupToken",
+          "tenantId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"OwnerSetupToken\" ADD COLUMN \"tenantId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "OwnerSetupToken",
+          "tenantId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-OwnerSetupToken-tenantId",
+    "label": "Data transform: backfill-OwnerSetupToken-tenantId",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-OwnerSetupToken-tenantId has work to do",
+        "sql": "SELECT EXISTS (\n            SELECT \"id\" FROM \"public\".\"OwnerSetupToken\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-OwnerSetupToken-tenantId",
+        "sql": "\n            UPDATE \"public\".\"OwnerSetupToken\"\n            SET \"tenantId\" = $1\n            WHERE \"tenantId\" IS NULL\n          ",
+        "params": [
+          "legacy-tenant"
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-OwnerSetupToken-tenantId resolved all violations",
+        "sql": "SELECT NOT EXISTS (\n            SELECT \"id\" FROM \"public\".\"OwnerSetupToken\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.OwnerSetupToken.tenantId",
+    "label": "Set NOT NULL on \"OwnerSetupToken\".\"tenantId\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "OwnerSetupToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "OwnerSetupToken",
+          "tenantId"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"tenantId\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"OwnerSetupToken\" WHERE \"tenantId\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"OwnerSetupToken\" ALTER COLUMN \"tenantId\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "OwnerSetupToken",
+          "tenantId",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Permission.tenantId",
+    "label": "Add column \"tenantId\" to \"Permission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "Permission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Permission",
+          "tenantId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"Permission\" ADD COLUMN \"tenantId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Permission",
+          "tenantId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-Permission-tenantId",
+    "label": "Data transform: backfill-Permission-tenantId",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-Permission-tenantId has work to do",
+        "sql": "SELECT EXISTS (\n            SELECT \"id\" FROM \"public\".\"Permission\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-Permission-tenantId",
+        "sql": "\n            UPDATE \"public\".\"Permission\"\n            SET \"tenantId\" = $1\n            WHERE \"tenantId\" IS NULL\n          ",
+        "params": [
+          "legacy-tenant"
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-Permission-tenantId resolved all violations",
+        "sql": "SELECT NOT EXISTS (\n            SELECT \"id\" FROM \"public\".\"Permission\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.Permission.tenantId",
+    "label": "Set NOT NULL on \"Permission\".\"tenantId\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "Permission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Permission",
+          "tenantId"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"tenantId\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"Permission\" WHERE \"tenantId\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"Permission\" ALTER COLUMN \"tenantId\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Permission",
+          "tenantId",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Resource.tenantId",
+    "label": "Add column \"tenantId\" to \"Resource\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "Resource"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Resource",
+          "tenantId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"Resource\" ADD COLUMN \"tenantId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Resource",
+          "tenantId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-Resource-tenantId",
+    "label": "Data transform: backfill-Resource-tenantId",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-Resource-tenantId has work to do",
+        "sql": "SELECT EXISTS (\n            SELECT \"id\" FROM \"public\".\"Resource\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-Resource-tenantId",
+        "sql": "\n            UPDATE \"public\".\"Resource\"\n            SET \"tenantId\" = $1\n            WHERE \"tenantId\" IS NULL\n          ",
+        "params": [
+          "legacy-tenant"
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-Resource-tenantId resolved all violations",
+        "sql": "SELECT NOT EXISTS (\n            SELECT \"id\" FROM \"public\".\"Resource\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.Resource.tenantId",
+    "label": "Set NOT NULL on \"Resource\".\"tenantId\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "Resource"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Resource",
+          "tenantId"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"tenantId\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"Resource\" WHERE \"tenantId\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"Resource\" ALTER COLUMN \"tenantId\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Resource",
+          "tenantId",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Role.tenantId",
+    "label": "Add column \"tenantId\" to \"Role\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "Role"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Role",
+          "tenantId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"Role\" ADD COLUMN \"tenantId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Role",
+          "tenantId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-Role-tenantId",
+    "label": "Data transform: backfill-Role-tenantId",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-Role-tenantId has work to do",
+        "sql": "SELECT EXISTS (\n            SELECT \"id\" FROM \"public\".\"Role\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-Role-tenantId",
+        "sql": "\n            UPDATE \"public\".\"Role\"\n            SET \"tenantId\" = $1\n            WHERE \"tenantId\" IS NULL\n          ",
+        "params": [
+          "legacy-tenant"
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-Role-tenantId resolved all violations",
+        "sql": "SELECT NOT EXISTS (\n            SELECT \"id\" FROM \"public\".\"Role\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.Role.tenantId",
+    "label": "Set NOT NULL on \"Role\".\"tenantId\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "Role"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Role",
+          "tenantId"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"tenantId\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"Role\" WHERE \"tenantId\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"Role\" ALTER COLUMN \"tenantId\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Role",
+          "tenantId",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.RoleAssignment.tenantId",
+    "label": "Add column \"tenantId\" to \"RoleAssignment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "RoleAssignment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "RoleAssignment",
+          "tenantId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"RoleAssignment\" ADD COLUMN \"tenantId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "RoleAssignment",
+          "tenantId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-RoleAssignment-tenantId",
+    "label": "Data transform: backfill-RoleAssignment-tenantId",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-RoleAssignment-tenantId has work to do",
+        "sql": "SELECT EXISTS (\n            SELECT \"id\" FROM \"public\".\"RoleAssignment\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-RoleAssignment-tenantId",
+        "sql": "\n            UPDATE \"public\".\"RoleAssignment\"\n            SET \"tenantId\" = $1\n            WHERE \"tenantId\" IS NULL\n          ",
+        "params": [
+          "legacy-tenant"
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-RoleAssignment-tenantId resolved all violations",
+        "sql": "SELECT NOT EXISTS (\n            SELECT \"id\" FROM \"public\".\"RoleAssignment\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.RoleAssignment.tenantId",
+    "label": "Set NOT NULL on \"RoleAssignment\".\"tenantId\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "RoleAssignment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "RoleAssignment",
+          "tenantId"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"tenantId\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"RoleAssignment\" WHERE \"tenantId\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"RoleAssignment\" ALTER COLUMN \"tenantId\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "RoleAssignment",
+          "tenantId",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.RolePermission.tenantId",
+    "label": "Add column \"tenantId\" to \"RolePermission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "RolePermission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "RolePermission",
+          "tenantId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"RolePermission\" ADD COLUMN \"tenantId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "RolePermission",
+          "tenantId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-RolePermission-tenantId",
+    "label": "Data transform: backfill-RolePermission-tenantId",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-RolePermission-tenantId has work to do",
+        "sql": "SELECT EXISTS (\n            SELECT \"id\" FROM \"public\".\"RolePermission\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-RolePermission-tenantId",
+        "sql": "\n            UPDATE \"public\".\"RolePermission\"\n            SET \"tenantId\" = $1\n            WHERE \"tenantId\" IS NULL\n          ",
+        "params": [
+          "legacy-tenant"
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-RolePermission-tenantId resolved all violations",
+        "sql": "SELECT NOT EXISTS (\n            SELECT \"id\" FROM \"public\".\"RolePermission\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.RolePermission.tenantId",
+    "label": "Set NOT NULL on \"RolePermission\".\"tenantId\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "RolePermission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "RolePermission",
+          "tenantId"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"tenantId\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"RolePermission\" WHERE \"tenantId\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"RolePermission\" ALTER COLUMN \"tenantId\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "RolePermission",
+          "tenantId",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Unit.tenantId",
+    "label": "Add column \"tenantId\" to \"Unit\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "Unit"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Unit",
+          "tenantId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"Unit\" ADD COLUMN \"tenantId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Unit",
+          "tenantId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-Unit-tenantId",
+    "label": "Data transform: backfill-Unit-tenantId",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-Unit-tenantId has work to do",
+        "sql": "SELECT EXISTS (\n            SELECT \"id\" FROM \"public\".\"Unit\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-Unit-tenantId",
+        "sql": "\n            UPDATE \"public\".\"Unit\"\n            SET \"tenantId\" = $1\n            WHERE \"tenantId\" IS NULL\n          ",
+        "params": [
+          "legacy-tenant"
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-Unit-tenantId resolved all violations",
+        "sql": "SELECT NOT EXISTS (\n            SELECT \"id\" FROM \"public\".\"Unit\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.Unit.tenantId",
+    "label": "Set NOT NULL on \"Unit\".\"tenantId\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "Unit"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Unit",
+          "tenantId"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"tenantId\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"Unit\" WHERE \"tenantId\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"Unit\" ALTER COLUMN \"tenantId\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Unit",
+          "tenantId",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.User.tenantId",
+    "label": "Add column \"tenantId\" to \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "tenantId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD COLUMN \"tenantId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "tenantId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-User-tenantId",
+    "label": "Data transform: backfill-User-tenantId",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-User-tenantId has work to do",
+        "sql": "SELECT EXISTS (\n            SELECT \"id\" FROM \"public\".\"User\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-User-tenantId",
+        "sql": "\n            UPDATE \"public\".\"User\"\n            SET \"tenantId\" = $1\n            WHERE \"tenantId\" IS NULL\n          ",
+        "params": [
+          "legacy-tenant"
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-User-tenantId resolved all violations",
+        "sql": "SELECT NOT EXISTS (\n            SELECT \"id\" FROM \"public\".\"User\"\n            WHERE \"tenantId\" IS NULL\n            LIMIT 1\n          ) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.User.tenantId",
+    "label": "Set NOT NULL on \"User\".\"tenantId\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "tenantId",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"tenantId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "tenantId"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"tenantId\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"User\" WHERE \"tenantId\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"tenantId\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"tenantId\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"tenantId\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "tenantId",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.EmailVerificationToken.EmailVerificationToken_tenantId_tokenHash_key",
+    "label": "Add unique constraint on \"EmailVerificationToken\" (tenantId, tokenHash)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "EmailVerificationToken_tenantId_tokenHash_key",
+        "table": "EmailVerificationToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"EmailVerificationToken_tenantId_tokenHash_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "EmailVerificationToken_tenantId_tokenHash_key",
+          "public",
+          "\"public\".\"EmailVerificationToken\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"EmailVerificationToken_tenantId_tokenHash_key\"",
+        "sql": "ALTER TABLE \"public\".\"EmailVerificationToken\" ADD CONSTRAINT \"EmailVerificationToken_tenantId_tokenHash_key\" UNIQUE (\"tenantId\", \"tokenHash\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"EmailVerificationToken_tenantId_tokenHash_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "EmailVerificationToken_tenantId_tokenHash_key",
+          "public",
+          "\"public\".\"EmailVerificationToken\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.OwnerSetupToken.OwnerSetupToken_tenantId_tokenHash_key",
+    "label": "Add unique constraint on \"OwnerSetupToken\" (tenantId, tokenHash)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "OwnerSetupToken_tenantId_tokenHash_key",
+        "table": "OwnerSetupToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"OwnerSetupToken_tenantId_tokenHash_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "OwnerSetupToken_tenantId_tokenHash_key",
+          "public",
+          "\"public\".\"OwnerSetupToken\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"OwnerSetupToken_tenantId_tokenHash_key\"",
+        "sql": "ALTER TABLE \"public\".\"OwnerSetupToken\" ADD CONSTRAINT \"OwnerSetupToken_tenantId_tokenHash_key\" UNIQUE (\"tenantId\", \"tokenHash\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"OwnerSetupToken_tenantId_tokenHash_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "OwnerSetupToken_tenantId_tokenHash_key",
+          "public",
+          "\"public\".\"OwnerSetupToken\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Permission.Permission_tenantId_resourceId_action_key",
+    "label": "Add unique constraint on \"Permission\" (tenantId, resourceId, action)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Permission_tenantId_resourceId_action_key",
+        "table": "Permission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Permission_tenantId_resourceId_action_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Permission_tenantId_resourceId_action_key",
+          "public",
+          "\"public\".\"Permission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Permission_tenantId_resourceId_action_key\"",
+        "sql": "ALTER TABLE \"public\".\"Permission\" ADD CONSTRAINT \"Permission_tenantId_resourceId_action_key\" UNIQUE (\"tenantId\", \"resourceId\", \"action\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Permission_tenantId_resourceId_action_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Permission_tenantId_resourceId_action_key",
+          "public",
+          "\"public\".\"Permission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Resource.Resource_tenantId_route_key",
+    "label": "Add unique constraint on \"Resource\" (tenantId, route)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Resource_tenantId_route_key",
+        "table": "Resource"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Resource_tenantId_route_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Resource_tenantId_route_key",
+          "public",
+          "\"public\".\"Resource\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Resource_tenantId_route_key\"",
+        "sql": "ALTER TABLE \"public\".\"Resource\" ADD CONSTRAINT \"Resource_tenantId_route_key\" UNIQUE (\"tenantId\", \"route\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Resource_tenantId_route_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Resource_tenantId_route_key",
+          "public",
+          "\"public\".\"Resource\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Role.Role_tenantId_unitId_name_key",
+    "label": "Add unique constraint on \"Role\" (tenantId, unitId, name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Role_tenantId_unitId_name_key",
+        "table": "Role"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Role_tenantId_unitId_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Role_tenantId_unitId_name_key",
+          "public",
+          "\"public\".\"Role\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Role_tenantId_unitId_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"Role\" ADD CONSTRAINT \"Role_tenantId_unitId_name_key\" UNIQUE (\"tenantId\", \"unitId\", \"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Role_tenantId_unitId_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Role_tenantId_unitId_name_key",
+          "public",
+          "\"public\".\"Role\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.RoleAssignment.RoleAssignment_tenantId_userId_roleId_key",
+    "label": "Add unique constraint on \"RoleAssignment\" (tenantId, userId, roleId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "RoleAssignment_tenantId_userId_roleId_key",
+        "table": "RoleAssignment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"RoleAssignment_tenantId_userId_roleId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RoleAssignment_tenantId_userId_roleId_key",
+          "public",
+          "\"public\".\"RoleAssignment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"RoleAssignment_tenantId_userId_roleId_key\"",
+        "sql": "ALTER TABLE \"public\".\"RoleAssignment\" ADD CONSTRAINT \"RoleAssignment_tenantId_userId_roleId_key\" UNIQUE (\"tenantId\", \"userId\", \"roleId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"RoleAssignment_tenantId_userId_roleId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RoleAssignment_tenantId_userId_roleId_key",
+          "public",
+          "\"public\".\"RoleAssignment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.RolePermission.RolePermission_tenantId_roleId_permissionId_key",
+    "label": "Add unique constraint on \"RolePermission\" (tenantId, roleId, permissionId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "RolePermission_tenantId_roleId_permissionId_key",
+        "table": "RolePermission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"RolePermission_tenantId_roleId_permissionId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RolePermission_tenantId_roleId_permissionId_key",
+          "public",
+          "\"public\".\"RolePermission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"RolePermission_tenantId_roleId_permissionId_key\"",
+        "sql": "ALTER TABLE \"public\".\"RolePermission\" ADD CONSTRAINT \"RolePermission_tenantId_roleId_permissionId_key\" UNIQUE (\"tenantId\", \"roleId\", \"permissionId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"RolePermission_tenantId_roleId_permissionId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RolePermission_tenantId_roleId_permissionId_key",
+          "public",
+          "\"public\".\"RolePermission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Subscription.Subscription_tenantId_key",
+    "label": "Add unique constraint on \"Subscription\" (tenantId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Subscription_tenantId_key",
+        "table": "Subscription"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Subscription_tenantId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subscription_tenantId_key",
+          "public",
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Subscription_tenantId_key\"",
+        "sql": "ALTER TABLE \"public\".\"Subscription\" ADD CONSTRAINT \"Subscription_tenantId_key\" UNIQUE (\"tenantId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Subscription_tenantId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subscription_tenantId_key",
+          "public",
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Tenant.Tenant_slug_key",
+    "label": "Add unique constraint on \"Tenant\" (slug)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Tenant_slug_key",
+        "table": "Tenant"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Tenant_slug_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Tenant_slug_key",
+          "public",
+          "\"public\".\"Tenant\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Tenant_slug_key\"",
+        "sql": "ALTER TABLE \"public\".\"Tenant\" ADD CONSTRAINT \"Tenant_slug_key\" UNIQUE (\"slug\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Tenant_slug_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Tenant_slug_key",
+          "public",
+          "\"public\".\"Tenant\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Unit.Unit_tenantId_parentId_name_key",
+    "label": "Add unique constraint on \"Unit\" (tenantId, parentId, name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Unit_tenantId_parentId_name_key",
+        "table": "Unit"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Unit_tenantId_parentId_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Unit_tenantId_parentId_name_key",
+          "public",
+          "\"public\".\"Unit\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Unit_tenantId_parentId_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"Unit\" ADD CONSTRAINT \"Unit_tenantId_parentId_name_key\" UNIQUE (\"tenantId\", \"parentId\", \"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Unit_tenantId_parentId_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Unit_tenantId_parentId_name_key",
+          "public",
+          "\"public\".\"Unit\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.User.User_tenantId_email_key",
+    "label": "Add unique constraint on \"User\" (tenantId, email)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "User_tenantId_email_key",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"User_tenantId_email_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "User_tenantId_email_key",
+          "public",
+          "\"public\".\"User\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"User_tenantId_email_key\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD CONSTRAINT \"User_tenantId_email_key\" UNIQUE (\"tenantId\", \"email\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"User_tenantId_email_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "User_tenantId_email_key",
+          "public",
+          "\"public\".\"User\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.EmailVerificationToken.EmailVerificationToken_tenantId_idx_c93ed4f1",
+    "label": "Create index \"EmailVerificationToken_tenantId_idx_c93ed4f1\" on \"EmailVerificationToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "EmailVerificationToken_tenantId_idx_c93ed4f1",
+        "table": "EmailVerificationToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"EmailVerificationToken_tenantId_idx_c93ed4f1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"EmailVerificationToken_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"EmailVerificationToken_tenantId_idx_c93ed4f1\"",
+        "sql": "CREATE INDEX \"EmailVerificationToken_tenantId_idx_c93ed4f1\" ON \"public\".\"EmailVerificationToken\" (\"tenantId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"EmailVerificationToken_tenantId_idx_c93ed4f1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"EmailVerificationToken_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.OwnerSetupToken.OwnerSetupToken_tenantId_email_idx_88e149c0",
+    "label": "Create index \"OwnerSetupToken_tenantId_email_idx_88e149c0\" on \"OwnerSetupToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "OwnerSetupToken_tenantId_email_idx_88e149c0",
+        "table": "OwnerSetupToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"OwnerSetupToken_tenantId_email_idx_88e149c0\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"OwnerSetupToken_tenantId_email_idx_88e149c0\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"OwnerSetupToken_tenantId_email_idx_88e149c0\"",
+        "sql": "CREATE INDEX \"OwnerSetupToken_tenantId_email_idx_88e149c0\" ON \"public\".\"OwnerSetupToken\" (\"tenantId\", \"email\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"OwnerSetupToken_tenantId_email_idx_88e149c0\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"OwnerSetupToken_tenantId_email_idx_88e149c0\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.OwnerSetupToken.OwnerSetupToken_tenantId_idx_c93ed4f1",
+    "label": "Create index \"OwnerSetupToken_tenantId_idx_c93ed4f1\" on \"OwnerSetupToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "OwnerSetupToken_tenantId_idx_c93ed4f1",
+        "table": "OwnerSetupToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"OwnerSetupToken_tenantId_idx_c93ed4f1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"OwnerSetupToken_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"OwnerSetupToken_tenantId_idx_c93ed4f1\"",
+        "sql": "CREATE INDEX \"OwnerSetupToken_tenantId_idx_c93ed4f1\" ON \"public\".\"OwnerSetupToken\" (\"tenantId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"OwnerSetupToken_tenantId_idx_c93ed4f1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"OwnerSetupToken_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Permission.Permission_tenantId_idx_c93ed4f1",
+    "label": "Create index \"Permission_tenantId_idx_c93ed4f1\" on \"Permission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Permission_tenantId_idx_c93ed4f1",
+        "table": "Permission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Permission_tenantId_idx_c93ed4f1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Permission_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Permission_tenantId_idx_c93ed4f1\"",
+        "sql": "CREATE INDEX \"Permission_tenantId_idx_c93ed4f1\" ON \"public\".\"Permission\" (\"tenantId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Permission_tenantId_idx_c93ed4f1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Permission_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Resource.Resource_tenantId_idx_c93ed4f1",
+    "label": "Create index \"Resource_tenantId_idx_c93ed4f1\" on \"Resource\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Resource_tenantId_idx_c93ed4f1",
+        "table": "Resource"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Resource_tenantId_idx_c93ed4f1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Resource_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Resource_tenantId_idx_c93ed4f1\"",
+        "sql": "CREATE INDEX \"Resource_tenantId_idx_c93ed4f1\" ON \"public\".\"Resource\" (\"tenantId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Resource_tenantId_idx_c93ed4f1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Resource_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Role.Role_tenantId_idx_c93ed4f1",
+    "label": "Create index \"Role_tenantId_idx_c93ed4f1\" on \"Role\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Role_tenantId_idx_c93ed4f1",
+        "table": "Role"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Role_tenantId_idx_c93ed4f1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Role_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Role_tenantId_idx_c93ed4f1\"",
+        "sql": "CREATE INDEX \"Role_tenantId_idx_c93ed4f1\" ON \"public\".\"Role\" (\"tenantId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Role_tenantId_idx_c93ed4f1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Role_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Role.Role_tenantId_systemKey_idx_b361b661",
+    "label": "Create index \"Role_tenantId_systemKey_idx_b361b661\" on \"Role\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Role_tenantId_systemKey_idx_b361b661",
+        "table": "Role"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Role_tenantId_systemKey_idx_b361b661\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Role_tenantId_systemKey_idx_b361b661\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Role_tenantId_systemKey_idx_b361b661\"",
+        "sql": "CREATE INDEX \"Role_tenantId_systemKey_idx_b361b661\" ON \"public\".\"Role\" (\"tenantId\", \"systemKey\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Role_tenantId_systemKey_idx_b361b661\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Role_tenantId_systemKey_idx_b361b661\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.RoleAssignment.RoleAssignment_tenantId_idx_c93ed4f1",
+    "label": "Create index \"RoleAssignment_tenantId_idx_c93ed4f1\" on \"RoleAssignment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "RoleAssignment_tenantId_idx_c93ed4f1",
+        "table": "RoleAssignment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"RoleAssignment_tenantId_idx_c93ed4f1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RoleAssignment_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"RoleAssignment_tenantId_idx_c93ed4f1\"",
+        "sql": "CREATE INDEX \"RoleAssignment_tenantId_idx_c93ed4f1\" ON \"public\".\"RoleAssignment\" (\"tenantId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"RoleAssignment_tenantId_idx_c93ed4f1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RoleAssignment_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.RolePermission.RolePermission_tenantId_idx_c93ed4f1",
+    "label": "Create index \"RolePermission_tenantId_idx_c93ed4f1\" on \"RolePermission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "RolePermission_tenantId_idx_c93ed4f1",
+        "table": "RolePermission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"RolePermission_tenantId_idx_c93ed4f1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RolePermission_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"RolePermission_tenantId_idx_c93ed4f1\"",
+        "sql": "CREATE INDEX \"RolePermission_tenantId_idx_c93ed4f1\" ON \"public\".\"RolePermission\" (\"tenantId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"RolePermission_tenantId_idx_c93ed4f1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RolePermission_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Unit.Unit_tenantId_idx_c93ed4f1",
+    "label": "Create index \"Unit_tenantId_idx_c93ed4f1\" on \"Unit\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Unit_tenantId_idx_c93ed4f1",
+        "table": "Unit"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Unit_tenantId_idx_c93ed4f1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Unit_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Unit_tenantId_idx_c93ed4f1\"",
+        "sql": "CREATE INDEX \"Unit_tenantId_idx_c93ed4f1\" ON \"public\".\"Unit\" (\"tenantId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Unit_tenantId_idx_c93ed4f1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Unit_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.User.User_email_idx_46df9cad",
+    "label": "Create index \"User_email_idx_46df9cad\" on \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "User_email_idx_46df9cad",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"User_email_idx_46df9cad\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_email_idx_46df9cad\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"User_email_idx_46df9cad\"",
+        "sql": "CREATE INDEX \"User_email_idx_46df9cad\" ON \"public\".\"User\" (\"email\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"User_email_idx_46df9cad\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_email_idx_46df9cad\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.User.User_tenantId_idx_c93ed4f1",
+    "label": "Create index \"User_tenantId_idx_c93ed4f1\" on \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "User_tenantId_idx_c93ed4f1",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"User_tenantId_idx_c93ed4f1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"User_tenantId_idx_c93ed4f1\"",
+        "sql": "CREATE INDEX \"User_tenantId_idx_c93ed4f1\" ON \"public\".\"User\" (\"tenantId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"User_tenantId_idx_c93ed4f1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_tenantId_idx_c93ed4f1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Subscription.Subscription_tenantId_fkey",
+    "label": "Add foreign key \"Subscription_tenantId_fkey\" on \"Subscription\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Subscription_tenantId_fkey",
+        "table": "Subscription"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Subscription_tenantId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subscription_tenantId_fkey",
+          "public",
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Subscription_tenantId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Subscription\"\nADD CONSTRAINT \"Subscription_tenantId_fkey\"\nFOREIGN KEY (\"tenantId\")\nREFERENCES \"public\".\"Tenant\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Subscription_tenantId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subscription_tenantId_fkey",
+          "public",
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.EmailVerificationToken.EmailVerificationToken_tenantId_fkey",
+    "label": "Add foreign key \"EmailVerificationToken_tenantId_fkey\" on \"EmailVerificationToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "EmailVerificationToken_tenantId_fkey",
+        "table": "EmailVerificationToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"EmailVerificationToken_tenantId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "EmailVerificationToken_tenantId_fkey",
+          "public",
+          "\"public\".\"EmailVerificationToken\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"EmailVerificationToken_tenantId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"EmailVerificationToken\"\nADD CONSTRAINT \"EmailVerificationToken_tenantId_fkey\"\nFOREIGN KEY (\"tenantId\")\nREFERENCES \"public\".\"Tenant\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"EmailVerificationToken_tenantId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "EmailVerificationToken_tenantId_fkey",
+          "public",
+          "\"public\".\"EmailVerificationToken\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.OwnerSetupToken.OwnerSetupToken_tenantId_fkey",
+    "label": "Add foreign key \"OwnerSetupToken_tenantId_fkey\" on \"OwnerSetupToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "OwnerSetupToken_tenantId_fkey",
+        "table": "OwnerSetupToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"OwnerSetupToken_tenantId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "OwnerSetupToken_tenantId_fkey",
+          "public",
+          "\"public\".\"OwnerSetupToken\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"OwnerSetupToken_tenantId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"OwnerSetupToken\"\nADD CONSTRAINT \"OwnerSetupToken_tenantId_fkey\"\nFOREIGN KEY (\"tenantId\")\nREFERENCES \"public\".\"Tenant\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"OwnerSetupToken_tenantId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "OwnerSetupToken_tenantId_fkey",
+          "public",
+          "\"public\".\"OwnerSetupToken\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Permission.Permission_tenantId_fkey",
+    "label": "Add foreign key \"Permission_tenantId_fkey\" on \"Permission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Permission_tenantId_fkey",
+        "table": "Permission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Permission_tenantId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Permission_tenantId_fkey",
+          "public",
+          "\"public\".\"Permission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Permission_tenantId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Permission\"\nADD CONSTRAINT \"Permission_tenantId_fkey\"\nFOREIGN KEY (\"tenantId\")\nREFERENCES \"public\".\"Tenant\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Permission_tenantId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Permission_tenantId_fkey",
+          "public",
+          "\"public\".\"Permission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Resource.Resource_tenantId_fkey",
+    "label": "Add foreign key \"Resource_tenantId_fkey\" on \"Resource\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Resource_tenantId_fkey",
+        "table": "Resource"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Resource_tenantId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Resource_tenantId_fkey",
+          "public",
+          "\"public\".\"Resource\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Resource_tenantId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Resource\"\nADD CONSTRAINT \"Resource_tenantId_fkey\"\nFOREIGN KEY (\"tenantId\")\nREFERENCES \"public\".\"Tenant\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Resource_tenantId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Resource_tenantId_fkey",
+          "public",
+          "\"public\".\"Resource\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Role.Role_tenantId_fkey",
+    "label": "Add foreign key \"Role_tenantId_fkey\" on \"Role\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Role_tenantId_fkey",
+        "table": "Role"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Role_tenantId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Role_tenantId_fkey",
+          "public",
+          "\"public\".\"Role\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Role_tenantId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Role\"\nADD CONSTRAINT \"Role_tenantId_fkey\"\nFOREIGN KEY (\"tenantId\")\nREFERENCES \"public\".\"Tenant\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Role_tenantId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Role_tenantId_fkey",
+          "public",
+          "\"public\".\"Role\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.RoleAssignment.RoleAssignment_tenantId_fkey",
+    "label": "Add foreign key \"RoleAssignment_tenantId_fkey\" on \"RoleAssignment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "RoleAssignment_tenantId_fkey",
+        "table": "RoleAssignment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"RoleAssignment_tenantId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RoleAssignment_tenantId_fkey",
+          "public",
+          "\"public\".\"RoleAssignment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"RoleAssignment_tenantId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"RoleAssignment\"\nADD CONSTRAINT \"RoleAssignment_tenantId_fkey\"\nFOREIGN KEY (\"tenantId\")\nREFERENCES \"public\".\"Tenant\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"RoleAssignment_tenantId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RoleAssignment_tenantId_fkey",
+          "public",
+          "\"public\".\"RoleAssignment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.RolePermission.RolePermission_tenantId_fkey",
+    "label": "Add foreign key \"RolePermission_tenantId_fkey\" on \"RolePermission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "RolePermission_tenantId_fkey",
+        "table": "RolePermission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"RolePermission_tenantId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RolePermission_tenantId_fkey",
+          "public",
+          "\"public\".\"RolePermission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"RolePermission_tenantId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"RolePermission\"\nADD CONSTRAINT \"RolePermission_tenantId_fkey\"\nFOREIGN KEY (\"tenantId\")\nREFERENCES \"public\".\"Tenant\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"RolePermission_tenantId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RolePermission_tenantId_fkey",
+          "public",
+          "\"public\".\"RolePermission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Unit.Unit_tenantId_fkey",
+    "label": "Add foreign key \"Unit_tenantId_fkey\" on \"Unit\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Unit_tenantId_fkey",
+        "table": "Unit"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Unit_tenantId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Unit_tenantId_fkey",
+          "public",
+          "\"public\".\"Unit\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Unit_tenantId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Unit\"\nADD CONSTRAINT \"Unit_tenantId_fkey\"\nFOREIGN KEY (\"tenantId\")\nREFERENCES \"public\".\"Tenant\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Unit_tenantId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Unit_tenantId_fkey",
+          "public",
+          "\"public\".\"Unit\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.User.User_tenantId_fkey",
+    "label": "Add foreign key \"User_tenantId_fkey\" on \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "User_tenantId_fkey",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"User_tenantId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "User_tenantId_fkey",
+          "public",
+          "\"public\".\"User\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"User_tenantId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"User\"\nADD CONSTRAINT \"User_tenantId_fkey\"\nFOREIGN KEY (\"tenantId\")\nREFERENCES \"public\".\"Tenant\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"User_tenantId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "User_tenantId_fkey",
+          "public",
+          "\"public\".\"User\""
+        ]
+      }
+    ]
+  }
+]
