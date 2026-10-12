@@ -38,6 +38,8 @@ model EmailVerificationToken {
   @@unique([tenantId, tokenHash])
   @@index([tenantId])
   @@index([userId])
+  @@index([expiresAt])
+  @@index([usedAt])
 }
 
 model OwnerSetupToken {
@@ -55,6 +57,8 @@ model OwnerSetupToken {
   @@unique([tenantId, tokenHash])
   @@index([tenantId])
   @@index([tenantId, email])
+  @@index([expiresAt])
+  @@index([usedAt])
 }
 
 //AUTHORIZATION

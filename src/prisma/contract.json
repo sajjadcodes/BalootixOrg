@@ -1880,10 +1880,26 @@
               "indexes": [
                 {
                   "columns": [
+                    "expiresAt"
+                  ],
+                  "name": "EmailVerificationToken_expiresAt_idx_6b6b8c10",
+                  "prefix": "EmailVerificationToken_expiresAt_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
                     "tenantId"
                   ],
                   "name": "EmailVerificationToken_tenantId_idx_c93ed4f1",
                   "prefix": "EmailVerificationToken_tenantId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "usedAt"
+                  ],
+                  "name": "EmailVerificationToken_usedAt_idx_31286b90",
+                  "prefix": "EmailVerificationToken_usedAt_idx",
                   "unique": false
                 },
                 {
@@ -2044,6 +2060,14 @@
               "indexes": [
                 {
                   "columns": [
+                    "expiresAt"
+                  ],
+                  "name": "OwnerSetupToken_expiresAt_idx_6b6b8c10",
+                  "prefix": "OwnerSetupToken_expiresAt_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
                     "tenantId",
                     "email"
                   ],
@@ -2057,6 +2081,14 @@
                   ],
                   "name": "OwnerSetupToken_tenantId_idx_c93ed4f1",
                   "prefix": "OwnerSetupToken_tenantId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "usedAt"
+                  ],
+                  "name": "OwnerSetupToken_usedAt_idx_31286b90",
+                  "prefix": "OwnerSetupToken_usedAt_idx",
                   "unique": false
                 }
               ],
@@ -3216,7 +3248,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "64dab11946facbfc3887c482453278a790e7fda92b0db641fc8a09c2ec1e1cf5"
+    "storageHash": "2649268b3f921a20e1224b1d6fc54dd4a84610cdc1778719d51803ca20b5c60d"
   },
   "execution": {
     "executionHash": "9a8358150cdec86ef120156bfc641fb74b2c68d39a9d1307126d659ccd3b8e97",
