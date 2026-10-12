@@ -1,14 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { UserData } from '../users/types/user.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import type { TenantData } from './types/platform-admin.js';
+import type { TenantData, TenantStatus } from './types/platform-admin.js';
 
 @Injectable()
 export class PlatformAdminService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listTenants(): Promise<TenantData[]> {
-    const tenants = await this.prisma.public.Tenant.where({}).all();
+  async listTenants(status?: TenantStatus): Promise<TenantData[]> {
+    const filters = status ? { status } : {};
+    const tenants = await this.prisma.public.Tenant.where(filters).all();
 
     return tenants.map((tenant) => ({
       id: tenant.id,

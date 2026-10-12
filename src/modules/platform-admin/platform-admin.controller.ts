@@ -1,9 +1,9 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type { UserData } from '../users/types/user.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { GlobalAdminGuard } from '../authorization/guards/global-admin.guard.js';
-import type { TenantData } from './types/platform-admin.js';
+import type { TenantData, TenantStatus } from './types/platform-admin.js';
 import { PlatformAdminService } from './platform-admin.service.js';
 
 @ApiTags('Platform Admin')
@@ -13,8 +13,8 @@ export class PlatformAdminController {
   constructor(private readonly platformAdminService: PlatformAdminService) {}
 
   @Get('tenants')
-  listTenants(): Promise<TenantData[]> {
-    return this.platformAdminService.listTenants();
+  listTenants(@Query('status') status?: TenantStatus): Promise<TenantData[]> {
+    return this.platformAdminService.listTenants(status);
   }
 
   @Get('tenants/:tenantId')
