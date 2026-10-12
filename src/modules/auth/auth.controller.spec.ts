@@ -132,6 +132,29 @@ describe('AuthController', () => {
     });
   });
 
+  it('routes resend-verification requests to the service', async () => {
+    const resendVerificationEmail = jest.fn(async () => ({
+      message:
+        'If an unverified account exists with this email, a verification link has been sent.',
+    }));
+    const controller = new AuthController(
+      {
+        resendVerificationEmail,
+      } as unknown as AuthService,
+      { completeSetup: jest.fn() } as never,
+    );
+
+    await expect(
+      controller.resendVerificationEmail({ email: 'person@example.com' }),
+    ).resolves.toEqual({
+      message:
+        'If an unverified account exists with this email, a verification link has been sent.',
+    });
+    expect(resendVerificationEmail).toHaveBeenCalledWith({
+      email: 'person@example.com',
+    });
+  });
+
   it('resets a password with a valid token', async () => {
     const resetPassword = jest.fn(async () => ({ reset: true as const }));
     const controller = new AuthController(

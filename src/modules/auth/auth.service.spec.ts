@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { jest } from '@jest/globals';
@@ -216,6 +217,93 @@ describe('AuthService', () => {
     expect(userCreate).not.toHaveBeenCalled();
     expect(tokenCreate).not.toHaveBeenCalled();
     expect(sendVerificationEmail).not.toHaveBeenCalled();
+  });
+
+  it('keeps registration recoverable and returns 503 when verification delivery fails', async () => {
+    sendVerificationEmail.mockRejectedValueOnce(new Error('provider failure'));
+
+    await expect(
+      service.registerWithEmailPassword({
+        email: createdUser.email,
+        password: 'password123',
+        displayName: createdUser.displayName,
+      }),
+    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+
+    expect(userCreate).toHaveBeenCalledTimes(1);
+    expect(tokenCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns the generic password-reset response when email delivery fails', async () => {
+    authUser = {
+      ...createdUser,
+      tenantId: defaultTenant.id,
+      hashedPassword: 'stored-password-hash',
+      emailVerifiedAt: new Date().toISOString(),
+      mobile: null,
+      avatarUrl: null,
+      refreshTokenHash: null,
+    };
+    sendPasswordResetEmail.mockRejectedValueOnce(new Error('provider failure'));
+
+    await expect(
+      service.forgotPassword({ email: createdUser.email }),
+    ).resolves.toEqual({
+      message:
+        'If an account exists with this email, a reset link has been sent.',
+    });
+
+    expect(tokenCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it('resends verification without disclosing whether the account exists', async () => {
+    authUser = {
+      ...createdUser,
+      tenantId: defaultTenant.id,
+      hashedPassword: 'stored-password-hash',
+      emailVerifiedAt: null,
+      mobile: null,
+      avatarUrl: null,
+      refreshTokenHash: null,
+    };
+    const genericResponse = {
+      message:
+        'If an unverified account exists with this email, a verification link has been sent.',
+    };
+
+    await expect(
+      service.resendVerificationEmail({ email: createdUser.email }),
+    ).resolves.toEqual(genericResponse);
+
+    expect(tokenCreate).toHaveBeenCalledTimes(1);
+    expect(sendVerificationEmail).toHaveBeenCalledTimes(1);
+
+    authUser = null;
+    existingUser = null;
+    await expect(
+      service.resendVerificationEmail({ email: 'unknown@example.com' }),
+    ).resolves.toEqual(genericResponse);
+    expect(tokenCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns the same resend response when verification delivery fails', async () => {
+    authUser = {
+      ...createdUser,
+      tenantId: defaultTenant.id,
+      hashedPassword: 'stored-password-hash',
+      emailVerifiedAt: null,
+      mobile: null,
+      avatarUrl: null,
+      refreshTokenHash: null,
+    };
+    sendVerificationEmail.mockRejectedValueOnce(new Error('provider failure'));
+
+    await expect(
+      service.resendVerificationEmail({ email: createdUser.email }),
+    ).resolves.toEqual({
+      message:
+        'If an unverified account exists with this email, a verification link has been sent.',
+    });
   });
 
   it('sends a password reset link when the user exists', async () => {

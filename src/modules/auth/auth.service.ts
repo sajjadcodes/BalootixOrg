@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Injectable,
   Logger,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
@@ -91,8 +92,15 @@ export class AuthService {
       expiresAt,
     });
 
-    // Send the verification email before returning the registration response.
-    await this.emailService.sendVerificationEmail(email, token);
+    // Keep the account recoverable if delivery fails; the resend endpoint can issue another link.
+    try {
+      await this.emailService.sendVerificationEmail(email, token);
+    } catch {
+      this.logger.warn('Verification email delivery failed after registration');
+      throw new ServiceUnavailableException(
+        'Verification email could not be sent. Please retry verification later.',
+      );
+    }
 
     // Log registration without including the token or password.
     this.logger.log('User registered successfully');
@@ -103,6 +111,40 @@ export class AuthService {
       displayName: result.displayName,
       isManager: result.isManager,
     };
+  }
+
+  async resendVerificationEmail(input: { email: string }): Promise<{
+    message: string;
+  }> {
+    const message =
+      'If an unverified account exists with this email, a verification link has been sent.';
+    const email = input.email.trim().toLowerCase();
+    const user = await this.prisma.public.User.where({ email })
+      .select('id', 'email', 'tenantId', 'emailVerifiedAt')
+      .first();
+
+    if (!user || user.emailVerifiedAt !== null) {
+      return { message };
+    }
+
+    const token = randomBytes(32).toString('base64url');
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+
+    await this.prisma.public.EmailVerificationToken.create({
+      tenantId: user.tenantId,
+      userId: user.id,
+      tokenHash,
+      expiresAt,
+    });
+
+    try {
+      await this.emailService.sendVerificationEmail(email, token);
+    } catch {
+      this.logger.warn('Verification email resend delivery failed');
+    }
+
+    return { message };
   }
 
   //EMAIL VERIFY
@@ -184,7 +226,11 @@ export class AuthService {
       expiresAt,
     });
 
-    await this.emailService.sendPasswordResetEmail(email, token);
+    try {
+      await this.emailService.sendPasswordResetEmail(email, token);
+    } catch {
+      this.logger.warn('Password reset email delivery failed');
+    }
 
     return {
       message:
