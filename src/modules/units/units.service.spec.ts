@@ -9,8 +9,9 @@ import { UnitsService } from './units.service.js';
 import type { UnitData, UnitType } from './types/unit.js';
 import { assertTargetParentIsValid, buildTree } from './utils/tree.js';
 
-const unit: UnitData = {
+const unit: UnitData & { tenantId: string } = {
   id: 'unit-1',
+  tenantId: 'tenant-1',
   parentId: null,
   name: 'Finance',
   type: 'DEPARTMENT',
@@ -45,6 +46,9 @@ const unitWhere = jest.fn(() => ({
   delete: unitDelete,
 }));
 const unitOrderBy = jest.fn(() => ({ all: unitAll }));
+const tenant = { id: 'tenant-1' };
+const tenantFirst = jest.fn(async () => tenant);
+const tenantOrderBy = jest.fn(() => ({ first: tenantFirst }));
 const roleFirst = jest.fn(async () => null as { id: string } | null);
 const roleWhere = jest.fn(() => ({ first: roleFirst }));
 
@@ -55,6 +59,7 @@ const prisma = {
       create: unitCreate,
       orderBy: unitOrderBy,
     },
+    Tenant: { orderBy: tenantOrderBy },
     Role: { where: roleWhere },
   },
 };
@@ -271,6 +276,8 @@ describe('UnitsService', () => {
     unitAll.mockReset().mockResolvedValue([]);
     unitWhere.mockClear();
     unitOrderBy.mockClear();
+    tenantFirst.mockReset().mockResolvedValue(tenant);
+    tenantOrderBy.mockClear();
     roleFirst.mockReset().mockResolvedValue(null);
     roleWhere.mockClear();
 
@@ -282,6 +289,7 @@ describe('UnitsService', () => {
       service.createUnit({ name: ' Finance ', type: 'DEPARTMENT' }),
     ).resolves.toEqual(unit);
     expect(unitCreate).toHaveBeenCalledWith({
+      tenantId: tenant.id,
       parentId: null,
       name: 'Finance',
       type: 'DEPARTMENT',
@@ -300,6 +308,7 @@ describe('UnitsService', () => {
     });
 
     expect(unitCreate).toHaveBeenCalledWith({
+      tenantId: tenant.id,
       parentId: unit.id,
       name: 'Accounts Payable',
       type: 'TEAM',

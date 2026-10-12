@@ -79,7 +79,7 @@ enum PermissionActionEnum {
 model Resource {
   id          String                     @id @default(uuid())
   tenantId    String
-  route       String                     @unique
+  route       String
   createdAt   TimestamptzString          @default(now())
   updatedAt   temporal.updatedAtString()
 

@@ -12,6 +12,7 @@ import { ResourcesController } from './resources/resources.controller.js';
 import { ResourcesService } from './resources/resources.service.js';
 import { RolesController } from './roles/roles.controller.js';
 import { RolesService } from './roles/roles.service.js';
+import { AuthorizationSeedService } from './authorization-seed.service.js';
 
 @Module({
   imports: [PrismaModule],
@@ -30,7 +31,8 @@ import { RolesService } from './roles/roles.service.js';
     RoleAssignmentsService,
     AuthorizationService,
     AuthorizationGuard,
+    AuthorizationSeedService,
   ],
-  exports: [AuthorizationService, AuthorizationGuard],
+  exports: [AuthorizationService, AuthorizationGuard, AuthorizationSeedService],
 })
 export class AuthorizationModule {}

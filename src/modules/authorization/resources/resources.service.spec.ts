@@ -10,14 +10,17 @@ const resource: ResourceData = {
   createdAt: '2026-10-09T00:00:00.000Z',
   updatedAt: '2026-10-09T00:00:00.000Z',
 };
+const tenant = { id: 'tenant-1' };
 
 const resourceFirst = jest.fn(async () => null as ResourceData | null);
 const resourceUpdate = jest.fn(async (_data: { route: string }) => resource);
 const resourceDelete = jest.fn(async () => resource);
-const resourceCreate = jest.fn(async ({ route }: { route: string }) => ({
-  ...resource,
-  route,
-}));
+const resourceCreate = jest.fn(
+  async ({ route }: { tenantId: string; route: string }) => ({
+    ...resource,
+    route,
+  }),
+);
 const resourceAll = jest.fn(async () => [] as ResourceData[]);
 const resourceWhere = jest.fn(() => ({
   first: resourceFirst,
@@ -25,6 +28,8 @@ const resourceWhere = jest.fn(() => ({
   delete: resourceDelete,
 }));
 const resourceOrderBy = jest.fn(() => ({ all: resourceAll }));
+const tenantFirst = jest.fn(async () => tenant);
+const tenantOrderBy = jest.fn(() => ({ first: tenantFirst }));
 const permissionFirst = jest.fn(async () => null as { id: string } | null);
 const permissionWhere = jest.fn(() => ({ first: permissionFirst }));
 
@@ -35,6 +40,7 @@ const prisma = {
       create: resourceCreate,
       orderBy: resourceOrderBy,
     },
+    Tenant: { orderBy: tenantOrderBy },
     Permission: { where: permissionWhere },
   },
 };
@@ -53,6 +59,8 @@ describe('ResourcesService', () => {
     resourceAll.mockReset().mockResolvedValue([]);
     resourceWhere.mockClear();
     resourceOrderBy.mockClear();
+    tenantFirst.mockReset().mockResolvedValue(tenant);
+    tenantOrderBy.mockClear();
     permissionFirst.mockReset().mockResolvedValue(null);
     permissionWhere.mockClear();
 
@@ -63,7 +71,10 @@ describe('ResourcesService', () => {
     await expect(
       service.createResource({ route: ' /users ' }),
     ).resolves.toEqual(resource);
-    expect(resourceCreate).toHaveBeenCalledWith({ route: '/users' });
+    expect(resourceCreate).toHaveBeenCalledWith({
+      tenantId: tenant.id,
+      route: '/users',
+    });
   });
 
   it('rejects a duplicate route', async () => {

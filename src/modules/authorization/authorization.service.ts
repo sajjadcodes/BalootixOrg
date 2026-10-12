@@ -25,9 +25,17 @@ export class AuthorizationService {
       return false;
     }
 
-    // Step 2: load the user's active role assignments.
+    const user = await this.prisma.public.User.where({ id: userId }).first();
+    if (!user) {
+      return false;
+    }
+
+    const tenantId = user.tenantId;
+
+    // Load assignments only from the user's tenant.
     const roleAssignments = await this.prisma.public.RoleAssignment.where({
       userId,
+      tenantId,
     }).all();
 
     // Step 3: filter out inactive role assignments.
@@ -46,6 +54,7 @@ export class AuthorizationService {
     for (const assignment of activeAssignments) {
       const role = await this.prisma.public.Role.where({
         id: assignment.roleId,
+        tenantId,
       }).first();
 
       // Skip any role that is not found or inactive.
@@ -63,6 +72,7 @@ export class AuthorizationService {
 
     // Step 6: resolve the route to the protected resource record.
     const resource = await this.prisma.public.Resource.where({
+      tenantId,
       route: resourceRoute,
     }).first();
 
@@ -73,6 +83,7 @@ export class AuthorizationService {
 
     // Step 8: resolve the permission record for the resource and action.
     const permission = await this.prisma.public.Permission.where({
+      tenantId,
       resourceId: resource.id,
       action,
     }).first();
@@ -83,7 +94,7 @@ export class AuthorizationService {
     }
 
     // Step 10: build a map of all units for efficient ancestry checks during role validation.
-    const unitsByIdMap = await this.getUnitsByIdMap();
+    const unitsByIdMap = await this.getUnitsByIdMap(tenantId);
 
     // Step 11: iterate through the valid active roles to check for permission access.
     for (const role of activeRoles) {
@@ -94,7 +105,11 @@ export class AuthorizationService {
 
       // Step 11b: collect the effective permission IDs for the role, including any inherited from descendant roles.
       const effectivePermissionIds =
-        await this.getEffectivePermissionIdsForRole(role, unitsByIdMap);
+        await this.getEffectivePermissionIdsForRole(
+          role,
+          tenantId,
+          unitsByIdMap,
+        );
 
       // Step 11c: if the required permission ID is in the effective permission set, grant access.
       if (effectivePermissionIds.has(permission.id)) {
@@ -107,10 +122,10 @@ export class AuthorizationService {
   }
 
   // Build a map for direct unit lookup while walking parent ancestry.
-  private async getUnitsByIdMap(): Promise<Map<string, UnitData>> {
-    const units = await this.prisma.public.Unit.orderBy((unit) =>
-      unit.name.asc(),
-    ).all();
+  private async getUnitsByIdMap(
+    tenantId: string,
+  ): Promise<Map<string, UnitData>> {
+    const units = await this.prisma.public.Unit.where({ tenantId }).all();
 
     return new Map(units.map((unit) => [unit.id, unit] as const));
   }
@@ -118,6 +133,7 @@ export class AuthorizationService {
   // Recursively collect the effective permission set for a role, considering its scope and descendants.
   private async getEffectivePermissionIdsForRole(
     role: RoleData,
+    tenantId: string,
     unitsByIdMap: Map<string, UnitData>,
   ): Promise<Set<string>> {
     // Step 1: initialize a set to hold the unique permission IDs for this role.
@@ -126,6 +142,7 @@ export class AuthorizationService {
     // Step 2: load the direct permissions assigned to this role and add them to the set.
     const directRolePermissions = await this.prisma.public.RolePermission.where(
       {
+        tenantId,
         roleId: role.id,
       },
     ).all();
@@ -141,9 +158,7 @@ export class AuthorizationService {
     }
 
     // Step 4: load all roles in the system to evaluate descendant permissions.
-    const allRoles = await this.prisma.public.Role.orderBy((candidate) =>
-      candidate.name.asc(),
-    ).all();
+    const allRoles = await this.prisma.public.Role.where({ tenantId }).all();
 
     for (const candidateRole of allRoles) {
       if (candidateRole.id === role.id || !candidateRole.isActive) {
@@ -163,6 +178,7 @@ export class AuthorizationService {
       // Step 6: Load the permissions for the descendant role and add them to the set.
       const descendantPermissions =
         await this.prisma.public.RolePermission.where({
+          tenantId,
           roleId: candidateRole.id,
         }).all();
 

@@ -178,6 +178,7 @@ Cycle prevention and unit-deletion rules require explicit enforcement beyond a s
 
 - For a new, empty dev database, run `pnpm prisma db init --advance-ref db`.
 - For an existing database, preview the changes with `pnpm prisma db migrate --show`, then apply them with `pnpm prisma db migrate --advance-ref db`.
+- Seed a tenant's protected routes and required permissions with `pnpm authorization:seed -- <tenantId>`. It is safe to rerun; tenants create their own roles and permission links.
 - If you edit a migration, re-emit it with `node migrations/app/<migration>/migration.ts` before applying it. Plan each contract change only once.
 - If a migration hash keeps changing, check whether its backfill updates `updatedAt`; use stable SQL so each emit produces the same migration.
 - Check the final schema with `pnpm prisma db verify --log-level info`.

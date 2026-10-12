@@ -12,6 +12,7 @@ const { OwnerBootstrapService } = await import('./owner-bootstrap.service.js');
 
 type SetupToken = {
   id: string;
+  tenantId: string;
   email: string;
   displayName: string;
   tokenHash: string;
@@ -21,6 +22,7 @@ type SetupToken = {
 
 const setupToken: SetupToken = {
   id: 'setup-token-1',
+  tenantId: 'platform-tenant',
   email: 'owner@example.com',
   displayName: 'Org Owner',
   tokenHash: 'stored-token-hash',
@@ -30,6 +32,7 @@ const setupToken: SetupToken = {
 
 const rootUnit = {
   id: 'system-unit',
+  tenantId: 'platform-tenant',
   parentId: null,
   name: 'System',
   type: 'MANAGEMENT',
@@ -41,12 +44,14 @@ const rootUnit = {
 
 const createdUser = {
   id: 'owner-user',
+  tenantId: 'platform-tenant',
   email: setupToken.email,
   displayName: setupToken.displayName,
 };
 
 const createdRole = {
   id: 'owner-role',
+  tenantId: 'platform-tenant',
   unitId: rootUnit.id,
   systemKey: 'OWNER',
   name: 'Organization Owner',
@@ -57,6 +62,9 @@ let currentOwnerRole: typeof createdRole | null = null;
 let currentUser: typeof createdUser | null = null;
 let currentRootUnit: typeof rootUnit | null = null;
 let consumedTokenCount = 1;
+const platformTenant = { id: 'platform-tenant' };
+const tenantFirst = jest.fn(async () => platformTenant);
+const tenantOrderBy = jest.fn(() => ({ first: tenantFirst }));
 
 const setupTokenFirst = jest.fn(async () => currentSetupToken);
 const setupTokenUpdateAll = jest.fn(async () =>
@@ -104,6 +112,7 @@ const transaction = jest.fn(
 
 const prismaService = {
   public: {
+    Tenant: { orderBy: tenantOrderBy },
     OwnerSetupToken: { create: setupTokenCreate },
     Role: { where: ownerRoleWhere },
     User: { where: userWhere },
@@ -122,6 +131,8 @@ describe('OwnerBootstrapService', () => {
     currentUser = null;
     currentRootUnit = null;
     consumedTokenCount = 1;
+    tenantFirst.mockReset().mockResolvedValue(platformTenant);
+    tenantOrderBy.mockClear();
     hashPassword.mockReset().mockResolvedValue('hashed-password');
     setupTokenFirst
       .mockReset()
@@ -161,6 +172,7 @@ describe('OwnerBootstrapService', () => {
     const setupInviteCall = setupTokenCreate.mock.calls[0] as unknown as
       | [
           {
+            tenantId: string;
             email: string;
             displayName: string;
             tokenHash: string;
@@ -185,6 +197,7 @@ describe('OwnerBootstrapService', () => {
       expect.objectContaining({
         email: 'owner@example.com',
         displayName: 'Org Owner',
+        tenantId: platformTenant.id,
         tokenHash: createHash('sha256').update(emailedToken).digest('hex'),
       }),
     );
@@ -228,6 +241,7 @@ describe('OwnerBootstrapService', () => {
       usedAt: expect.any(String),
     });
     expect(unitCreate).toHaveBeenCalledWith({
+      tenantId: platformTenant.id,
       parentId: null,
       name: 'System',
       type: 'MANAGEMENT',
@@ -236,6 +250,7 @@ describe('OwnerBootstrapService', () => {
     });
     expect(userCreate).toHaveBeenCalledWith(
       expect.objectContaining({
+        tenantId: platformTenant.id,
         email: setupToken.email,
         displayName: setupToken.displayName,
         hashedPassword: 'hashed-password',
@@ -244,11 +259,13 @@ describe('OwnerBootstrapService', () => {
     );
     expect(ownerRoleCreate).toHaveBeenCalledWith(
       expect.objectContaining({
+        tenantId: platformTenant.id,
         systemKey: 'OWNER',
         unitId: rootUnit.id,
       }),
     );
     expect(roleAssignmentCreate).toHaveBeenCalledWith({
+      tenantId: platformTenant.id,
       userId: createdUser.id,
       roleId: createdRole.id,
       isActive: true,

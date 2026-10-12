@@ -35,6 +35,8 @@ const user: UserData = {
   createdAt: '2026-10-09T00:00:00.000Z',
   updatedAt: '2026-10-09T00:00:00.000Z',
 };
+const tenantId = 'tenant-1';
+const tenantUser = { ...user, tenantId };
 
 const roleSelf: RoleData = {
   id: 'role-self',
@@ -106,32 +108,57 @@ const unitOutside: any = {
   name: 'HR',
 };
 
+const userFirst = jest.fn(async () => tenantUser);
+const userWhere = jest.fn((_filter?: { id?: string }) => ({
+  first: userFirst,
+}));
 const resourceWhere = jest.fn(async () => null as typeof resource | null);
+const resourceFilter = jest.fn(
+  (_filter?: { tenantId?: string; route?: string }) => ({
+    first: resourceWhere,
+  }),
+);
 const permissionWhere = jest.fn(async () => null as typeof permission | null);
+const permissionFilter = jest.fn(
+  (_filter?: { tenantId?: string; resourceId?: string; action?: string }) => ({
+    first: permissionWhere,
+  }),
+);
 const roleAssignmentAll = jest.fn(async () => [] as RoleAssignmentData[]);
+const roleAssignmentFilter = jest.fn(
+  (_filter?: { userId?: string; tenantId?: string }) => ({
+    all: roleAssignmentAll,
+  }),
+);
 const roleWhere = jest.fn(async () => null as RoleData | null);
 const roleAll = jest.fn(async () => [] as RoleData[]);
+const roleFilter = jest.fn((_filter?: { id?: string; tenantId?: string }) => ({
+  first: roleWhere,
+  all: roleAll,
+}));
 const rolePermissionAll = jest.fn(
-  async (_args?: { roleId?: string }) =>
+  async (_args?: { roleId?: string; tenantId?: string }) =>
     [] as { id: string; roleId: string; permissionId: string }[],
 );
+const rolePermissionFilter = jest.fn(
+  (args?: { roleId?: string; tenantId?: string }) => ({
+    all: () => rolePermissionAll(args),
+  }),
+);
 const unitAll = jest.fn(async () => [] as (typeof unitRoot)[]);
+const unitFilter = jest.fn((_filter?: { tenantId?: string }) => ({
+  all: unitAll,
+}));
 
 const prisma = {
   public: {
-    Resource: { where: () => ({ first: resourceWhere }) },
-    Permission: { where: () => ({ first: permissionWhere }) },
-    RoleAssignment: { where: () => ({ all: roleAssignmentAll }) },
-    Role: {
-      where: () => ({ first: roleWhere }),
-      orderBy: () => ({ all: roleAll }),
-    },
-    RolePermission: {
-      where: (args?: { roleId?: string }) => ({
-        all: () => rolePermissionAll(args),
-      }),
-    },
-    Unit: { orderBy: () => ({ all: unitAll }) },
+    User: { where: userWhere },
+    Resource: { where: resourceFilter },
+    Permission: { where: permissionFilter },
+    RoleAssignment: { where: roleAssignmentFilter },
+    Role: { where: roleFilter },
+    RolePermission: { where: rolePermissionFilter },
+    Unit: { where: unitFilter },
   },
 };
 
@@ -139,13 +166,21 @@ describe('OrganizationAuthorizationService', () => {
   let service: AuthorizationService;
 
   beforeEach(() => {
+    userFirst.mockReset().mockResolvedValue(tenantUser);
+    userWhere.mockClear();
     resourceWhere.mockReset().mockResolvedValue(null);
+    resourceFilter.mockClear();
     permissionWhere.mockReset().mockResolvedValue(null);
+    permissionFilter.mockClear();
     roleAssignmentAll.mockReset().mockResolvedValue([]);
+    roleAssignmentFilter.mockClear();
     roleWhere.mockReset().mockResolvedValue(null);
     roleAll.mockReset().mockResolvedValue([]);
+    roleFilter.mockClear();
     rolePermissionAll.mockReset().mockResolvedValue([]);
+    rolePermissionFilter.mockClear();
     unitAll.mockReset().mockResolvedValue([]);
+    unitFilter.mockClear();
 
     service = new AuthorizationService(prisma as unknown as PrismaService);
   });
@@ -159,6 +194,12 @@ describe('OrganizationAuthorizationService', () => {
     await expect(
       service.canAccess(user.id, permission.action, resource.route, 'unit-1'),
     ).resolves.toBe(true);
+
+    expect(roleAssignmentFilter).toHaveBeenCalledWith({
+      userId: user.id,
+      tenantId,
+    });
+    expect(roleFilter).toHaveBeenCalledWith({ id: ownerRole.id, tenantId });
   });
 
   it('does not grant the OWNER override to a role based only on its name', async () => {
@@ -185,6 +226,17 @@ describe('OrganizationAuthorizationService', () => {
     await expect(
       service.canAccess(user.id, permission.action, resource.route, 'unit-1'),
     ).resolves.toBe(true);
+
+    expect(resourceFilter).toHaveBeenCalledWith({
+      tenantId,
+      route: resource.route,
+    });
+    expect(permissionFilter).toHaveBeenCalledWith({
+      tenantId,
+      resourceId: resource.id,
+      action: permission.action,
+    });
+    expect(unitFilter).toHaveBeenCalledWith({ tenantId });
   });
 
   it('denies SELF access when the permission belongs to another role in the same unit', async () => {

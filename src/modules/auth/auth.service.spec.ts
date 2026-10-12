@@ -27,6 +27,7 @@ type VerificationRecord = {
 };
 
 type AuthUserRecord = RegisteredUserData & {
+  tenantId: string;
   hashedPassword: string;
   emailVerifiedAt: string | null;
   mobile: string | null;
@@ -40,12 +41,14 @@ const createdUser: RegisteredUserData = {
   displayName: 'Person Example',
   isManager: false,
 };
+const defaultTenant = { id: 'tenant-1' };
 
 let existingUser: RegisteredUserData | null = null;
 let authUser: AuthUserRecord | null = null;
 let verificationRecord: VerificationRecord | null = null;
 let affectedVerificationRows = 1;
 const storedTokens: Array<{
+  tenantId: string;
   userId: string;
   tokenHash: string;
   expiresAt: string;
@@ -67,6 +70,8 @@ const tokenCreate = jest.fn(async (token: (typeof storedTokens)[number]) => {
   storedTokens.push(token);
   return token;
 });
+const tenantFirst = jest.fn(async () => defaultTenant);
+const tenantOrderBy = jest.fn(() => ({ first: tenantFirst }));
 const sendVerificationEmail = jest.fn(async (email: string, token: string) => {
   sentEmails.push({ email, token });
 });
@@ -105,6 +110,7 @@ const transaction = jest.fn(
 
 const prismaService = {
   public: {
+    Tenant: { orderBy: tenantOrderBy },
     User: { where: userWhere, create: userCreate },
     EmailVerificationToken: { create: tokenCreate },
   },
@@ -135,6 +141,8 @@ describe('AuthService', () => {
     storedTokens.length = 0;
     sentEmails.length = 0;
     firstUser.mockClear();
+    tenantFirst.mockReset().mockResolvedValue(defaultTenant);
+    tenantOrderBy.mockClear();
     userWhere.mockClear();
     userCreate.mockClear();
     tokenCreate.mockClear();
@@ -176,11 +184,13 @@ describe('AuthService', () => {
     expect(userWhere).toHaveBeenCalledWith({ email: 'person@example.com' });
     expect(userCreate).toHaveBeenCalledWith(
       expect.objectContaining({
+        tenantId: defaultTenant.id,
         email: 'person@example.com',
         hashedPassword: 'hashed-password',
       }),
     );
     expect(storedTokens).toHaveLength(1);
+    expect(storedTokens[0].tenantId).toBe(defaultTenant.id);
     expect(storedTokens[0].userId).toBe(createdUser.id);
     expect(storedTokens[0].tokenHash).toBe(
       createHash('sha256').update(sentEmail.token).digest('hex'),
@@ -211,6 +221,7 @@ describe('AuthService', () => {
   it('sends a password reset link when the user exists', async () => {
     authUser = {
       ...createdUser,
+      tenantId: defaultTenant.id,
       hashedPassword: 'stored-password-hash',
       emailVerifiedAt: new Date().toISOString(),
       mobile: null,
@@ -339,6 +350,7 @@ describe('AuthService', () => {
   it('authenticates a verified user, issues tokens, and stores the refresh hash', async () => {
     authUser = {
       ...createdUser,
+      tenantId: defaultTenant.id,
       hashedPassword: 'stored-password-hash',
       emailVerifiedAt: new Date().toISOString(),
       mobile: '555-0100',
@@ -395,6 +407,7 @@ describe('AuthService', () => {
   it('rejects login when the password is invalid', async () => {
     authUser = {
       ...createdUser,
+      tenantId: defaultTenant.id,
       hashedPassword: 'stored-password-hash',
       emailVerifiedAt: new Date().toISOString(),
       mobile: null,
@@ -417,6 +430,7 @@ describe('AuthService', () => {
   it('rejects login when the user email is not verified', async () => {
     authUser = {
       ...createdUser,
+      tenantId: defaultTenant.id,
       hashedPassword: 'stored-password-hash',
       emailVerifiedAt: null,
       mobile: null,
@@ -438,6 +452,7 @@ describe('AuthService', () => {
   it('returns the current user profile without sensitive fields', async () => {
     authUser = {
       ...createdUser,
+      tenantId: defaultTenant.id,
       hashedPassword: 'stored-password-hash',
       emailVerifiedAt: new Date().toISOString(),
       mobile: '555-0100',
@@ -474,6 +489,7 @@ describe('AuthService', () => {
   it('rotates a valid refresh token and persists the replacement hash', async () => {
     authUser = {
       ...createdUser,
+      tenantId: defaultTenant.id,
       hashedPassword: 'stored-password-hash',
       emailVerifiedAt: new Date().toISOString(),
       mobile: null,
@@ -504,6 +520,7 @@ describe('AuthService', () => {
   it('rejects an invalid refresh token without rotating it', async () => {
     authUser = {
       ...createdUser,
+      tenantId: defaultTenant.id,
       hashedPassword: 'stored-password-hash',
       emailVerifiedAt: new Date().toISOString(),
       mobile: null,
@@ -523,6 +540,7 @@ describe('AuthService', () => {
   it('clears the stored refresh hash on logout only when the token matches', async () => {
     authUser = {
       ...createdUser,
+      tenantId: defaultTenant.id,
       hashedPassword: 'stored-password-hash',
       emailVerifiedAt: new Date().toISOString(),
       mobile: null,
