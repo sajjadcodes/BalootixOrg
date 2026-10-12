@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'64dab11946facbfc3887c482453278a790e7fda92b0db641fc8a09c2ec1e1cf5'>;
+  StorageHashBase<'2649268b3f921a20e1224b1d6fc54dd4a84610cdc1778719d51803ca20b5c60d'>;
 export type ExecutionHash =
   ExecutionHashBase<'9a8358150cdec86ef120156bfc641fb74b2c68d39a9d1307126d659ccd3b8e97'>;
 export type ProfileHash =
@@ -981,9 +981,21 @@ type ContractBase = Omit<
               ];
               indexes: readonly [
                 {
+                  readonly name: 'EmailVerificationToken_expiresAt_idx_6b6b8c10';
+                  readonly prefix: 'EmailVerificationToken_expiresAt_idx';
+                  readonly columns: readonly ['expiresAt'];
+                  readonly unique: false;
+                },
+                {
                   readonly name: 'EmailVerificationToken_tenantId_idx_c93ed4f1';
                   readonly prefix: 'EmailVerificationToken_tenantId_idx';
                   readonly columns: readonly ['tenantId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'EmailVerificationToken_usedAt_idx_31286b90';
+                  readonly prefix: 'EmailVerificationToken_usedAt_idx';
+                  readonly columns: readonly ['usedAt'];
                   readonly unique: false;
                 },
                 {
@@ -1119,6 +1131,12 @@ type ContractBase = Omit<
               ];
               indexes: readonly [
                 {
+                  readonly name: 'OwnerSetupToken_expiresAt_idx_6b6b8c10';
+                  readonly prefix: 'OwnerSetupToken_expiresAt_idx';
+                  readonly columns: readonly ['expiresAt'];
+                  readonly unique: false;
+                },
+                {
                   readonly name: 'OwnerSetupToken_tenantId_email_idx_88e149c0';
                   readonly prefix: 'OwnerSetupToken_tenantId_email_idx';
                   readonly columns: readonly ['tenantId', 'email'];
@@ -1128,6 +1146,12 @@ type ContractBase = Omit<
                   readonly name: 'OwnerSetupToken_tenantId_idx_c93ed4f1';
                   readonly prefix: 'OwnerSetupToken_tenantId_idx';
                   readonly columns: readonly ['tenantId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'OwnerSetupToken_usedAt_idx_31286b90';
+                  readonly prefix: 'OwnerSetupToken_usedAt_idx';
+                  readonly columns: readonly ['usedAt'];
                   readonly unique: false;
                 },
               ];

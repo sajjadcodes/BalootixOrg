@@ -21,7 +21,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "contract:emit": "prisma contract emit",
     "authorization:seed": "tsx scripts/seed-authorization.ts",
-    "owner:bootstrap": "tsx scripts/bootstrap-owner.ts"
+    "owner:bootstrap": "tsx scripts/bootstrap-owner.ts",
+    "auth-tokens:cleanup": "tsx scripts/cleanup-auth-tokens.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.1.2",

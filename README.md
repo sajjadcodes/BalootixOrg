@@ -183,6 +183,10 @@ Cycle prevention and unit-deletion rules require explicit enforcement beyond a s
 - If a migration hash keeps changing, check whether its backfill updates `updatedAt`; use stable SQL so each emit produces the same migration.
 - Check the final schema with `pnpm prisma db verify --log-level info`.
 
+## Authentication token retention
+
+Verification, password-reset, and owner-setup token rows contain only token hashes. Cleanup retains unused tokens until 7 days after expiry and consumed tokens for 30 days after use. Run `pnpm auth-tokens:cleanup` daily from the deployment scheduler; the command deletes in batches of 500 and can safely overlap another run. It requires `DATABASE_URL` and does not run an in-process timer.
+
 ## Relationship cardinalities
 
 The following describes the model relationships. The relation fields are ORM navigation fields; the foreign-key scalar fields are the actual database columns.
