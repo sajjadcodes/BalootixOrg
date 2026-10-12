@@ -9,17 +9,19 @@ import { AuthorizationModule } from './modules/authorization/authorization.modul
 import { UsersModule } from './modules/users/users.module.js';
 import { UnitsModule } from './modules/units/units.module.js';
 import { PlatformAdminModule } from './modules/platform-admin/platform-admin.module.js';
+import { validateEnvironment } from './config/validate-environment.js';
+import { HealthController } from './health.controller.js';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, validate: validateEnvironment }),
     AuthModule,
     AuthorizationModule,
     UsersModule,
     UnitsModule,
     PlatformAdminModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [
     AppService,
     {
