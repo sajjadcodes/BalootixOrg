@@ -68,7 +68,7 @@ export class OwnerBootstrapService {
 
     // Generate a cryptographically random one-time token and hash it before storing
     // it. The raw value is only sent through email and never persisted in the DB.
-    const token = randomBytes(32).toString('hex');
+    const token = randomBytes(32).toString('base64url');
     const tokenHash = createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + OWNER_SETUP_TTL_MS).toISOString();
 
