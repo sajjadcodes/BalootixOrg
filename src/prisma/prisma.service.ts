@@ -21,7 +21,7 @@ export class PrismaService implements OnModuleDestroy {
   }
 
   async checkConnection(): Promise<void> {
-    await this.public.Tenant.where({ id: '__orgflow_readiness_probe__' })
+    await this.public.Tenant.where({ id: '__balootorg_readiness_probe__' })
       .select('id')
       .first();
   }

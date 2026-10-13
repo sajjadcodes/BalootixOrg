@@ -34,7 +34,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('OrgFlow API')
+    .setTitle('Baloot Org API')
     // These two only show lock icons per route in Swagger.
     // The browser sends the real cookies by itself (httponly).
     .addCookieAuth('access_token', undefined, 'access_token')

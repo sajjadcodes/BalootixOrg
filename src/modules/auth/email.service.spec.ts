@@ -22,7 +22,7 @@ describe('EmailService', () => {
 
     const configValues: Record<string, string> = {
       RESEND_API_KEY: 'test-api-key',
-      RESEND_FROM_EMAIL: 'OrgFlow <verify@example.com>',
+      RESEND_FROM_EMAIL: 'Baloot Org <verify@example.com>',
       APP_URL: 'http://localhost:4000/api/',
       FRONTEND_URL: 'http://localhost:3000/',
     };
@@ -37,7 +37,7 @@ describe('EmailService', () => {
     await service.sendVerificationEmail('person@example.com', 'token+/=');
 
     expect(send).toHaveBeenCalledWith({
-      from: 'OrgFlow <verify@example.com>',
+      from: 'Baloot Org <verify@example.com>',
       to: 'person@example.com',
       subject: 'Verify your email address',
       text: expect.stringContaining(
@@ -50,7 +50,7 @@ describe('EmailService', () => {
     await service.sendPasswordResetEmail('person@example.com', 'token+/=');
 
     expect(send).toHaveBeenCalledWith({
-      from: 'OrgFlow <verify@example.com>',
+      from: 'Baloot Org <verify@example.com>',
       to: 'person@example.com',
       subject: 'Reset your password',
       text: expect.stringContaining(
@@ -63,9 +63,9 @@ describe('EmailService', () => {
     await service.sendOwnerSetupEmail('owner@example.com', 'token+/=');
 
     expect(send).toHaveBeenCalledWith({
-      from: 'OrgFlow <verify@example.com>',
+      from: 'Baloot Org <verify@example.com>',
       to: 'owner@example.com',
-      subject: 'Set up your OrgFlow owner account',
+      subject: 'Set up your Baloot Org owner account',
       text: expect.stringContaining(
         'http://localhost:3000/owner-setup?token=token%2B%2F%3D',
       ),

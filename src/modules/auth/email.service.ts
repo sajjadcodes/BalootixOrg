@@ -58,8 +58,8 @@ export class EmailService {
     const { error } = await this.resend.emails.send({
       from: this.from,
       to: email,
-      subject: 'Set up your OrgFlow owner account',
-      text: `Set up your OrgFlow owner account by opening this link: ${setupUrl}\n\nThis link expires in 30 minutes and can only be used once.`,
+      subject: 'Set up your Baloot Org owner account',
+      text: `Set up your Baloot Org owner account by opening this link: ${setupUrl}\n\nThis link expires in 30 minutes and can only be used once.`,
     });
 
     if (error) {

@@ -1,7 +1,7 @@
 import { validateEnvironment } from './validate-environment.js';
 
 const validEnvironment = {
-  DATABASE_URL: 'postgresql://app:secret@localhost:5432/orgflow',
+  DATABASE_URL: 'postgresql://app:secret@localhost:5432/balootorg',
   JWT_ACCESS_SECRET: 'development-access-secret',
   JWT_REFRESH_SECRET: 'development-refresh-secret',
   RESEND_API_KEY: 'resend-test-key',

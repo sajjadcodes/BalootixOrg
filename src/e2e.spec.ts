@@ -25,7 +25,7 @@ function createMockPrisma() {
       {
         id: 'user-owner',
         tenantId: 'tenant-default',
-        email: 'owner@orgflow.test',
+        email: 'owner@balootorg.test',
         displayName: 'Owner',
         hashedPassword:
           '$2b$12$8nKXQ4J0Eri4v0Z9E2EgnOnz0h8ZW89v2a2dP9U1a8g2jL6yNC4iW',
@@ -309,7 +309,7 @@ function createMockPrisma() {
   const GlobalAdmin = {
     where: (filters: Record<string, unknown> = {}) =>
       makeQuery(
-        [{ email: 'platform@orgflow.test', isActive: true, id: 'ga-1' }],
+        [{ email: 'platform@balootorg.test', isActive: true, id: 'ga-1' }],
         filters,
       ),
   };
@@ -361,13 +361,13 @@ describe('E2E backend coverage', () => {
     state = initialized.state;
 
     config = new ConfigService({
-      DATABASE_URL: 'postgresql://user:pass@localhost:5432/orgflow_test',
+      DATABASE_URL: 'postgresql://user:pass@localhost:5432/balootorg_test',
       JWT_ACCESS_SECRET: 'test-access-secret',
       JWT_REFRESH_SECRET: 'test-refresh-secret',
       RESEND_API_KEY: 'test-key',
-      RESEND_FROM_EMAIL: 'noreply@orgflow.test',
-      APP_URL: 'https://api.orgflow.test',
-      FRONTEND_URL: 'https://app.orgflow.test',
+      RESEND_FROM_EMAIL: 'noreply@balootorg.test',
+      APP_URL: 'https://api.balootorg.test',
+      FRONTEND_URL: 'https://app.balootorg.test',
     });
 
     emailService = {
@@ -394,7 +394,7 @@ describe('E2E backend coverage', () => {
     state.tenants = [];
 
     await ownerBootstrapService.issueSetupInvite({
-      email: 'platform-owner@orgflow.test',
+      email: 'platform-owner@balootorg.test',
       displayName: 'Platform Owner',
     });
 
@@ -417,12 +417,12 @@ describe('E2E backend coverage', () => {
 
   it('B: registers, verifies, logs in, reads me, refreshes, and logs out', async () => {
     const registration = await authService.registerWithEmailPassword({
-      email: 'new.user@orgflow.test',
+      email: 'new.user@balootorg.test',
       password: 'StrongPassword123!',
       displayName: 'New User',
     });
 
-    expect(registration.email).toBe('new.user@orgflow.test');
+    expect(registration.email).toBe('new.user@balootorg.test');
 
     const verificationToken = emailService.sendVerificationEmail.mock
       .calls[0]?.[1] as string;
@@ -431,16 +431,16 @@ describe('E2E backend coverage', () => {
     await authService.verifyEmail(verificationToken);
 
     const login = await authService.loginWithEmailPassword({
-      email: 'new.user@orgflow.test',
+      email: 'new.user@balootorg.test',
       password: 'StrongPassword123!',
     });
 
-    expect(login.user.email).toBe('new.user@orgflow.test');
+    expect(login.user.email).toBe('new.user@balootorg.test');
     expect(login.tokens.accessToken).toBeTruthy();
     expect(login.tokens.refreshToken).toBeTruthy();
 
     const currentUser = await authService.getCurrentUser(login.user.id);
-    expect(currentUser.email).toBe('new.user@orgflow.test');
+    expect(currentUser.email).toBe('new.user@balootorg.test');
 
     const refreshed = await authService.refresh(
       login.user.id,
@@ -456,7 +456,7 @@ describe('E2E backend coverage', () => {
 
   it('C: forgot-password and reset-password flows work end-to-end', async () => {
     await authService.registerWithEmailPassword({
-      email: 'reset.user@orgflow.test',
+      email: 'reset.user@balootorg.test',
       password: 'Password123!',
       displayName: 'Reset User',
     });
@@ -465,7 +465,7 @@ describe('E2E backend coverage', () => {
       .calls[0]?.[1] as string;
     await authService.verifyEmail(verificationToken);
 
-    await authService.forgotPassword({ email: 'reset.user@orgflow.test' });
+    await authService.forgotPassword({ email: 'reset.user@balootorg.test' });
 
     const resetToken = emailService.sendPasswordResetEmail.mock
       .calls[0]?.[1] as string;
@@ -479,11 +479,11 @@ describe('E2E backend coverage', () => {
     ).resolves.toEqual({ reset: true });
 
     const login = await authService.loginWithEmailPassword({
-      email: 'reset.user@orgflow.test',
+      email: 'reset.user@balootorg.test',
       password: 'ResetPassword456!',
     });
 
-    expect(login.user.email).toBe('reset.user@orgflow.test');
+    expect(login.user.email).toBe('reset.user@balootorg.test');
   }, 30_000);
 
   it('D: invalid and normalized tenant slugs are rejected and accepted correctly', () => {
@@ -499,7 +499,7 @@ describe('E2E backend coverage', () => {
 
   it('E: platform-admin listing returns tenant metadata and tenant users', async () => {
     await authService.registerWithEmailPassword({
-      email: 'tenant-user@orgflow.test',
+      email: 'tenant-user@balootorg.test',
       password: 'Password123!',
       displayName: 'Tenant User',
     });
@@ -519,7 +519,7 @@ describe('E2E backend coverage', () => {
       await platformAdminService.listTenantUsers('tenant-default');
     expect(
       tenantUsers.items.some(
-        (user) => user.email === 'tenant-user@orgflow.test',
+        (user) => user.email === 'tenant-user@balootorg.test',
       ),
     ).toBe(true);
   });
@@ -539,7 +539,7 @@ describe('E2E backend coverage', () => {
 
     await prisma.public.User.create({
       tenantId: firstTenant.id,
-      email: 'alpha@orgflow.test',
+      email: 'alpha@balootorg.test',
       displayName: 'Alpha User',
       hashedPassword: 'hashed',
       isManager: false,
@@ -549,12 +549,12 @@ describe('E2E backend coverage', () => {
       String(firstTenant.id),
     );
     expect(
-      tenantUsers.items.every((user) => user.email !== 'beta@orgflow.test'),
+      tenantUsers.items.every((user) => user.email !== 'beta@balootorg.test'),
     ).toBe(true);
 
     await expect(
       authService.loginWithEmailPassword({
-        email: 'missing@orgflow.test',
+        email: 'missing@balootorg.test',
         password: 'Nope!',
       }),
     ).rejects.toThrow('Invalid credentials');

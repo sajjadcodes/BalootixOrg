@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the authorization policy for tenant-scoped access in OrgFlow.
+This document defines the authorization policy for tenant-scoped access in Baloot Org.
 
 The system answers two questions:
 
