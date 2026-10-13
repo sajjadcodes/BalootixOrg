@@ -10,7 +10,6 @@ import { UsersModule } from './modules/users/users.module.js';
 import { UnitsModule } from './modules/units/units.module.js';
 import { PlatformAdminModule } from './modules/platform-admin/platform-admin.module.js';
 import { validateEnvironment } from './config/validate-environment.js';
-import { HealthController } from './health.controller.js';
 
 @Module({
   imports: [
@@ -21,7 +20,7 @@ import { HealthController } from './health.controller.js';
     UnitsModule,
     PlatformAdminModule,
   ],
-  controllers: [AppController, HealthController],
+  controllers: [AppController],
   providers: [
     AppService,
     {
