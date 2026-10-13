@@ -1,3 +1,210 @@
+# Baloot Org Backend
+
+# Setup Guide
+
+This repository is the backend for Baloot Org.
+
+## 1. Prerequisites
+
+Before you start, make sure you have:
+
+- Node.js 20+
+- pnpm 9+
+- PostgreSQL 14+ or a compatible managed Postgres instance
+- A Git client
+- Access to an email sending service (the project uses Resend)
+
+You should also have a frontend app or a route that can handle the owner setup link, because the initial platform owner is created via a token link sent by email.
+
+## 2. Clone the repository
+
+```bash
+git clone <your-repo-url>
+cd balootix-org/backend
+```
+
+## 3. Install dependencies
+
+```bash
+pnpm install
+```
+
+## 4. Create your environment file
+
+Copy the example environment file and fill it in:
+
+```bash
+cp .env.example .env
+```
+
+Example values:
+
+```env
+APP_PORT=4000
+APP_URL=http://localhost:4000/api
+FRONTEND_URL=http://localhost:3000
+NODE_ENV=development
+
+JWT_ACCESS_SECRET=replace-with-a-long-random-secret
+JWT_REFRESH_SECRET=replace-with-a-long-random-secret
+
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/balootorg
+
+RESEND_API_KEY=your-resend-api-key
+RESEND_FROM_EMAIL=noreply@yourdomain.com
+```
+
+Important notes:
+
+- `DATABASE_URL` must point to a PostgreSQL database that this app can access.
+- `APP_URL` is the API base URL used for email links.
+- `FRONTEND_URL` is the frontend origin used for owner setup and other user-facing links.
+- In production, JWT secrets must be at least 32 characters long and HTTPS URLs are required.
+
+## 5. Prepare the database
+
+Create a Postgres database if needed, then run the Prisma contract migration/init flow.
+
+For a brand new empty dev database:
+
+```bash
+pnpm prisma db init --advance-ref db
+```
+
+For an existing database:
+
+```bash
+pnpm prisma db migrate --show
+pnpm prisma db migrate --advance-ref db
+```
+
+Then verify the schema:
+
+```bash
+pnpm prisma db verify --log-level info
+```
+
+## 6. Run the app locally
+
+Development mode:
+
+```bash
+pnpm start:dev
+```
+
+Production build:
+
+```bash
+pnpm build
+pnpm start:prod
+```
+
+The API will start on the `APP_PORT` value (default `4000`).
+
+## 7. Bootstrap the global owner account
+
+This project is designed so the very first person to create the platform is the global owner. The owner bootstrap flow creates:
+
+- the Platform Tenant
+- the System management unit
+- the reserved `OWNER` role
+- the first verified user account
+- the active role assignment that gives that user full system ownership
+
+Run:
+
+```bash
+pnpm owner:bootstrap -- "owner@example.com" "Platform Owner"
+```
+
+This sends an email with a one-time setup link to the provided address. The raw token is only sent in email; the database stores only a hash.
+
+The email link should point to the frontend owner-setup page, for example:
+
+```text
+http://localhost:3000/owner-setup?token=...
+```
+
+Open that link and complete the setup by creating the password for the global owner.
+
+After the setup completes, the user becomes the system-level owner and can manage the entire platform.
+
+## 8. What the global owner can do
+
+The global owner is the platform administrator. They are not just another tenant manager; they are the reserved `OWNER` actor used for the platform bootstrap case.
+
+This means the global owner can:
+
+- manage the platform tenant
+- create or supervise higher-level platform administration
+- access reserved system-level flows
+- approve or manage tenant-wide business operations according to the app's authorization model
+
+The owner is protected by a reserved system role, not by a regular role name or generic permission assignment.
+
+## 9. Seed authorization data for a tenant
+
+If you want to initialize permissions and tenant-protected routes for a specific tenant, run:
+
+```bash
+pnpm authorization:seed -- <tenantId>
+```
+
+This is safe to rerun; it creates the tenant's relevant roles and permission links without duplicating them.
+
+## 10. Useful scripts
+
+These are the main commands in this project:
+
+```bash
+pnpm install
+pnpm build
+pnpm test
+pnpm start
+pnpm start:dev
+pnpm owner:bootstrap -- <email> "Display Name"
+pnpm authorization:seed -- <tenantId>
+pnpm auth-tokens:cleanup
+```
+
+## 11. Token cleanup
+
+Verification, password reset, and owner setup tokens are stored as hashes only. Unused tokens are retained for 7 days after expiry and consumed tokens for 30 days after use.
+
+To clean them up from the scheduler or a maintenance job:
+
+```bash
+pnpm auth-tokens:cleanup
+```
+
+This requires `DATABASE_URL` and deletes records in batches of 500 safely.
+
+## 12. Typical first-run flow
+
+A typical first-time developer or operator flow looks like this:
+
+1. Install dependencies with `pnpm install`
+2. Create `.env` from `.env.example`
+3. Create or configure the PostgreSQL database
+4. Run Prisma database init/migrate
+5. Start the backend with `pnpm start:dev`
+6. Run `pnpm owner:bootstrap -- <email> "Display Name"`
+7. Open the email link in your frontend and complete the owner setup
+8. Log in as the global owner
+9. Seed tenant authorization if needed
+10. Start managing the platform and tenant flows
+
+## 13. Troubleshooting
+
+- If the app fails on startup, confirm `DATABASE_URL`, `JWT_ACCESS_SECRET`, and `JWT_REFRESH_SECRET` are set correctly.
+- If email links do not work, confirm `APP_URL` and `FRONTEND_URL` are valid and reachable.
+- If Prisma migration commands fail, make sure Postgres is running and the connection string is valid.
+- If bootstrap fails because an owner already exists, that means the platform already has a reserved `OWNER` account configured.
+
+## 14. Important security note
+
+Never commit real secrets to GitHub. Use `.env` for local secrets and store production values via your deployment platform's secret manager.
+
 # Tenant Authorization Policy
 
 ## Purpose
