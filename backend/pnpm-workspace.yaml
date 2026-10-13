@@ -1,0 +1,9 @@
+allowBuilds:
+  '@parcel/watcher': true
+  '@scarf/scarf': false
+  bcrypt: false
+  esbuild: true
+  unrs-resolver: true
+  workerd: false
+overrides:
+  effect: ^4.0.1

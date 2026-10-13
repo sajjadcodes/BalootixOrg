@@ -1,0 +1,86 @@
+[
+  {
+    "id": "dropCheckConstraint.Permission.Permission_action_check_e9dee24b",
+    "label": "Drop check constraint \"Permission_action_check_e9dee24b\" on \"Permission\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "Permission_action_check_e9dee24b",
+        "table": "Permission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Permission_action_check_e9dee24b\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Permission_action_check_e9dee24b",
+          "public",
+          "\"public\".\"Permission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop check constraint \"Permission_action_check_e9dee24b\"",
+        "sql": "ALTER TABLE \"public\".\"Permission\" DROP CONSTRAINT \"Permission_action_check_e9dee24b\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Permission_action_check_e9dee24b\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Permission_action_check_e9dee24b",
+          "public",
+          "\"public\".\"Permission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.Permission.Permission_action_check_7589694b",
+    "label": "Add check constraint \"Permission_action_check_7589694b\" on \"Permission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "Permission_action_check_7589694b",
+        "table": "Permission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Permission_action_check_7589694b\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Permission_action_check_7589694b",
+          "public",
+          "\"public\".\"Permission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"Permission_action_check_7589694b\"",
+        "sql": "ALTER TABLE \"public\".\"Permission\" ADD CONSTRAINT \"Permission_action_check_7589694b\" CHECK (\"action\" IN ('READ', 'CREATE', 'UPDATE', 'DELETE'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Permission_action_check_7589694b\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Permission_action_check_7589694b",
+          "public",
+          "\"public\".\"Permission\""
+        ]
+      }
+    ]
+  }
+]

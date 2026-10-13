@@ -1,0 +1,44 @@
+[
+  {
+    "id": "column.public.User.refreshTokenHash",
+    "label": "Add column \"refreshTokenHash\" to \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "refreshTokenHash",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"refreshTokenHash\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "refreshTokenHash"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"refreshTokenHash\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD COLUMN \"refreshTokenHash\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"refreshTokenHash\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "refreshTokenHash"
+        ]
+      }
+    ]
+  }
+]

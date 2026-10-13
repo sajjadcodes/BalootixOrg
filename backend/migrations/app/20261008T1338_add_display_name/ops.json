@@ -1,0 +1,128 @@
+[
+  {
+    "id": "dropColumn.User.firstName",
+    "label": "Drop column \"firstName\" from \"User\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "firstName",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"firstName\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "firstName"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"firstName\"",
+        "sql": "ALTER TABLE \"public\".\"User\" DROP COLUMN \"firstName\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"firstName\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "firstName"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropColumn.User.lastName",
+    "label": "Drop column \"lastName\" from \"User\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "lastName",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"lastName\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "lastName"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"lastName\"",
+        "sql": "ALTER TABLE \"public\".\"User\" DROP COLUMN \"lastName\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"lastName\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "lastName"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.User.displayName",
+    "label": "Add column \"displayName\" to \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "displayName",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"displayName\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "displayName"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"displayName\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD COLUMN \"displayName\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"displayName\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "displayName"
+        ]
+      }
+    ]
+  }
+]
