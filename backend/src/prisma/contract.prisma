@@ -114,7 +114,7 @@ model Role {
   id              String                     @id @default(uuid())
   tenantId        String
   unitId          String
-  systemKey       String?                    @unique
+  systemKey       String?
   name            String
   description     String?
   scope           RoleScopeEnum              @default(DESCENDANTS)
@@ -127,8 +127,8 @@ model Role {
   roleAssignments RoleAssignment[]
 
   @@unique([tenantId, unitId, name])
+  @@unique([tenantId, systemKey])
   @@index([tenantId])
-  @@index([tenantId, systemKey])
 }
 
 model RolePermission {

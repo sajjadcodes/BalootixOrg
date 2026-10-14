@@ -1,0 +1,125 @@
+[
+  {
+    "id": "dropIndex.Role.Role_tenantId_systemKey_idx_b361b661",
+    "label": "Drop index \"Role_tenantId_systemKey_idx_b361b661\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Role_tenantId_systemKey_idx_b361b661",
+        "table": "Role"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Role_tenantId_systemKey_idx_b361b661\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Role_tenantId_systemKey_idx_b361b661\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop index \"Role_tenantId_systemKey_idx_b361b661\"",
+        "sql": "DROP INDEX \"public\".\"Role_tenantId_systemKey_idx_b361b661\"",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Role_tenantId_systemKey_idx_b361b661\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Role_tenantId_systemKey_idx_b361b661\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropConstraint.Role.Role_systemKey_key",
+    "label": "Drop constraint \"Role_systemKey_key\" on \"Role\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Role_systemKey_key",
+        "table": "Role"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Role_systemKey_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Role_systemKey_key",
+          "public",
+          "\"public\".\"Role\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"Role_systemKey_key\"",
+        "sql": "ALTER TABLE \"public\".\"Role\" DROP CONSTRAINT \"Role_systemKey_key\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Role_systemKey_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Role_systemKey_key",
+          "public",
+          "\"public\".\"Role\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Role.Role_tenantId_systemKey_key",
+    "label": "Add unique constraint on \"Role\" (tenantId, systemKey)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Role_tenantId_systemKey_key",
+        "table": "Role"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Role_tenantId_systemKey_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Role_tenantId_systemKey_key",
+          "public",
+          "\"public\".\"Role\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Role_tenantId_systemKey_key\"",
+        "sql": "ALTER TABLE \"public\".\"Role\" ADD CONSTRAINT \"Role_tenantId_systemKey_key\" UNIQUE (\"tenantId\", \"systemKey\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Role_tenantId_systemKey_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Role_tenantId_systemKey_key",
+          "public",
+          "\"public\".\"Role\""
+        ]
+      }
+    ]
+  }
+]

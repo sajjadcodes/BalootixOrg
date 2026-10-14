@@ -2430,15 +2430,6 @@
                 },
                 {
                   "columns": [
-                    "tenantId",
-                    "systemKey"
-                  ],
-                  "name": "Role_tenantId_systemKey_idx_b361b661",
-                  "prefix": "Role_tenantId_systemKey_idx",
-                  "unique": false
-                },
-                {
-                  "columns": [
                     "unitId"
                   ],
                   "name": "Role_unitId_idx_be785412",
@@ -2454,14 +2445,15 @@
               "uniques": [
                 {
                   "columns": [
-                    "systemKey"
+                    "tenantId",
+                    "unitId",
+                    "name"
                   ]
                 },
                 {
                   "columns": [
                     "tenantId",
-                    "unitId",
-                    "name"
+                    "systemKey"
                   ]
                 }
               ]
@@ -3248,7 +3240,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "2649268b3f921a20e1224b1d6fc54dd4a84610cdc1778719d51803ca20b5c60d"
+    "storageHash": "737ab5da64e363b96f1296ad31d08a1fcee9f4da3d31e1fa36dcd1b33dc729f5"
   },
   "execution": {
     "executionHash": "9a8358150cdec86ef120156bfc641fb74b2c68d39a9d1307126d659ccd3b8e97",
