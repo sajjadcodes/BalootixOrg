@@ -14,7 +14,7 @@ Before you start, make sure you have:
 - A Git client
 - Access to an email sending service (the project uses Resend)
 
-You should also have a frontend app or a route that can handle the owner setup link, because the initial platform owner is created via a token link sent by email.
+You should also have a frontend app or a route that can handle the owner setup link, because the platform operator and every customer organization owner are created through a token link sent by email.
 
 ## 2. Clone the repository
 
@@ -101,46 +101,59 @@ pnpm start:prod
 
 The API will start on the `APP_PORT` value (default `4000`).
 
-## 7. Bootstrap the global owner account
+## 7. Bootstrap the platform operator (global admin)
 
-This project is designed so the very first person to create the platform is the global owner. The owner bootstrap flow creates:
+Baloot Org is a multi-tenant SaaS. There are two kinds of privileged accounts, and they are intentionally separate:
 
-- the Platform Tenant
-- the System management unit
-- the reserved `OWNER` role
-- the first verified user account
-- the active role assignment that gives that user full system ownership
+- **Global admin (you, the platform operator):** manages the whole system, creates customer organizations and manages their subscriptions. Backed by an active `GlobalAdmin` record. It does **not** own a customer organization and has no `OWNER` role.
+- **Organization OWNER (your customer):** the first user of one customer organization (tenant). Backed by the reserved `OWNER` role inside that tenant only. Each organization has its own OWNER.
 
-Run:
+Every login account still lives in a tenant. The platform operator's account lives in the internal platform tenant (the oldest tenant), which only holds the operator and is never a customer organization.
+
+Run once:
 
 ```bash
-pnpm owner:bootstrap -- "owner@example.com" "Platform Owner"
+pnpm owner:bootstrap -- "you@example.com" "Platform Operator"
 ```
 
-This sends an email with a one-time setup link to the provided address. The raw token is only sent in email; the database stores only a hash.
+This creates the platform tenant if needed and emails a one-time setup link. It refuses to run again once an active global admin exists. The command compiles the bootstrap entry with TypeScript first so NestJS constructor injection works correctly. The API server does not need to be running, but the database must be reachable and `.env` must be configured. The raw token is only sent in email; the database stores only a hash.
 
-The email link should point to the frontend owner-setup page, for example:
+The link points to the frontend owner-setup page, for example:
 
 ```text
 http://localhost:3000/owner-setup?token=...
 ```
 
-Open that link and complete the setup by creating the password for the global owner.
+Open it and choose a password. Setup creates a verified user plus the `GlobalAdmin` record, which unlocks the `/platform-admin` APIs and the global dashboard.
 
-After the setup completes, the user becomes the system-level owner and can manage the entire platform.
+If you bootstrapped before the global-admin split and your account has no `GlobalAdmin` record, grant it once (the user must be verified and in the platform tenant):
 
-## 8. What the global owner can do
+```bash
+pnpm owner:grant-platform-admin -- "you@example.com"
+```
 
-The global owner is the platform administrator. They are not just another tenant manager; they are the reserved `OWNER` actor used for the platform bootstrap case.
+It is safe to rerun for an already-active global admin and rejects customer-tenant users.
 
-This means the global owner can:
+## 8. What the global admin can do
 
-- manage the platform tenant
-- create or supervise higher-level platform administration
-- access reserved system-level flows
-- approve or manage tenant-wide business operations according to the app's authorization model
+As the platform operator you can:
 
-The owner is protected by a reserved system role, not by a regular role name or generic permission assignment.
+- create a customer organization with its subscription (`POST /platform-admin/tenants`)
+- invite or re-invite the organization's OWNER by email
+- list tenants and their users
+- change tenant status (`ACTIVE`, `TRIAL`, `SUSPENDED`, `ARCHIVED`) and subscription plan, status and period
+- create users in any tenant through `POST /auth/register` with a `tenantId`
+
+Global admins pass every authorization check. Suspending or archiving a tenant blocks sign-in and token refresh for its users; global admins are exempt so they can always reach the platform dashboard.
+
+### Onboarding a customer organization
+
+1. Log in as the global admin.
+2. Create the organization with the owner's email, display name and plan (`TRIAL` gives a 14-day trial; paid plans start a 30-day period).
+3. The owner receives an email link to `/owner-setup?token=...` and sets a password. This creates their verified user, the organization's root unit and the reserved `OWNER` role.
+4. The owner logs in as OWNER of their organization and manages their own org. If the email is lost or expires (30 minutes), re-send it with `POST /platform-admin/tenants/:tenantId/owner-invite` while the organization has no owner yet.
+
+Billing is not automated yet. Plan, status and period are set manually by the global admin; no payment provider is integrated.
 
 ## 9. Seed authorization data for a tenant
 
@@ -150,7 +163,7 @@ If you want to initialize permissions and tenant-protected routes for a specific
 pnpm authorization:seed -- <tenantId>
 ```
 
-This is safe to rerun; it creates the tenant's relevant roles and permission links without duplicating them.
+This is safe to rerun; it creates the tenant's relevant roles and permission links without duplicating them. The tenant OWNER bypasses permission checks, so seeding is only needed once the owner starts delegating roles to other users.
 
 ## 10. Useful scripts
 
@@ -163,6 +176,7 @@ pnpm test
 pnpm start
 pnpm start:dev
 pnpm owner:bootstrap -- <email> "Display Name"
+pnpm owner:grant-platform-admin -- <platform-user-email>
 pnpm authorization:seed -- <tenantId>
 pnpm auth-tokens:cleanup
 ```
@@ -181,25 +195,25 @@ This requires `DATABASE_URL` and deletes records in batches of 500 safely.
 
 ## 12. Typical first-run flow
 
-A typical first-time developer or operator flow looks like this:
-
 1. Install dependencies with `pnpm install`
 2. Create `.env` from `.env.example`
 3. Create or configure the PostgreSQL database
-4. Run Prisma database init/migrate
+4. Run Prisma database init/migrate (every migration in `migrations/app` must be applied, including the per-tenant `Role.systemKey` change)
 5. Start the backend with `pnpm start:dev`
 6. Run `pnpm owner:bootstrap -- <email> "Display Name"`
-7. Open the email link in your frontend and complete the owner setup
-8. Log in as the global owner
-9. Seed tenant authorization if needed
-10. Start managing the platform and tenant flows
+7. Open the email link in your frontend and set your password
+8. Log in as the global admin
+9. Create a customer organization and invite its owner
+10. The owner accepts the invite, logs in and manages their organization
 
 ## 13. Troubleshooting
 
 - If the app fails on startup, confirm `DATABASE_URL`, `JWT_ACCESS_SECRET`, and `JWT_REFRESH_SECRET` are set correctly.
 - If email links do not work, confirm `APP_URL` and `FRONTEND_URL` are valid and reachable.
 - If Prisma migration commands fail, make sure Postgres is running and the connection string is valid.
-- If bootstrap fails because an owner already exists, that means the platform already has a reserved `OWNER` account configured.
+- If bootstrap says a platform admin has already been provisioned, the platform operator already exists. Use `pnpm owner:grant-platform-admin` only to repair an older account.
+- If creating an organization says the owner invite could not be sent, the organization was still created; fix email delivery and use the owner-invite endpoint.
+- If a customer owner cannot be invited because "a user already exists with this email", user emails are globally unique across all tenants.
 
 ## 14. Important security note
 
@@ -250,22 +264,27 @@ This is intentionally narrower than a unit inheritance policy.
 
 ### 4. OWNER is a reserved system override
 
-The `OWNER` role is a reserved system-level role used for the tenant owner or platform bootstrap case.
+The `OWNER` role is a reserved system-level role used for the owner of one customer organization (tenant).
 
+- there is at most one `OWNER` role per tenant; it is unique per `(tenantId, systemKey)`
+- it is created by the owner invite flow, never by normal role management
 - it is not treated as an ordinary permission-bearing role
 - it bypasses permission checks when the assignment is active and valid for the tenant
 - it must not be inferred from generic role permissions or from all roles in a unit
 - it is evaluated by identity and tenant validity, not by a broad unit membership check
 
-The system should not allow any arbitrary role to become `OWNER` through normal business logic. `OWNER` must be explicitly reserved and managed in the bootstrap flow.
+The system should not allow any arbitrary role to become `OWNER` through normal business logic. `OWNER` must be explicitly reserved and created only by the owner-setup flow.
 
 ### 5. Global admin is separate from tenant ownership
 
-A `GlobalAdmin` is a platform-level actor and is not a tenant role.
+A `GlobalAdmin` is the platform operator and is not a tenant role.
 
 - it is not evaluated as a tenant-local role
 - it can be granted platform-level access outside the tenant hierarchy
 - it should not inherit tenant role permissions by default
+- the one-time platform bootstrap creates a verified user and a `GlobalAdmin` record only; it creates no `OWNER` role
+- customer organization owners are created by the global admin through `POST /platform-admin/tenants`, and each gets their own tenant-scoped `OWNER` role
+- for an older bootstrap account without a `GlobalAdmin` record, `pnpm owner:grant-platform-admin -- <platform-user-email>` grants platform access to a verified platform-tenant user
 
 This separation keeps platform administration distinct from tenant-level authorization.
 
@@ -341,6 +360,25 @@ The platform should treat tenant status as a core access gate.
 - a tenant may exist without a valid active subscription, but access gating must reject non-allowed usage according to policy
 
 The tenant lifecycle should define which states are active for business operations, and the authorization layer should enforce them consistently.
+
+Currently enforced: users of a `SUSPENDED` or `ARCHIVED` tenant cannot log in or refresh tokens (global admins are exempt). Subscription state is recorded and managed by the global admin but does not gate access yet.
+
+### Platform-admin API
+
+All routes require a logged-in global admin.
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/platform-admin/tenants` | List tenants (paginated) |
+| `GET` | `/platform-admin/tenants/:tenantId` | Get one tenant |
+| `GET` | `/platform-admin/tenants/:tenantId/users` | List the tenant's users |
+| `POST` | `/platform-admin/tenants` | Create a tenant with its subscription and email the owner invite. Body: `name`, `slug`, `ownerEmail`, `ownerDisplayName`, optional `plan` (default `TRIAL`) |
+| `POST` | `/platform-admin/tenants/:tenantId/owner-invite` | Re-send the owner invite (only while the tenant has no owner). Body: `ownerEmail`, `ownerDisplayName` |
+| `PATCH` | `/platform-admin/tenants/:tenantId/status` | Set tenant status. Body: `status` |
+| `GET` | `/platform-admin/tenants/:tenantId/subscription` | Read the subscription |
+| `PATCH` | `/platform-admin/tenants/:tenantId/subscription` | Update `plan`, `status` and/or `currentPeriodEnd` |
+
+The platform tenant itself cannot be managed through these routes. `GET /auth/me` and the login response include `tenantId` and `isGlobalAdmin`. `POST /auth/register` creates the user in the caller's tenant; only global admins may pass a different `tenantId`.
 
 ## Unit and role policy
 
@@ -421,7 +459,9 @@ Errors use the same status/code relationship and never include stack traces or i
 
 `message` is human-readable and may vary by error. Clients should branch on the HTTP status or `code`, not parse message text. Validation messages are currently joined into a single string. Unexpected server errors always return code 500 and the generic `Internal server error` message.
 
-### Platform-admin tenant summaries
+### Platform-admin tenant summaries (target contract, not yet exposed)
+
+The summary and dashboard shapes below are defined as types but are not returned by any endpoint yet; the tenant list currently returns only the public tenant fields (`id`, `slug`, `name`, `status`, timestamps).
 
 Platform-admin tenant lists use the same paginated envelope. Each tenant item contains its public tenant identity and lifecycle `status`, a nullable `subscription` summary (`plan`, subscription `status`, `currentPeriodStart`, `currentPeriodEnd`, and `cancelAt`), and a `usage` summary. Usage counts include total and verified users, total and active units, and total and active roles. These are counts, not entitlements or billing quantities.
 
