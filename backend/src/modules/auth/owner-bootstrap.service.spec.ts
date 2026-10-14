@@ -47,6 +47,7 @@ const createdUser = {
   tenantId: 'platform-tenant',
   email: setupToken.email,
   displayName: setupToken.displayName,
+  emailVerifiedAt: '2026-10-11T00:00:00.000Z',
 };
 
 const createdRole = {
@@ -61,8 +62,13 @@ let currentSetupToken: SetupToken | null = null;
 let currentOwnerRole: typeof createdRole | null = null;
 let currentUser: typeof createdUser | null = null;
 let currentRootUnit: typeof rootUnit | null = null;
+let currentGlobalAdmin: {
+  email: string;
+  isActive: boolean;
+} | null = null;
 let consumedTokenCount = 1;
 const platformTenant = { id: 'platform-tenant' };
+const customerTenant = { id: 'customer-tenant' };
 const tenantFirst = jest.fn(async () => platformTenant);
 const tenantOrderBy = jest.fn(() => ({ first: tenantFirst }));
 
@@ -88,10 +94,20 @@ const userFirst = jest.fn(async () => currentUser);
 const userWhere = jest.fn(() => ({ first: userFirst }));
 const userCreate = jest.fn(async () => createdUser);
 
+const globalAdminFirst = jest.fn(async () => currentGlobalAdmin);
+const globalAdminWhere = jest.fn(() => ({ first: globalAdminFirst }));
+const globalAdminCreate = jest.fn(async () => ({
+  email: createdUser.email,
+  displayName: createdUser.displayName,
+  isActive: true,
+}));
+
 const unitFirst = jest.fn(async () => currentRootUnit);
 const unitWhere = jest.fn(() => ({ first: unitFirst }));
 const unitCreate = jest.fn(async () => rootUnit);
 const roleAssignmentCreate = jest.fn(async () => ({ id: 'assignment-1' }));
+const roleAssignmentFirst = jest.fn(async () => ({ id: 'assignment-1' }));
+const roleAssignmentWhere = jest.fn(() => ({ first: roleAssignmentFirst }));
 
 const transactionContext = {
   orm: {
@@ -100,7 +116,11 @@ const transactionContext = {
       Role: { where: ownerRoleWhere, create: ownerRoleCreate },
       User: { where: userWhere, create: userCreate },
       Unit: { where: unitWhere, create: unitCreate },
-      RoleAssignment: { create: roleAssignmentCreate },
+      RoleAssignment: {
+        create: roleAssignmentCreate,
+        where: roleAssignmentWhere,
+      },
+      GlobalAdmin: { where: globalAdminWhere, create: globalAdminCreate },
     },
   },
 };
@@ -112,10 +132,14 @@ const transaction = jest.fn(
 
 const prismaService = {
   public: {
-    Tenant: { orderBy: tenantOrderBy },
+    Tenant: {
+      orderBy: tenantOrderBy,
+      where: jest.fn(() => ({ first: async () => customerTenant })),
+    },
     OwnerSetupToken: { create: setupTokenCreate },
     Role: { where: ownerRoleWhere },
     User: { where: userWhere },
+    GlobalAdmin: { where: globalAdminWhere, create: globalAdminCreate },
   },
   client: { transaction },
 };
@@ -130,6 +154,7 @@ describe('OwnerBootstrapService', () => {
     currentOwnerRole = null;
     currentUser = null;
     currentRootUnit = null;
+    currentGlobalAdmin = null;
     consumedTokenCount = 1;
     tenantFirst.mockReset().mockResolvedValue(platformTenant);
     tenantOrderBy.mockClear();
@@ -150,10 +175,19 @@ describe('OwnerBootstrapService', () => {
     userFirst.mockReset().mockImplementation(async () => currentUser);
     userWhere.mockClear();
     userCreate.mockReset().mockResolvedValue(createdUser);
+    globalAdminFirst
+      .mockReset()
+      .mockImplementation(async () => currentGlobalAdmin);
+    globalAdminWhere.mockClear();
+    globalAdminCreate.mockClear();
     unitFirst.mockReset().mockImplementation(async () => currentRootUnit);
     unitWhere.mockClear();
     unitCreate.mockReset().mockResolvedValue(rootUnit);
     roleAssignmentCreate.mockReset().mockResolvedValue({ id: 'assignment-1' });
+    roleAssignmentFirst
+      .mockReset()
+      .mockResolvedValue({ id: 'assignment-1' });
+    roleAssignmentWhere.mockClear();
     transaction.mockClear();
     sendOwnerSetupEmail.mockReset().mockResolvedValue(undefined);
 
@@ -209,8 +243,8 @@ describe('OwnerBootstrapService', () => {
     );
   });
 
-  it('refuses to issue an invite after an OWNER role exists', async () => {
-    currentOwnerRole = createdRole;
+  it('refuses to issue a platform invite after a platform admin exists', async () => {
+    currentGlobalAdmin = { email: 'admin@example.com', isActive: true };
 
     await expect(
       service.issueSetupInvite({
@@ -223,7 +257,52 @@ describe('OwnerBootstrapService', () => {
     expect(sendOwnerSetupEmail).not.toHaveBeenCalled();
   });
 
-  it('creates the verified user, system role, and assignment atomically', async () => {
+  it('issues a tenant owner invite scoped to the customer tenant', async () => {
+    await service.issueTenantOwnerInvite({
+      tenantId: customerTenant.id,
+      email: ' Boss@Acme.com ',
+      displayName: 'Acme Boss',
+    });
+
+    expect(setupTokenCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: customerTenant.id,
+        email: 'boss@acme.com',
+      }),
+    );
+    expect(sendOwnerSetupEmail).toHaveBeenCalledWith(
+      'boss@acme.com',
+      expect.any(String),
+    );
+  });
+
+  it('does not allow a tenant owner invite for the platform tenant', async () => {
+    await expect(
+      service.issueTenantOwnerInvite({
+        tenantId: platformTenant.id,
+        email: 'boss@acme.com',
+        displayName: 'Acme Boss',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(sendOwnerSetupEmail).not.toHaveBeenCalled();
+  });
+
+  it('refuses a tenant owner invite when the tenant already has an owner', async () => {
+    currentOwnerRole = createdRole;
+
+    await expect(
+      service.issueTenantOwnerInvite({
+        tenantId: customerTenant.id,
+        email: 'boss@acme.com',
+        displayName: 'Acme Boss',
+      }),
+    ).rejects.toBeInstanceOf(ConflictException);
+
+    expect(sendOwnerSetupEmail).not.toHaveBeenCalled();
+  });
+
+  it('creates only a verified user and GlobalAdmin for platform setup', async () => {
     currentSetupToken = {
       ...setupToken,
       tokenHash: createHash('sha256').update('valid-owner-token').digest('hex'),
@@ -240,14 +319,6 @@ describe('OwnerBootstrapService', () => {
     expect(setupTokenUpdateAll).toHaveBeenCalledWith({
       usedAt: expect.any(String),
     });
-    expect(unitCreate).toHaveBeenCalledWith({
-      tenantId: platformTenant.id,
-      parentId: null,
-      name: 'System',
-      type: 'MANAGEMENT',
-      description: 'System unit for platform roles',
-      isActive: true,
-    });
     expect(userCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         tenantId: platformTenant.id,
@@ -257,19 +328,95 @@ describe('OwnerBootstrapService', () => {
         emailVerifiedAt: expect.any(String),
       }),
     );
+    expect(globalAdminCreate).toHaveBeenCalledWith({
+      email: createdUser.email,
+      displayName: createdUser.displayName,
+      hashedPassword: null,
+      isActive: true,
+    });
+    expect(unitCreate).not.toHaveBeenCalled();
+    expect(ownerRoleCreate).not.toHaveBeenCalled();
+    expect(roleAssignmentCreate).not.toHaveBeenCalled();
+  });
+
+  it('creates the root unit, OWNER role and assignment for a tenant owner', async () => {
+    currentSetupToken = { ...setupToken, tenantId: customerTenant.id };
+
+    await expect(
+      service.completeSetup({
+        token: 'valid-owner-token',
+        password: 'securePassword123',
+      }),
+    ).resolves.toEqual({ completed: true });
+
+    expect(unitCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: customerTenant.id,
+        parentId: null,
+        type: 'MANAGEMENT',
+      }),
+    );
+    expect(userCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: customerTenant.id,
+        emailVerifiedAt: expect.any(String),
+      }),
+    );
     expect(ownerRoleCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        tenantId: platformTenant.id,
+        tenantId: customerTenant.id,
         systemKey: 'OWNER',
         unitId: rootUnit.id,
       }),
     );
-    expect(roleAssignmentCreate).toHaveBeenCalledWith({
-      tenantId: platformTenant.id,
-      userId: createdUser.id,
-      roleId: createdRole.id,
+    expect(roleAssignmentCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: customerTenant.id,
+        userId: createdUser.id,
+        roleId: createdRole.id,
+        isActive: true,
+      }),
+    );
+    expect(globalAdminCreate).not.toHaveBeenCalled();
+  });
+
+  it('grants platform-admin access to a verified platform-tenant user', async () => {
+    currentUser = createdUser;
+
+    await expect(
+      service.grantPlatformAdmin(' OWNER@Example.com '),
+    ).resolves.toEqual({ granted: true });
+
+    expect(globalAdminCreate).toHaveBeenCalledWith({
+      email: createdUser.email,
+      displayName: createdUser.displayName,
+      hashedPassword: null,
       isActive: true,
     });
+  });
+
+  it('refuses to grant platform-admin access to a customer-tenant user', async () => {
+    currentUser = { ...createdUser, tenantId: customerTenant.id };
+
+    await expect(
+      service.grantPlatformAdmin(createdUser.email),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(globalAdminCreate).not.toHaveBeenCalled();
+  });
+
+  it('does not reactivate an inactive platform-admin record', async () => {
+    currentUser = createdUser;
+    currentGlobalAdmin = {
+      email: createdUser.email,
+      isActive: false,
+    };
+
+    await expect(
+      service.grantPlatformAdmin(createdUser.email),
+    ).rejects.toBeInstanceOf(ConflictException);
+
+    expect(globalAdminCreate).not.toHaveBeenCalled();
   });
 
   it('rejects an invalid setup token', async () => {
@@ -317,7 +464,8 @@ describe('OwnerBootstrapService', () => {
     expect(ownerRoleCreate).not.toHaveBeenCalled();
   });
 
-  it('rejects setup when an OWNER was provisioned after the invite was sent', async () => {
+  it('rejects tenant owner setup when the organization already has an owner', async () => {
+    currentSetupToken = { ...setupToken, tenantId: customerTenant.id };
     currentOwnerRole = createdRole;
 
     await expect(

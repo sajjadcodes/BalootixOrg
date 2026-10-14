@@ -43,6 +43,7 @@ function createMockPrisma() {
     roles: [],
     units: [],
     roleAssignments: [],
+    globalAdmins: [],
   };
 
   const pick = (record: Record<string, unknown>, fields: string[]) => {
@@ -308,10 +309,18 @@ function createMockPrisma() {
 
   const GlobalAdmin = {
     where: (filters: Record<string, unknown> = {}) =>
-      makeQuery(
-        [{ email: 'platform@balootorg.test', isActive: true, id: 'ga-1' }],
-        filters,
-      ),
+      makeQuery([...state.globalAdmins], filters),
+    create: async (input: Record<string, unknown>) => {
+      const created = {
+        id: `ga-${state.globalAdmins.length + 2}`,
+        isActive: true,
+        createdAt: createDate(),
+        updatedAt: createDate(),
+        ...input,
+      } as Record<string, unknown>;
+      state.globalAdmins.push(created);
+      return created;
+    },
   };
 
   const publicApi = {
@@ -390,8 +399,9 @@ describe('E2E backend coverage', () => {
     platformAdminService = new PlatformAdminService(prisma as never);
   });
 
-  it('A: owner bootstrap creates a reserved OWNER account and platform tenant', async () => {
+  it('A: platform bootstrap creates a GlobalAdmin without an OWNER role', async () => {
     state.tenants = [];
+    state.globalAdmins = [];
 
     await ownerBootstrapService.issueSetupInvite({
       email: 'platform-owner@balootorg.test',
@@ -412,7 +422,14 @@ describe('E2E backend coverage', () => {
       (entry) => entry.name === 'Platform Tenant',
     );
     expect(tenant).toBeTruthy();
-    expect(state.roles.some((entry) => entry.systemKey === 'OWNER')).toBe(true);
+    expect(state.roles.some((entry) => entry.systemKey === 'OWNER')).toBe(
+      false,
+    );
+    expect(
+      state.globalAdmins.some(
+        (entry) => entry.email === 'platform-owner@balootorg.test',
+      ),
+    ).toBe(true);
   });
 
   it('B: registers, verifies, logs in, reads me, refreshes, and logs out', async () => {

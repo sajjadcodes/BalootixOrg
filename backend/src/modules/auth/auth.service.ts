@@ -51,13 +51,74 @@ export class AuthService {
     });
   }
 
+  // New users join the caller's own tenant. Platform admins may target any tenant
+  // explicitly; everyone else may only target their own.
+  private async resolveRegistrationTenant(
+    requestedTenantId: string | undefined,
+    caller?: { tenantId?: string; email?: string },
+  ) {
+    if (!caller?.tenantId) {
+      return this.ensureDefaultTenant();
+    }
+
+    const targetTenantId = requestedTenantId ?? caller.tenantId;
+
+    if (targetTenantId !== caller.tenantId) {
+      const globalAdmin = caller.email
+        ? await this.prisma.public.GlobalAdmin.where({
+            email: caller.email,
+          }).first()
+        : null;
+
+      if (!globalAdmin?.isActive) {
+        throw new ForbiddenException(
+          'You can only create users in your own organization',
+        );
+      }
+    }
+
+    const tenant = await this.prisma.public.Tenant.where({
+      id: targetTenantId,
+    }).first();
+
+    if (!tenant) {
+      throw new BadRequestException('Tenant not found');
+    }
+
+    return tenant;
+  }
+
+  // Suspended or archived organizations cannot sign in. Platform admins are exempt
+  // so they can always reach the platform dashboard.
+  private async assertTenantAllowsAccess(user: {
+    email: string;
+    tenantId: string;
+  }): Promise<void> {
+    const tenant = await this.prisma.public.Tenant.where({
+      id: user.tenantId,
+    }).first();
+
+    if (!tenant || (tenant.status !== 'SUSPENDED' && tenant.status !== 'ARCHIVED')) {
+      return;
+    }
+
+    const globalAdmin = await this.prisma.public.GlobalAdmin.where({
+      email: user.email,
+    }).first();
+
+    if (!globalAdmin?.isActive) {
+      throw new ForbiddenException('This organization is not active');
+    }
+  }
+
   async registerWithEmailPassword(
     input: RegisterWithEmailPasswordDto,
+    caller?: { tenantId?: string; email?: string },
   ): Promise<RegisteredUserData> {
     const hashedPassword = await bcrypt.hash(input.password, 12);
 
     const email = input.email.trim().toLowerCase();
-    const tenant = await this.ensureDefaultTenant();
+    const tenant = await this.resolveRegistrationTenant(input.tenantId, caller);
 
     const exists = await this.prisma.public.User.where({
       email,
@@ -311,6 +372,8 @@ export class AuthService {
       );
     }
 
+    await this.assertTenantAllowsAccess(user);
+
     const tokens = await this.generateTokens(
       user.id,
       user.email,
@@ -328,6 +391,8 @@ export class AuthService {
       isManager: user.isManager,
       mobile: user.mobile,
       avatar: user.avatarUrl,
+      tenantId: user.tenantId,
+      isGlobalAdmin: await this.isGlobalAdmin(user.email),
     };
 
     return {
@@ -390,6 +455,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
+    await this.assertTenantAllowsAccess(user);
+
     const tokens = await this.generateTokens(
       user.id,
       user.email,
@@ -421,10 +488,26 @@ export class AuthService {
     }
   }
 
+  private async isGlobalAdmin(email: string): Promise<boolean> {
+    const globalAdmin = await this.prisma.public.GlobalAdmin.where({
+      email,
+    }).first();
+
+    return Boolean(globalAdmin?.isActive);
+  }
+
   // GET CURRENT USER
   async getCurrentUser(userId: string): Promise<LoginUserData> {
     const user = await this.prisma.public.User.where({ id: userId })
-      .select('id', 'email', 'displayName', 'isManager', 'mobile', 'avatarUrl')
+      .select(
+        'id',
+        'email',
+        'displayName',
+        'isManager',
+        'mobile',
+        'avatarUrl',
+        'tenantId',
+      )
       .first();
 
     if (!user) {
@@ -438,6 +521,8 @@ export class AuthService {
       isManager: user.isManager,
       mobile: user.mobile,
       avatar: user.avatarUrl,
+      tenantId: user.tenantId,
+      isGlobalAdmin: await this.isGlobalAdmin(user.email),
     };
   }
 }

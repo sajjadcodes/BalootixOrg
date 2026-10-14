@@ -111,7 +111,13 @@ const transaction = jest.fn(
 
 const prismaService = {
   public: {
-    Tenant: { orderBy: tenantOrderBy },
+    Tenant: {
+      orderBy: tenantOrderBy,
+      where: jest.fn(() => ({
+        first: async () => ({ ...defaultTenant, status: 'ACTIVE' }),
+      })),
+    },
+    GlobalAdmin: { where: jest.fn(() => ({ first: async () => null })) },
     User: { where: userWhere, create: userCreate },
     EmailVerificationToken: { create: tokenCreate },
   },
@@ -458,6 +464,8 @@ describe('AuthService', () => {
         isManager: createdUser.isManager,
         mobile: '555-0100',
         avatar: 'https://example.com/avatar.png',
+        tenantId: defaultTenant.id,
+        isGlobalAdmin: false,
       },
       tokens: { accessToken: 'access-token', refreshToken: 'refresh-token' },
     });
@@ -565,6 +573,8 @@ describe('AuthService', () => {
       isManager: createdUser.isManager,
       mobile: '555-0100',
       avatar: 'https://example.com/avatar.png',
+      tenantId: defaultTenant.id,
+      isGlobalAdmin: false,
     });
 
     expect(userWhere).toHaveBeenCalledWith({ id: createdUser.id });
@@ -575,6 +585,7 @@ describe('AuthService', () => {
       'isManager',
       'mobile',
       'avatarUrl',
+      'tenantId',
     );
   });
 

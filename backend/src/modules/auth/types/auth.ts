@@ -12,6 +12,8 @@ export interface LoginUserData {
   isManager: boolean;
   mobile: string | null;
   avatar: string | null;
+  tenantId: string;
+  isGlobalAdmin: boolean;
 }
 
 export type AuthenticatedRequest = Request & {

@@ -62,10 +62,16 @@ describe('AuthController', () => {
       { completeSetup: jest.fn() } as never,
     );
 
-    await expect(controller.registerWithEmailPassword(input)).resolves.toBe(
-      user,
-    );
-    expect(registerWithEmailPassword).toHaveBeenCalledWith(input);
+    await expect(
+      controller.registerWithEmailPassword(input, {
+        user: { userId: 'u1', email: 'admin@example.com', tenantId: 't1' },
+      } as never),
+    ).resolves.toBe(user);
+    expect(registerWithEmailPassword).toHaveBeenCalledWith(input, {
+      userId: 'u1',
+      email: 'admin@example.com',
+      tenantId: 't1',
+    });
   });
 
   it('passes the verification token to the service', async () => {

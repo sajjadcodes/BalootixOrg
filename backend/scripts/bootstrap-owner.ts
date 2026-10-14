@@ -22,7 +22,7 @@ async function bootstrapOwner(): Promise<void> {
   // Create a lightweight application context so we can resolve the Auth module and its
   // OwnerBootstrapService without booting the full HTTP server.
   const app = await NestFactory.createApplicationContext(AppModule, {
-    logger: false,
+    logger: ['error', 'warn'],
   });
 
   try {
@@ -41,6 +41,6 @@ async function bootstrapOwner(): Promise<void> {
 
 // Run the bootstrap flow and surface a clear error message if the invite cannot be sent.
 bootstrapOwner().catch((error: unknown) => {
-  console.error(error instanceof Error ? error.message : 'Owner setup failed');
+  console.error(error);
   process.exitCode = 1;
 });

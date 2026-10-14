@@ -1,7 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
+  IsOptional,
   IsString,
+  IsUUID,
   Matches,
   MaxLength,
   MinLength,
@@ -29,4 +31,12 @@ export class RegisterWithEmailPasswordDto {
     message: 'Display name must contain at least one non-whitespace character',
   })
   displayName!: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Target tenant. Defaults to the caller tenant; only platform admins may target another tenant.',
+  })
+  @IsOptional()
+  @IsUUID()
+  tenantId?: string;
 }

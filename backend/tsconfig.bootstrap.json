@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "rootDir": ".",
+    "outDir": "dist-bootstrap",
+    "noEmit": false,
+    "declaration": false,
+    "incremental": false,
+    "sourceMap": false
+  },
+  "include": [
+    "scripts/bootstrap-owner.ts",
+    "scripts/grant-platform-admin.ts",
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-bootstrap",
+    "**/*.spec.ts",
+    "src/e2e.spec.ts"
+  ]
+}

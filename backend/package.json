@@ -20,7 +20,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "contract:emit": "prisma contract emit",
     "authorization:seed": "tsx scripts/seed-authorization.ts",
-    "owner:bootstrap": "tsx scripts/bootstrap-owner.ts",
+    "owner:bootstrap": "tsc -p tsconfig.bootstrap.json && node dist-bootstrap/scripts/bootstrap-owner.js",
+    "owner:grant-platform-admin": "tsc -p tsconfig.bootstrap.json && node dist-bootstrap/scripts/grant-platform-admin.js",
     "auth-tokens:cleanup": "tsx scripts/cleanup-auth-tokens.ts"
   },
   "dependencies": {

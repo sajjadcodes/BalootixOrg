@@ -53,8 +53,11 @@ export class AuthController {
   @Post('register')
   @RequirePermission('/auth/register', 'CREATE')
   @UseGuards(ThrottlerGuard, JwtAuthGuard, AuthorizationGuard)
-  registerWithEmailPassword(@Body() input: RegisterWithEmailPasswordDto) {
-    return this.authService.registerWithEmailPassword(input);
+  registerWithEmailPassword(
+    @Body() input: RegisterWithEmailPasswordDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.authService.registerWithEmailPassword(input, req.user);
   }
 
   @Get('verify-email')
